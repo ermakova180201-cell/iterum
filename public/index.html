@@ -411,18 +411,27 @@
       if (!response.ok) throw new Error("Не удалось открыть материал.");
     }
 
-    function showCaseList() {
+    function showCaseList(preserveLastCase = false) {
       document.body.classList.remove('is-workstation');
       currentCaseId = null;
+      if (!preserveLastCase) {
+        try { localStorage.removeItem("iterum:last-case:" + memberEmail.textContent); } catch {}
+      }
       availableCases.hidden = false;
       playerArchive.hidden = true;
       playerArchive.querySelectorAll(".desktop-window").forEach(win => { win.hidden = true; });
+      playerArchive.querySelectorAll("[data-open-window]").forEach(button => button.classList.remove("is-selected"));
     }
 
     function openCase(caseId) {
-      document.body.classList.add('is-workstation');
       const selected = archiveCases.find(item => item.id === caseId);
       if (!selected) return;
+      document.body.classList.add('is-workstation');
+      const desktopShell = document.querySelector(".desktop-shell");
+      if (desktopShell) {
+        desktopShell.querySelectorAll(".desktop-window").forEach(win => { win.hidden = true; });
+        desktopShell.querySelectorAll("[data-open-window]").forEach(button => button.classList.remove("is-selected"));
+      }
       currentCaseId = caseId;
       try { localStorage.setItem("iterum:last-case:" + memberEmail.textContent, caseId); } catch {}
       availableCases.hidden = true;
@@ -530,7 +539,7 @@
         }
         let lastCase = null;
         try { lastCase = localStorage.getItem("iterum:last-case:" + memberEmail.textContent); } catch {}
-        showCaseList();
+        showCaseList(true);
         if (lastCase && archiveCases.some(item => item.id === lastCase)) openCase(lastCase);
       } catch {
         availableCaseList.textContent = "Не удалось загрузить список дел. Обновите страницу.";

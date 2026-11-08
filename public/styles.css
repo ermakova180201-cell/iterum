@@ -702,3 +702,131 @@ footer { border-top-color: rgba(216,208,191,.16); }
     padding: 11px 10px 10px 13px;
   }
 }
+
+
+/* In-game mail client: inbox column and reading pane */
+.player-mail-list {
+  display: grid;
+  grid-template-columns: minmax(190px,  .82fr) minmax(0, 1.55fr);
+  gap: 0;
+  min-height: 310px;
+  margin-top: 0;
+  border: 1px solid rgba(174,145,108,.28);
+  background: rgba(15,17,16,.38);
+}
+.mail-inbox-list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid rgba(174,145,108,.24);
+  background: rgba(14,16,15,.34);
+}
+.mail-inbox-entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 5px 8px;
+  width: 100%;
+  padding: 13px 12px;
+  border: 0;
+  border-bottom: 1px solid rgba(174,145,108,.14);
+  background: transparent;
+  color: #d8cfbf;
+  text-align: left;
+  cursor: pointer;
+  transition: background .16s ease;
+}
+.mail-inbox-entry:hover { background: rgba(177,143,105,.09); }
+.mail-inbox-entry.is-active {
+  background: rgba(151,105,79,.18);
+  box-shadow: inset 3px 0 #98645d;
+}
+.mail-entry-sender {
+  overflow: hidden;
+  color: #c7ad91;
+  font: 9px var(--mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mail-inbox-entry time {
+  color: #817b70;
+  font: 8px var(--mono);
+  white-space: nowrap;
+}
+.mail-inbox-entry strong {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  color: #e0d7c7;
+  font: 500 13px var(--serif);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mail-inbox-entry small {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  color: #918b7f;
+  font: 9px/1.5 var(--sans);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mail-inbox-entry.is-unread .mail-entry-sender:before {
+  content: "";
+  display: inline-block;
+  width: 5px; height: 5px;
+  margin: 0 6px 1px 0;
+  border-radius: 50%;
+  background: #a96c5f;
+}
+.mail-reader {
+  min-width: 0;
+  padding: 22px 24px;
+  background: linear-gradient(145deg, rgba(40,38,33,.72), rgba(22,24,22,.78));
+}
+.mail-reader-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid rgba(174,145,108,.18);
+}
+.mail-reader-top time { color: #898174; font: 8px var(--mono); }
+.mail-reader-subject {
+  margin: 21px 0 12px;
+  color: #e8decd;
+  font: 500 24px/1.25 var(--serif);
+}
+.mail-reader-from {
+  color: #ad9e88;
+  font: 9px/1.6 var(--mono);
+  overflow-wrap: anywhere;
+}
+.mail-reader-divider {
+  height: 1px;
+  margin: 20px 0;
+  background: rgba(174,145,108,.16);
+}
+.mail-reader-body {
+  color: #c6beaf;
+  font: 12px/1.9 var(--sans);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 620px) {
+  .player-mail-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mail-inbox-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    border-right: 0;
+    border-bottom: 1px solid rgba(174,145,108,.24);
+  }
+  .mail-inbox-entry {
+    min-width: 0;
+    padding: 10px 8px;
+    border-right: 1px solid rgba(174,145,108,.12);
+  }
+  .mail-reader { padding: 17px 14px; min-height: 180px; }
+  .mail-reader-subject { font-size: 20px; }
+}

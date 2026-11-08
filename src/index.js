@@ -118,6 +118,20 @@ async function handleApi(request, env) {
     }
 
 
+    const caseAccessRoute = url.pathname.match(/^\/api\/admin\/cases\/([a-f0-9]+)\/access$/);
+    if (request.method === "POST" && caseAccessRoute) {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Выберите игрока." }, 400); }
+      const userId = String(body.userId || "");
+      const targetCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseAccessRoute[1]).first();
+      if (!targetCase) return json({ error: "Дело не найдено." }, 404);
+      const targetUser = await env.DB.prepare("SELECT id FROM users WHERE id = ?").bind(userId).first();
+      if (!targetUser) return json({ error: "Игрок не найден." }, 404);
+      await env.DB.prepare("INSERT OR IGNORE INTO case_access (user_id, case_id) VALUES (?, ?)")
+        .bind(userId, targetCase.id).run();
+      return json({ ok: true });
+    }
+
     const caseStatusRoute = url.pathname.match(/^\/api\/admin\/cases\/([a-f0-9]+)\/status$/);
     if (request.method === "POST" && caseStatusRoute) {
       let body;

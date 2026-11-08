@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=workstation-02">
+  <link rel="stylesheet" href="/styles.css?v=workstation-03">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -58,11 +58,8 @@
       <section class="available-cases" id="available-cases" aria-label="Выбор дела">
         <div class="case-selection-heading">
           <div>
-            <p class="section-kicker">АРХИВ РАССЛЕДОВАНИЙ / ДОСТУПНЫЕ МАТЕРИАЛЫ</p>
             <h2>Выберите дело</h2>
-            <p class="case-selection-copy">Выберите расследование, чтобы открыть рабочую станцию и получить доступ к его материалам.</p>
           </div>
-          <span class="archive-stamp">ВЫБОР ДЕЛА</span>
         </div>
         <div id="available-case-list" class="available-case-list"><p class="player-empty">Загружаем список дел…</p></div>
       </section>
@@ -543,13 +540,13 @@
           const state = document.createElement("span"); state.className = "case-state"; state.textContent = item.status === "draft" ? "ЧЕРНОВИК" : "ДОСТУПНО";
           top.append(code, state);
           const title = document.createElement("h3"); title.textContent = item.title;
-          const description = document.createElement("p"); description.textContent = item.description || "Материалы расследования и доступные сведения.";
-          const count = document.createElement("p"); count.className = "available-case-meta";
-          const countMaterials = archiveMaterials.filter(material => material.case_id === item.id).length;
-          count.textContent = "ДОСТУПНО МАТЕРИАЛОВ: " + countMaterials;
+          const description = document.createElement("p");
+          if (item.description) description.textContent = item.description;
           const start = document.createElement("button"); start.type = "button"; start.className = "case-start-button"; start.textContent = "НАЧАТЬ РАССЛЕДОВАНИЕ";
           start.addEventListener("click", () => openCase(item.id));
-          card.append(top, title, description, count, start);
+          card.append(top, title);
+          if (item.description) card.append(description);
+          card.append(start);
           availableCaseList.append(card);
         }
         // После каждой авторизации пользователь явно выбирает дело.

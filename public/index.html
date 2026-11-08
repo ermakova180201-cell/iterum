@@ -76,6 +76,16 @@
         </div>
       </div>
 
+
+      <section class="player-archive" id="player-archive" hidden>
+        <div class="modules-heading">
+          <span class="section-kicker">ОТКРЫТЫЕ МАТЕРИАЛЫ ДЕЛА</span>
+          <span class="modules-note" id="player-archive-count"></span>
+        </div>
+        <div id="player-case-list" class="player-case-list"></div>
+        <div id="player-material-list" class="player-material-list"></div>
+      </section>
+
       <div class="modules-heading">
         <span class="section-kicker">РАЗДЕЛЫ АРХИВА</span>
         <span class="modules-note">НОВЫЕ МАТЕРИАЛЫ БУДУТ ОТКРЫВАТЬСЯ ПОЭТАПНО</span>
@@ -155,6 +165,11 @@
           </form>
         </div>
 
+
+        <div class="admin-inventory">
+          <h3>Дела</h3>
+          <div id="admin-case-list" class="admin-case-list"><p class="admin-empty">Загружаем дела…</p></div>
+        </div>
         <div class="admin-inventory">
           <h3>Созданные материалы</h3>
           <div id="admin-material-list" class="admin-material-list"><p class="admin-empty">Пока материалов нет.</p></div>
@@ -217,7 +232,13 @@
     const caseMessage = document.getElementById("case-message");
     const materialMessage = document.getElementById("material-message");
     const materialCase = document.getElementById("material-case");
+
     const adminMaterialList = document.getElementById("admin-material-list");
+    const adminCaseList = document.getElementById("admin-case-list");
+    const playerArchive = document.getElementById("player-archive");
+    const playerCaseList = document.getElementById("player-case-list");
+    const playerMaterialList = document.getElementById("player-material-list");
+    const playerArchiveCount = document.getElementById("player-archive-count");
     let registering = false;
 
     function showMessage(message, error = false) {
@@ -253,6 +274,8 @@
           authUserEmail.textContent = "Вы вошли как " + data.user.email;
           adminPanel.hidden = !data.isAdmin;
           adminSetupNote.hidden = data.adminConfigured || data.isAdmin;
+
+          await loadPlayerArchive();
           if (data.isAdmin) await loadAdminOverview();
         } else {
           workspace.hidden = true;
@@ -316,6 +339,73 @@
       element.classList.toggle("is-error", error);
     }
 
+
+    async function loadPlayerArchive() {
+      try {
+        const response = await fetch("/api/player/archive", { credentials: "same-origin" });
+        if (!response.ok) throw new Error("Не удалось загрузить архив.");
+        const data = await response.json();
+        playerArchive.hidden = true;
+        playerCaseList.replaceChildren();
+        playerMaterialList.replaceChildren();
+        if (!data.cases.length) return;
+        playerArchive.hidden = false;
+        playerArchiveCount.textContent = data.materials.length + " МАТЕРИАЛОВ";
+        for (const item of data.cases) {
+          const caseLine = document.createElement("div");
+          caseLine.className = "player-case";
+          const name = document.createElement("strong");
+          name.textContent = item.title;
+          const code = document.createElement("span");
+          code.textContent = item.case_code;
+          caseLine.append(name, code);
+          playerCaseList.append(caseLine);
+        }
+        if (!data.materials.length) {
+          const empty = document.createElement("p");
+          empty.className = "player-empty";
+          empty.textContent = "Дело активно. Новые материалы пока не опубликованы.";
+          playerMaterialList.append(empty);
+        } else {
+          for (const item of data.materials) {
+            const card = document.createElement("article");
+            card.className = "player-material";
+            const type = document.createElement("span");
+            const labels = { email: "ПИСЬМО", publication: "ПУБЛИКАЦИЯ", document: "ДОКУМЕНТ", photo: "ФОТОГРАФИЯ", audio: "АУДИОЗАПИСЬ", map: "КАРТА / СХЕМА", other: "МАТЕРИАЛ" };
+            type.className = "player-material-type";
+            type.textContent = labels[item.material_type] || "МАТЕРИАЛ";
+            const title = document.createElement("h3");
+            title.textContent = item.title;
+            const summary = document.createElement("p");
+            summary.textContent = item.summary || "";
+            const content = document.createElement("div");
+            content.className = "player-material-content";
+            content.textContent = item.content || "Содержание не добавлено.";
+            card.append(type, title, summary, content);
+            playerMaterialList.append(card);
+          }
+        }
+      } catch {
+        playerArchive.hidden = true;
+      }
+    }
+
+    async function setCaseStatus(id, status) {
+      const action = status === "active" ? "активировать" : "деактивировать";
+      if (!window.confirm("Вы действительно хотите " + action + " это дело?")) return;
+      try {
+        await adminRequest("/api/admin/cases/" + encodeURIComponent(id) + "/status", {
+          method: "POST",
+          body: JSON.stringify({ status })
+        });
+        showAdminMessage(caseMessage, status === "active" ? "Дело активировано. Оно появится в кабинетах игроков." : "Дело деактивировано и скрыто от игроков.");
+        await loadAdminOverview();
+        await loadPlayerArchive();
+      } catch (error) {
+        showAdminMessage(caseMessage, error.message, true);
+      }
+    }
+
     async function loadAdminOverview() {
       try {
         const data = await adminRequest("/api/admin/overview");
@@ -334,6 +424,33 @@
             materialCase.append(option);
           }
           if (data.cases.some(item => item.id === previous)) materialCase.value = previous;
+        }
+
+
+        adminCaseList.replaceChildren();
+        if (!data.cases.length) {
+          const emptyCases = document.createElement("p");
+          emptyCases.className = "admin-empty";
+          emptyCases.textContent = "Пока дел нет.";
+          adminCaseList.append(emptyCases);
+        } else {
+          for (const item of data.cases) {
+            const card = document.createElement("article");
+            card.className = "admin-case";
+            const info = document.createElement("div");
+            const heading = document.createElement("strong");
+            heading.textContent = item.title + " · " + item.case_code;
+            const status = document.createElement("small");
+            status.textContent = item.status === "active" ? "АКТИВНОЕ ДЕЛО — ВИДНО ИГРОКАМ" : "ЧЕРНОВИК — СКРЫТО ОТ ИГРОКОВ";
+            info.append(heading, status);
+            const toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "admin-mini-button";
+            toggle.textContent = item.status === "active" ? "ДЕАКТИВИРОВАТЬ" : "АКТИВИРОВАТЬ";
+            toggle.addEventListener("click", () => setCaseStatus(item.id, item.status === "active" ? "draft" : "active"));
+            card.append(info, toggle);
+            adminCaseList.append(card);
+          }
         }
 
         adminMaterialList.replaceChildren();

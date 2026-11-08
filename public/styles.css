@@ -895,7 +895,12 @@ body.is-workstation .desktop-toolbar {
 body.is-workstation .desktop-area {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
+}
+body.is-workstation .desktop-icons,
+body.is-workstation .desktop-icon {
+  overflow: visible;
+  flex-shrink: 0;
 }
 body.is-workstation .desktop-taskbar {
   flex: 0 0 auto;

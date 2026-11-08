@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-8">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-9">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -991,124 +991,113 @@
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-
-      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const pointer = { x: .5, y: .5, tx: .5, ty: .5, active: false };
-      let width = 0, height = 0, dpr = 1, frame = 0;
-
-      function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-        canvas.width = Math.round(width * dpr);
-        canvas.height = Math.round(height * dpr);
-        canvas.style.width = width + "px";
-        canvas.style.height = height + "px";
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let w=0,h=0,dpr=1,raf=0,pointer={x:.5,y:.5,tx:.5,ty:.5};
+      function resize(){
+        w=innerWidth; h=innerHeight; dpr=Math.min(devicePixelRatio||1,1.5);
+        canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
+        canvas.style.width=w+"px"; canvas.style.height=h+"px";
+        ctx.setTransform(dpr,0,0,dpr,0,0);
       }
-
-      function line(points, color, thickness = 1) {
-        ctx.beginPath();
-        points.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
-        ctx.strokeStyle = color;
-        ctx.lineWidth = thickness;
-        ctx.stroke();
+      function stroke(points,color,width=1){
+        ctx.beginPath(); points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+        ctx.strokeStyle=color; ctx.lineWidth=width; ctx.stroke();
       }
+      function room(time){
+        const t=reduced?0:time;
+        const shift=Math.sin(t*.00017)*4;
+        const cx=w*.51+shift, cy=h*.46;
+        ctx.clearRect(0,0,w,h);
 
-      function draw(time) {
-        frame = requestAnimationFrame(draw);
-        if (document.hidden) return;
-        ctx.clearRect(0, 0, width, height);
+        // A recognizable room, deliberately composed like a film still.
+        const wall=ctx.createLinearGradient(0,0,0,h);
+        wall.addColorStop(0,"rgba(41,47,45,.25)"); wall.addColorStop(1,"rgba(8,12,13,.40)");
+        ctx.fillStyle=wall; ctx.fillRect(0,0,w,h);
 
-        const w = width, h = height;
-        const drift = reducedMotion ? 0 : Math.sin(time * .00016) * 5;
-        const vanishX = w * .53 + drift;
-        const vanishY = h * .43;
-        const px = pointer.x * w, py = pointer.y * h;
-
-        // Barely visible planes suggest a corridor disappearing into the dark.
-        ctx.fillStyle = "rgba(8,13,14,.17)";
-        ctx.beginPath();
-        ctx.moveTo(0, h * .08); ctx.lineTo(vanishX, vanishY);
-        ctx.lineTo(vanishX, h * .77); ctx.lineTo(0, h);
-        ctx.closePath(); ctx.fill();
-
-        ctx.fillStyle = "rgba(5,9,10,.20)";
-        ctx.beginPath();
-        ctx.moveTo(w, h * .03); ctx.lineTo(vanishX, vanishY);
-        ctx.lineTo(vanishX, h * .77); ctx.lineTo(w, h);
-        ctx.closePath(); ctx.fill();
-
-        // Perspective seams, almost lost in the shadows.
-        const seam = "rgba(176,174,155,.105)";
-        line([[0,h*.08],[vanishX,vanishY],[w,h*.03]], seam, 1);
-        line([[0,h],[vanishX,h*.77],[w,h]], "rgba(164,157,139,.09)", 1);
-        line([[w*.08,h*.12],[w*.08,h*.83]], "rgba(160,157,143,.045)", 1);
-        line([[w*.91,h*.09],[w*.91,h*.84]], "rgba(160,157,143,.045)", 1);
-
-        // A doorway in the left wall; its inner darkness shifts by a few pixels.
-        const doorX = w*.105, doorY = h*.22, doorW = w*.205, doorH = h*.57;
-        const doorShift = reducedMotion ? 0 : Math.sin(time*.00023)*2.2;
-        ctx.fillStyle = "rgba(2,5,6,.33)";
-        ctx.fillRect(doorX+doorShift, doorY, doorW, doorH);
-        ctx.strokeStyle = "rgba(177,164,140,.15)";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(doorX+doorShift, doorY, doorW, doorH);
-        line([[doorX+doorShift+doorW*.12,doorY+doorH],[doorX+doorShift+doorW*.12,doorY+doorH*.04],[doorX+doorShift+doorW*.88,doorY+doorH*.04],[doorX+doorShift+doorW*.88,doorY+doorH]], "rgba(177,164,140,.055)", 1);
-
-        // Warm light at the far end, like a lamp left on in an empty house.
-        const pulse = reducedMotion ? 1 : .94 + Math.sin(time*.00038)*.06;
-        const glow = ctx.createRadialGradient(vanishX,vanishY,2,vanishX,vanishY,Math.max(w,h)*.42);
-        glow.addColorStop(0,"rgba(173,132,91,"+(0.12*pulse)+")");
-        glow.addColorStop(.28,"rgba(120,101,77,.055)");
-        glow.addColorStop(1,"rgba(120,101,77,0)");
-        ctx.fillStyle=glow; ctx.fillRect(0,0,w,h);
-
-        // A soft, unidentifiable shadow crosses the wall very slowly.
-        if (!reducedMotion) {
-          const sx = w*(.19 + (Math.sin(time*.00011)+1)*.055);
-          const sy = h*.48;
-          const shadow = ctx.createRadialGradient(sx,sy,4,sx,sy,w*.18);
-          shadow.addColorStop(0,"rgba(0,0,0,.16)");
-          shadow.addColorStop(1,"rgba(0,0,0,0)");
-          ctx.fillStyle=shadow; ctx.fillRect(0,0,w,h);
+        // Left wall and floor perspective.
+        ctx.fillStyle="rgba(2,6,7,.22)";
+        ctx.beginPath();ctx.moveTo(0,h*.08);ctx.lineTo(cx,cy);ctx.lineTo(cx,h*.79);ctx.lineTo(0,h);ctx.closePath();ctx.fill();
+        ctx.fillStyle="rgba(3,6,7,.32)";
+        ctx.beginPath();ctx.moveTo(w,h*.04);ctx.lineTo(cx,cy);ctx.lineTo(cx,h*.79);ctx.lineTo(w,h);ctx.closePath();ctx.fill();
+        stroke([[0,h*.08],[cx,cy],[w,h*.04]],"rgba(185,179,157,.12)");
+        stroke([[0,h],[cx,h*.79],[w,h]],"rgba(185,179,157,.10)");
+        for(let i=1;i<7;i++){
+          const x=w*i/7;
+          stroke([[x,h],[cx+(x-cx)*.08,h*.79]],"rgba(174,168,149,.035)");
         }
 
-        // The cursor behaves like a weak flashlight, not a spotlight effect.
-        if (!reducedMotion) {
-          pointer.x += (pointer.tx-pointer.x)*.045;
-          pointer.y += (pointer.ty-pointer.y)*.045;
-        }
-        const lightX = pointer.active ? px*.12 + pointer.x*w*.88 : w*.5;
-        const lightY = pointer.active ? py*.12 + pointer.y*h*.88 : h*.48;
-        const radius = Math.max(180, Math.min(w,h)*.34);
-        const cursorGlow = ctx.createRadialGradient(lightX,lightY,0,lightX,lightY,radius);
-        cursorGlow.addColorStop(0,"rgba(172,164,139,.055)");
-        cursorGlow.addColorStop(.45,"rgba(130,143,132,.025)");
-        cursorGlow.addColorStop(1,"rgba(130,143,132,0)");
-        ctx.fillStyle=cursorGlow; ctx.fillRect(0,0,w,h);
+        // Doorway on the far wall; light leaks from a room that should be empty.
+        const dw=Math.min(w*.19,210), dh=h*.48, dx=cx-dw*.5, dy=cy-dh*.12;
+        ctx.fillStyle="rgba(1,4,5,.75)";ctx.fillRect(dx,dy,dw,dh);
+        ctx.fillStyle="rgba(155,119,78,.12)";
+        ctx.fillRect(dx+dw*.08,dy+dh*.08,dw*.84,dh*.88);
+        ctx.fillStyle="rgba(4,8,9,.86)";ctx.fillRect(dx+dw*.16,dy+dh*.08,dw*.68,dh*.92);
+        stroke([[dx,dy+dh],[dx,dy],[dx+dw,dy],[dx+dw,dy+dh]],"rgba(190,174,144,.22)",1.2);
+        const leak=ctx.createRadialGradient(cx,dy+dh*.45,2,cx,dy+dh*.45,dw*1.8);
+        leak.addColorStop(0,"rgba(177,132,84,.16)");leak.addColorStop(1,"rgba(177,132,84,0)");
+        ctx.fillStyle=leak;ctx.fillRect(0,0,w,h);
 
-        // A faint displaced reflection makes the geometry feel slightly wrong.
-        if (!reducedMotion) {
-          const shift = Math.sin(time*.00019)*3;
-          ctx.save();
-          ctx.globalAlpha=.16;
-          ctx.translate(shift,0);
-          line([[doorX,doorY+h*.015],[doorX,doorY+doorH],[doorX+doorW,doorY+doorH]],"rgba(176,184,171,.12)",1);
+        // A framed family photograph: the image itself is only an indistinct silhouette.
+        const fx=w*.13, fy=h*.24, fw=Math.min(w*.17,190), fh=h*.27;
+        ctx.fillStyle="rgba(4,7,8,.48)";ctx.fillRect(fx,fy,fw,fh);
+        ctx.strokeStyle="rgba(180,169,145,.22)";ctx.lineWidth=3;ctx.strokeRect(fx,fy,fw,fh);
+        ctx.fillStyle="rgba(96,108,99,.17)";ctx.fillRect(fx+8,fy+8,fw-16,fh-16);
+        ctx.fillStyle="rgba(8,13,13,.38)";
+        ctx.beginPath();ctx.ellipse(fx+fw*.52,fy+fh*.42,fw*.12,fh*.22,0,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(fx+fw*.5,fy+fh*.88,fw*.31,fh*.25,0,Math.PI,Math.PI*2);ctx.fill();
+
+        // The mirror shows a second, displaced doorway instead of reflecting the room.
+        const mx=w*.72, my=h*.17, mw=Math.min(w*.19,215), mh=h*.56;
+        ctx.fillStyle="rgba(1,4,5,.5)";ctx.fillRect(mx,my,mw,mh);
+        ctx.strokeStyle="rgba(174,181,171,.24)";ctx.lineWidth=2;ctx.strokeRect(mx,my,mw,mh);
+        const mirror=ctx.createLinearGradient(mx,my,mx+mw,my+mh);
+        mirror.addColorStop(0,"rgba(90,111,108,.13)");mirror.addColorStop(.5,"rgba(8,15,16,.48)");mirror.addColorStop(1,"rgba(138,117,91,.12)");
+        ctx.fillStyle=mirror;ctx.fillRect(mx+5,my+5,mw-10,mh-10);
+        const mdx=mx+mw*.29+Math.sin(t*.00021)*2;
+        ctx.fillStyle="rgba(1,4,5,.75)";ctx.fillRect(mdx,my+mh*.17,mw*.43,mh*.74);
+        stroke([[mdx,my+mh*.91],[mdx,my+mh*.17],[mdx+mw*.43,my+mh*.17],[mdx+mw*.43,my+mh*.91]],"rgba(180,159,125,.17)");
+        // A faint second outline is intentionally offset: the reflection is wrong.
+        if(!reduced){
+          ctx.save();ctx.globalAlpha=.25;ctx.translate(7+Math.sin(t*.0003)*3,0);
+          ctx.strokeStyle="rgba(160,188,178,.22)";ctx.strokeRect(mx+5,my+5,mw-10,mh-10);ctx.restore();
+        }
+
+        // Wall clock with two slightly disagreeing sets of hands.
+        const clockX=w*.48, clockY=h*.18, r=Math.min(25,w*.025);
+        ctx.beginPath();ctx.arc(clockX,clockY,r,0,Math.PI*2);
+        ctx.fillStyle="rgba(6,10,10,.5)";ctx.fill();
+        ctx.strokeStyle="rgba(190,177,149,.22)";ctx.lineWidth=1;ctx.stroke();
+        for(let i=0;i<12;i++){
+          const a=i*Math.PI/6;
+          stroke([[clockX+Math.cos(a)*r*.78,clockY+Math.sin(a)*r*.78],[clockX+Math.cos(a)*r*.9,clockY+Math.sin(a)*r*.9]],"rgba(198,186,158,.35)");
+        }
+        stroke([[clockX,clockY],[clockX+r*.05,clockY-r*.56]],"rgba(211,193,157,.55)",1.4);
+        stroke([[clockX,clockY],[clockX-r*.42,clockY+r*.16]],"rgba(211,193,157,.5)",1.2);
+        stroke([[clockX+2,clockY+1],[clockX+r*.45,clockY+r*.1]],"rgba(159,188,176,.24)",1);
+
+        // The room gently breathes; the cursor shifts the ghost reflection.
+        pointer.x+=(pointer.tx-pointer.x)*.035; pointer.y+=(pointer.ty-pointer.y)*.035;
+        const dx=(pointer.x-.5)*12, dy=(pointer.y-.5)*8;
+        if(!reduced){
+          ctx.save();ctx.globalAlpha=.12;ctx.translate(-dx*.5,dy*.4);
+          stroke([[mx,my],[mx+mw,my],[mx+mw,my+mh]],"rgba(184,196,181,.6)",1);
           ctx.restore();
         }
+        const glow=ctx.createRadialGradient(w*.5,h*.45,20,w*.5,h*.45,Math.max(w,h)*.7);
+        glow.addColorStop(0,"rgba(0,0,0,0)");glow.addColorStop(1,"rgba(0,0,0,.62)");
+        ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
+        const grainAlpha=.025;
+        ctx.fillStyle="rgba(196,191,170,"+grainAlpha+")";
+        for(let i=0;i<90;i++){
+          const x=(i*137.5+t*.006)%w, y=(i*83.7+t*.002)%h;
+          ctx.fillRect(x,y,1,1);
+        }
       }
-
-      window.addEventListener("pointermove", e => {
-        pointer.tx=e.clientX/Math.max(width,1);
-        pointer.ty=e.clientY/Math.max(height,1);
-        pointer.active=true;
-      }, {passive:true});
-      window.addEventListener("pointerleave", () => { pointer.active=false; }, {passive:true});
-      window.addEventListener("resize", resize, {passive:true});
-      window.addEventListener("pagehide", () => cancelAnimationFrame(frame), {once:true});
-      resize();
-      frame=requestAnimationFrame(draw);
+      function draw(time){raf=requestAnimationFrame(draw);if(!document.hidden)room(time);}
+      addEventListener("pointermove",e=>{pointer.tx=e.clientX/Math.max(w,1);pointer.ty=e.clientY/Math.max(h,1);},{passive:true});
+      addEventListener("resize",resize,{passive:true});
+      addEventListener("pagehide",()=>cancelAnimationFrame(raf),{once:true});
+      resize();raf=requestAnimationFrame(draw);
     })();
   </script>
 

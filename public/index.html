@@ -79,11 +79,39 @@
 
       <section class="player-archive" id="player-archive" hidden>
         <div class="modules-heading">
-          <span class="section-kicker">ОТКРЫТЫЕ МАТЕРИАЛЫ ДЕЛА</span>
+          <span class="section-kicker">ОТКРЫТЫЕ ДЕЛА</span>
           <span class="modules-note" id="player-archive-count"></span>
         </div>
         <div id="player-case-list" class="player-case-list"></div>
-        <div id="player-material-list" class="player-material-list"></div>
+
+        <section class="player-tool-section" aria-labelledby="search-heading">
+          <div class="player-tool-heading">
+            <div><span class="section-kicker">ИНФОРМАЦИОННАЯ СИСТЕМА</span><h2 id="search-heading">Поиск данных</h2></div>
+          </div>
+          <form id="player-search-form" class="player-search-form">
+            <label for="player-search-query">ИМЯ, ФАМИЛИЯ ИЛИ КЛЮЧЕВОЕ СЛОВО</label>
+            <div class="player-search-row">
+              <input id="player-search-query" type="search" minlength="2" placeholder="Например, Иван Иванов" required>
+              <button type="submit" class="admin-mini-button">НАЙТИ</button>
+            </div>
+          </form>
+          <div id="player-search-results" class="player-search-results" aria-live="polite"></div>
+        </section>
+
+        <section class="player-tool-section" aria-labelledby="mail-heading">
+          <div class="player-tool-heading">
+            <div><span class="section-kicker">ВНУТРЕННЯЯ КОРРЕСПОНДЕНЦИЯ</span><h2 id="mail-heading">Почта</h2></div>
+            <span class="modules-note" id="player-mail-count"></span>
+          </div>
+          <div id="player-mail-list" class="player-mail-list"></div>
+        </section>
+
+        <section class="player-tool-section" aria-labelledby="materials-heading">
+          <div class="player-tool-heading">
+            <div><span class="section-kicker">АРХИВ РАССЛЕДОВАНИЯ</span><h2 id="materials-heading">Материалы</h2></div>
+          </div>
+          <div id="player-material-list" class="player-material-list"></div>
+        </section>
       </section>
 
       <div class="modules-heading">
@@ -152,6 +180,18 @@
               <option value="map">Карта / схема</option>
               <option value="other">Другое</option>
             </select>
+            <div id="material-email-fields" class="admin-conditional-fields" hidden>
+              <label for="material-sender-name">ОТПРАВИТЕЛЬ</label>
+              <input id="material-sender-name" name="senderName" maxlength="120" placeholder="Имя или название организации">
+              <label for="material-sender-address">АДРЕС ОТПРАВИТЕЛЯ (ВНУТРИ ИГРЫ)</label>
+              <input id="material-sender-address" name="senderAddress" maxlength="200" placeholder="Например, info@example.local">
+              <label for="material-sent-at">ДАТА И ВРЕМЯ ПИСЬМА</label>
+              <input id="material-sent-at" name="sentAt" maxlength="40" placeholder="Например, 28.05.2025, 14:35">
+            </div>
+            <label class="admin-checkbox-label" id="material-searchable-wrap" hidden>
+              <input id="material-searchable" name="isSearchable" type="checkbox">
+              <span>Добавить документ в раздел «Поиск данных» как досье</span>
+            </label>
             <label for="material-title">НАЗВАНИЕ</label>
             <input id="material-title" name="title" required maxlength="200" placeholder="Название материала">
             <label for="material-summary">КОРОТКОЕ ОПИСАНИЕ</label>
@@ -241,6 +281,13 @@
     const materialCase = document.getElementById("material-case");
     const deliveryMode = document.getElementById("delivery-mode");
     const materialTrigger = document.getElementById("material-trigger");
+    const materialType = document.getElementById("material-type");
+    const emailFields = document.getElementById("material-email-fields");
+    const searchableWrap = document.getElementById("material-searchable-wrap");
+    const playerSearchForm = document.getElementById("player-search-form");
+    const playerSearchResults = document.getElementById("player-search-results");
+    const playerMailList = document.getElementById("player-mail-list");
+    const playerMailCount = document.getElementById("player-mail-count");
 
     const adminMaterialList = document.getElementById("admin-material-list");
     const adminCaseList = document.getElementById("admin-case-list");
@@ -349,16 +396,24 @@
     }
 
 
+    async function markMaterialRead(id) {
+      const response = await fetch("/api/player/materials/" + encodeURIComponent(id) + "/read", {
+        method: "POST", credentials: "same-origin"
+      });
+      if (!response.ok) throw new Error("Не удалось открыть материал.");
+    }
+
     async function loadPlayerArchive() {
       try {
         const response = await fetch("/api/player/archive", { credentials: "same-origin" });
         if (!response.ok) throw new Error("Не удалось загрузить архив.");
         const data = await response.json();
-        playerArchive.hidden = true;
+        playerArchive.hidden = !data.cases.length;
         playerCaseList.replaceChildren();
         playerMaterialList.replaceChildren();
+        playerMailList.replaceChildren();
+        playerSearchResults.replaceChildren();
         if (!data.cases.length) return;
-        playerArchive.hidden = false;
         playerArchiveCount.textContent = data.materials.length + " МАТЕРИАЛОВ";
         for (const item of data.cases) {
           const caseLine = document.createElement("div");
@@ -370,17 +425,67 @@
           caseLine.append(name, code);
           playerCaseList.append(caseLine);
         }
-        if (!data.materials.length) {
+
+        const emails = data.materials.filter(item => item.material_type === "email");
+        const unreadEmails = emails.filter(item => !item.is_read).length;
+        playerMailCount.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
+        if (!emails.length) {
           const empty = document.createElement("p");
           empty.className = "player-empty";
-          empty.textContent = "Дело активно. Новые материалы пока не опубликованы.";
+          empty.textContent = "Входящих сообщений пока нет.";
+          playerMailList.append(empty);
+        } else {
+          for (const item of emails) {
+            const card = document.createElement("article");
+            card.className = "player-mail-item" + (item.is_read ? " is-read" : " is-unread");
+            const head = document.createElement("div");
+            head.className = "player-mail-meta";
+            const sender = document.createElement("span");
+            sender.textContent = item.sender_name || "Неизвестный отправитель";
+            const date = document.createElement("time");
+            date.textContent = item.sent_at || "";
+            head.append(sender, date);
+            const subject = document.createElement("h3");
+            subject.textContent = item.title;
+            const address = document.createElement("p");
+            address.className = "player-mail-address";
+            address.textContent = item.sender_address ? "От: " + item.sender_address : "";
+            const summary = document.createElement("p");
+            summary.className = "player-mail-summary";
+            summary.textContent = item.summary || "";
+            const body = document.createElement("div");
+            body.className = "player-material-content";
+            body.hidden = true;
+            body.textContent = item.content || "Содержание письма не добавлено.";
+            const open = document.createElement("button");
+            open.type = "button";
+            open.className = "admin-mini-button";
+            open.textContent = item.is_read ? "ОТКРЫТЬ ПИСЬМО" : "ПРОЧИТАТЬ ПИСЬМО";
+            open.addEventListener("click", async () => {
+              body.hidden = !body.hidden;
+              if (!item.is_read) {
+                open.disabled = true;
+                try { await markMaterialRead(item.id); await loadPlayerArchive(); }
+                catch { open.disabled = false; body.hidden = true; }
+              }
+            });
+            card.append(head, subject, address, summary, open, body);
+            playerMailList.append(card);
+          }
+        }
+
+        const otherMaterials = data.materials.filter(item => item.material_type !== "email");
+        if (!otherMaterials.length) {
+          const empty = document.createElement("p");
+          empty.className = "player-empty";
+          empty.textContent = "Других открытых материалов пока нет.";
           playerMaterialList.append(empty);
         } else {
-          for (const item of data.materials) {
+          for (const item of otherMaterials) {
             const card = document.createElement("article");
             card.className = "player-material";
             const type = document.createElement("span");
-            const labels = { email: "ПИСЬМО", publication: "ПУБЛИКАЦИЯ", document: "ДОКУМЕНТ", photo: "ФОТОГРАФИЯ", audio: "АУДИОЗАПИСЬ", map: "КАРТА / СХЕМА", other: "МАТЕРИАЛ" };
+            const labels = { publication: "ПУБЛИКАЦИЯ", document: "ДОКУМЕНТ", photo: "ФОТОГРАФИЯ", audio: "АУДИОЗАПИСЬ", map: "КАРТА / СХЕМА", other: "МАТЕРИАЛ" };
             type.className = "player-material-type";
             type.textContent = labels[item.material_type] || "МАТЕРИАЛ";
             const title = document.createElement("h3");
@@ -391,22 +496,18 @@
             content.className = "player-material-content";
             content.textContent = item.content || "Содержание не добавлено.";
             card.append(type, title, summary, content);
-            const readButton = document.createElement("button");
-            readButton.type = "button";
-            readButton.className = "admin-mini-button";
-            readButton.textContent = item.is_read ? "ПРОЧИТАНО" : "ОТМЕТИТЬ КАК ПРОЧИТАННОЕ";
-            readButton.disabled = Boolean(item.is_read);
-            readButton.addEventListener("click", async () => {
-              readButton.disabled = true;
-              try {
-                const response = await fetch("/api/player/materials/" + encodeURIComponent(item.id) + "/read", { method: "POST", credentials: "same-origin" });
-                if (!response.ok) throw new Error("Не удалось отметить материал.");
-                await loadPlayerArchive();
-              } catch {
-                readButton.disabled = false;
-              }
-            });
-            card.append(readButton);
+            if (!item.is_read) {
+              const readButton = document.createElement("button");
+              readButton.type = "button";
+              readButton.className = "admin-mini-button";
+              readButton.textContent = "ОТМЕТИТЬ КАК ПРОЧИТАННОЕ";
+              readButton.addEventListener("click", async () => {
+                readButton.disabled = true;
+                try { await markMaterialRead(item.id); await loadPlayerArchive(); }
+                catch { readButton.disabled = false; }
+              });
+              card.append(readButton);
+            }
             playerMaterialList.append(card);
           }
         }
@@ -415,6 +516,68 @@
       }
     }
 
+    playerSearchForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const query = document.getElementById("player-search-query").value.trim();
+      playerSearchResults.replaceChildren();
+      if (query.length < 2) return;
+      const loading = document.createElement("p");
+      loading.className = "player-empty";
+      loading.textContent = "Выполняется поиск…";
+      playerSearchResults.append(loading);
+      try {
+        const response = await fetch("/api/player/search?q=" + encodeURIComponent(query), { credentials: "same-origin" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Поиск не выполнен.");
+        playerSearchResults.replaceChildren();
+        if (!data.results.length) {
+          const empty = document.createElement("p");
+          empty.className = "player-empty";
+          empty.textContent = "По вашему запросу ничего не найдено.";
+          playerSearchResults.append(empty);
+          return;
+        }
+        for (const item of data.results) {
+          const card = document.createElement("article");
+          card.className = "player-search-result";
+          const title = document.createElement("h3");
+          title.textContent = item.title;
+          const meta = document.createElement("p");
+          meta.textContent = item.case_title + (item.summary ? " · " + item.summary : "");
+          const content = document.createElement("div");
+          content.className = "player-material-content";
+          content.hidden = true;
+          content.textContent = item.content || "Содержание досье не добавлено.";
+          const open = document.createElement("button");
+          open.type = "button";
+          open.className = "admin-mini-button";
+          open.textContent = item.is_read ? "ОТКРЫТЬ ДОСЬЕ" : "ОТКРЫТЬ ДОСЬЕ";
+          open.addEventListener("click", async () => {
+            if (content.hidden) {
+              try {
+                await markMaterialRead(item.id);
+                content.hidden = false;
+                open.textContent = "ДОСЬЕ ОТКРЫТО";
+                await loadPlayerArchive();
+              } catch {
+                open.textContent = "НЕ УДАЛОСЬ ОТКРЫТЬ";
+              }
+            } else {
+              content.hidden = true;
+              open.textContent = "ОТКРЫТЬ ДОСЬЕ";
+            }
+          });
+          card.append(title, meta, open, content);
+          playerSearchResults.append(card);
+        }
+      } catch (error) {
+        playerSearchResults.replaceChildren();
+        const message = document.createElement("p");
+        message.className = "player-empty";
+        message.textContent = error.message;
+        playerSearchResults.append(message);
+      }
+    });
     async function setCaseStatus(id, status) {
       const action = status === "active" ? "активировать" : "деактивировать";
       if (!window.confirm("Вы действительно хотите " + action + " это дело?")) return;

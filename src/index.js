@@ -225,10 +225,15 @@ async function handleApi(request, env) {
       for (const file of uploads) {
         const id = randomToken(16);
         const originalName = String(file.name || "attachment").replace(/[\r\n]/g, "_").slice(0, 180);
-        const fileData = await file.arrayBuffer();
-        await env.DB.prepare(
-          "INSERT INTO material_files (id, material_id, file_name, content_type, file_size, file_data) VALUES (?, ?, ?, ?, ?, ?)"
-        ).bind(id, materialId, originalName, file.type, file.size, fileData).run();
+        try {
+          const fileData = new Uint8Array(await file.arrayBuffer());
+          await env.DB.prepare(
+            "INSERT INTO material_files (id, material_id, file_name, content_type, file_size, file_data) VALUES (?, ?, ?, ?, ?, ?)"
+          ).bind(id, materialId, originalName, file.type, file.size, fileData).run();
+        } catch (error) {
+          console.error("Material attachment save failed:", error);
+          return json({ error: "Материал сохранён, но фотографию «" + originalName + "» не удалось записать в базу данных. Попробуйте файл JPG или PNG размером до 1 МБ." }, 500);
+        }
         saved.push({ id, file_name: originalName, content_type: file.type, file_size: file.size });
       }
       return json({ ok: true, files: saved });

@@ -633,3 +633,72 @@ footer { border-top-color: rgba(216,208,191,.16); }
   .taskbar-apps button { padding: 0 6px; }
   .taskbar-apps button span { display: none; }
 }
+
+
+/* Floating application windows inside the desktop workspace */
+.desktop-area { min-height: 485px; }
+.desktop-area .desktop-window {
+  position: absolute;
+  z-index: 5;
+  top: 24px;
+  right: 4%;
+  bottom: 22px;
+  width: min(690px, calc(100% - 285px));
+  max-height: none;
+  overflow: auto;
+  margin: 0;
+  padding: 0 20px 20px;
+  border: 1px solid #80684f;
+  border-radius: 4px;
+  background: linear-gradient(145deg, rgba(38,37,32,.985), rgba(20,23,21,.99));
+  box-shadow: 0 22px 55px rgba(0,0,0,.58), 0 2px 8px rgba(0,0,0,.3);
+  backdrop-filter: blur(12px);
+}
+.desktop-area .desktop-window:before {
+  position: sticky;
+  display: block;
+  top: 0;
+  left: -20px;
+  right: -20px;
+  width: calc(100% + 40px);
+  height: 3px;
+  margin: 0 -20px 16px;
+}
+.desktop-area .desktop-window .player-tool-heading {
+  position: sticky;
+  top: 3px;
+  z-index: 2;
+  margin: 0 -20px 18px;
+  padding: 13px 17px 12px 20px;
+  border-bottom: 1px solid rgba(190,157,116,.2);
+  background: rgba(34,33,29,.97);
+  align-items: center;
+}
+.desktop-area .desktop-window .player-tool-heading h2 { margin: 3px 0 0; }
+.desktop-area .desktop-window .window-close { border-radius: 3px; }
+.taskbar-apps button.is-selected {
+  border-color: rgba(191,154,111,.38);
+  background: rgba(191,154,111,.14);
+  box-shadow: inset 0 -2px #9b6954;
+}
+.desktop-icons .desktop-icon.is-selected {
+  border-color: rgba(198,164,119,.48);
+  background: rgba(191,158,113,.13);
+}
+@media (max-width: 620px) {
+  .desktop-area { min-height: 485px; }
+  .desktop-area .desktop-window {
+    top: 12px; right: 8px; bottom: 12px; left: 8px;
+    width: auto;
+    padding: 0 12px 14px;
+  }
+  .desktop-area .desktop-window:before {
+    left: -12px; right: -12px;
+    width: calc(100% + 24px);
+    margin: 0 -12px 13px;
+  }
+  .desktop-area .desktop-window .player-tool-heading {
+    margin: 0 -12px 15px;
+    padding: 11px 10px 10px 13px;
+  }
+}

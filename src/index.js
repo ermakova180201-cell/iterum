@@ -82,6 +82,55 @@ async function handleApi(request, env) {
       return json({ cases: cases.results || [], materials: materials.results || [] });
     }
 
+    const materialRoute = url.pathname.match(/^\/api\/admin\/materials\/([a-f0-9]+)(?:\/(publish))?$/);
+    if (materialRoute) {
+      const materialId = materialRoute[1];
+      const isPublishRoute = materialRoute[2] === "publish";
+      if (request.method === "GET" && !isPublishRoute) {
+        const material = await env.DB.prepare(
+          "SELECT id, case_id, material_type, title, summary, content, release_order, is_published FROM materials WHERE id = ?"
+        ).bind(materialId).first();
+        if (!material) return json({ error: "Материал не найден." }, 404);
+        return json({ material });
+      }
+
+      if (request.method === "PUT" && !isPublishRoute) {
+        let body;
+        try { body = await request.json(); } catch { return json({ error: "Проверьте введённые данные." }, 400); }
+        const caseId = String(body.caseId || "");
+        const type = String(body.type || "");
+        const title = String(body.title || "").trim();
+        const summary = String(body.summary || "").trim();
+        const content = String(body.content || "").trim();
+        const releaseOrder = Number(body.releaseOrder ?? 0);
+        const allowedTypes = ["email", "publication", "document", "photo", "audio", "map", "other"];
+        if (!caseId || !allowedTypes.includes(type) || !title || title.length > 200 ||
+            summary.length > 1000 || content.length > 50000 ||
+            !Number.isInteger(releaseOrder) || releaseOrder < 0 || releaseOrder > 100000) {
+          return json({ error: "Проверьте тип, название, текст и порядок открытия материала." }, 400);
+        }
+        const targetCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseId).first();
+        if (!targetCase) return json({ error: "Выбранное дело не найдено." }, 404);
+        const existing = await env.DB.prepare("SELECT id FROM materials WHERE id = ?").bind(materialId).first();
+        if (!existing) return json({ error: "Материал не найден." }, 404);
+        await env.DB.prepare(
+          "UPDATE materials SET case_id = ?, material_type = ?, title = ?, summary = ?, content = ?, release_order = ? WHERE id = ?"
+        ).bind(caseId, type, title, summary, content, releaseOrder, materialId).run();
+        return json({ ok: true });
+      }
+
+      if (request.method === "POST" && isPublishRoute) {
+        let body;
+        try { body = await request.json(); } catch { return json({ error: "Проверьте действие." }, 400); }
+        if (typeof body.published !== "boolean") return json({ error: "Не указано состояние публикации." }, 400);
+        const existing = await env.DB.prepare("SELECT id FROM materials WHERE id = ?").bind(materialId).first();
+        if (!existing) return json({ error: "Материал не найден." }, 404);
+        await env.DB.prepare("UPDATE materials SET is_published = ? WHERE id = ?")
+          .bind(body.published ? 1 : 0, materialId).run();
+        return json({ ok: true, published: body.published });
+      }
+    }
+
     if (request.method === "POST" && url.pathname === "/api/admin/cases") {
       let body;
       try { body = await request.json(); } catch { return json({ error: "Проверьте введённые данные." }, 400); }

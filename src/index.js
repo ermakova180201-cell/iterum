@@ -228,8 +228,8 @@ async function handleApi(request, env) {
         try {
           const fileData = new Uint8Array(await file.arrayBuffer());
           await env.DB.prepare(
-            "INSERT INTO material_files (id, material_id, file_name, content_type, file_size, file_data) VALUES (?, ?, ?, ?, ?, ?)"
-          ).bind(id, materialId, originalName, file.type, file.size, fileData).run();
+            "INSERT INTO material_files (id, material_id, file_name, content_type, file_size, object_key, file_data) VALUES (?, ?, ?, ?, ?, ?, ?)"
+          ).bind(id, materialId, originalName, file.type, file.size, id, fileData).run();
         } catch (error) {
           console.error("Material attachment save failed:", error);
           const reason = error && error.message ? String(error.message).slice(0, 240) : "неизвестная ошибка базы данных";

@@ -902,6 +902,10 @@ body.is-workstation .desktop-icon {
   overflow: visible;
   flex-shrink: 0;
 }
+body.is-workstation .desktop-icons {
+  margin-top: 18px;
+  align-self: flex-start;
+}
 body.is-workstation .desktop-taskbar {
   flex: 0 0 auto;
 }

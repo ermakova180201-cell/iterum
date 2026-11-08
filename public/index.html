@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=desktop-icon-labels-01">
+  <link rel="stylesheet" href="/styles.css?v=desktop-workstation-widgets-01">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -83,7 +83,27 @@
                 <span class="desktop-icon-art folder-art" aria-hidden="true"><span class="folder-paper"></span></span>
                 <span class="icon-caption">Материалы дела</span>
               </button>
+              <button class="desktop-icon" type="button" data-open-window="system-log-window" aria-label="Системный архив" title="Системный архив">
+                <span class="desktop-icon-art log-art" aria-hidden="true"><span class="log-paper"></span></span>
+                <span class="icon-caption">Системный архив</span>
+              </button>
             </div>
+            <section class="desktop-date-panel" aria-label="Дата и время">
+              <span class="desktop-panel-kicker">ЛОКАЛЬНОЕ ВРЕМЯ</span>
+              <strong id="desktop-date">—</strong>
+              <time id="desktop-time">--:--</time>
+            </section>
+            <section class="desktop-system-panel" aria-label="Состояние системы">
+              <div class="desktop-panel-heading"><span class="system-live-dot"></span> СОСТОЯНИЕ СИСТЕМЫ</div>
+              <div class="system-status-row"><span>Сеанс</span><strong id="system-session-status">АКТИВЕН</strong></div>
+              <div class="system-status-row"><span>Архив дела</span><strong id="system-archive-status">ЗАГРУЖЕН</strong></div>
+              <div class="system-status-row"><span>Связь</span><strong id="system-connection-status">ПОДКЛЮЧЕНА</strong></div>
+            </section>
+            <section class="desktop-notes-widget" aria-label="Заметки">
+              <div class="desktop-widget-heading"><span>ЛИЧНЫЕ ЗАМЕТКИ</span><span id="desktop-note-status">АВТОСОХРАНЕНИЕ</span></div>
+              <textarea id="desktop-note-input" rows="4" maxlength="2000" placeholder="Запишите важную мысль или зацепку…"></textarea>
+            </section>
+            <div class="desktop-notice-toast" id="desktop-notice-toast" role="status" aria-live="polite" hidden></div>
             <div class="desktop-case-shortcut">
               <div class="desktop-case-glyph">01</div>
               <div><span>ТЕКУЩЕЕ ДЕЛО</span><strong id="desktop-case-name">Обстоятельства аварии Ильи</strong><small>ЛИЧНОЕ РАССЛЕДОВАНИЕ</small></div>
@@ -118,6 +138,15 @@
             <button class="window-close" type="button" data-close-window="materials-window" aria-label="Закрыть окно">×</button>
           </div>
           <div id="player-material-list" class="player-material-list"></div>
+        </section>
+
+        <section id="system-log-window" class="player-tool-section desktop-window system-log-window" aria-labelledby="system-log-heading" hidden>
+          <div class="player-tool-heading window-drag-handle">
+            <div><span class="section-kicker">СИСТЕМНОЕ ПРИЛОЖЕНИЕ / 04</span><h2 id="system-log-heading">Журнал событий</h2></div>
+            <button class="window-close" type="button" data-close-window="system-log-window" aria-label="Закрыть окно">×</button>
+          </div>
+          <p class="system-log-intro">История действий и уведомлений в рамках текущего сеанса.</p>
+          <div class="system-log-list" id="system-log-list" aria-live="polite"><p class="player-empty">Событий пока нет.</p></div>
         </section>
 
           </div>
@@ -1033,6 +1062,110 @@
     });
 
     refreshAuth();
+  </script>
+
+  <script>
+    (() => {
+      const area = document.querySelector(".desktop-area");
+      if (!area) return;
+      const dateNode = document.getElementById("desktop-date");
+      const timeNode = document.getElementById("desktop-time");
+      const note = document.getElementById("desktop-note-input");
+      const noteStatus = document.getElementById("desktop-note-status");
+      const logList = document.getElementById("system-log-list");
+      const toast = document.getElementById("desktop-notice-toast");
+      const caseName = document.getElementById("desktop-case-name");
+      const emailNode = document.getElementById("member-email");
+      const events = [];
+      let toastTimer = null;
+      const stamp = () => new Intl.DateTimeFormat("ru-RU", { dateStyle: "medium", timeStyle: "short" }).format(new Date());
+      function updateDateTime() {
+        const now = new Date();
+        if (dateNode) dateNode.textContent = new Intl.DateTimeFormat("ru-RU", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(now).toUpperCase();
+        if (timeNode) timeNode.textContent = new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(now);
+      }
+      function renderLog() {
+        if (!logList) return;
+        logList.replaceChildren();
+        if (!events.length) {
+          const empty = document.createElement("p");
+          empty.className = "player-empty";
+          empty.textContent = "Событий пока нет.";
+          logList.append(empty);
+          return;
+        }
+        for (const entry of [...events].reverse()) {
+          const row = document.createElement("article");
+          row.className = "system-log-entry";
+          const time = document.createElement("time");
+          time.textContent = entry.time;
+          const message = document.createElement("span");
+          message.textContent = entry.message;
+          row.append(time, message);
+          logList.append(row);
+        }
+      }
+      function notify(message, showToast = true) {
+        events.push({ time: stamp(), message });
+        if (events.length > 40) events.shift();
+        renderLog();
+        if (showToast && toast) {
+          toast.textContent = message;
+          toast.hidden = false;
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => { toast.hidden = true; }, 4200);
+        }
+      }
+      function noteKey() {
+        const user = emailNode?.textContent?.trim() || "guest";
+        const selectedCase = caseName?.textContent?.trim() || "case";
+        return "iterum:desktop-note:" + user + ":" + selectedCase;
+      }
+      function loadNote() {
+        if (!note) return;
+        try { note.value = localStorage.getItem(noteKey()) || ""; } catch { note.value = ""; }
+        if (noteStatus) noteStatus.textContent = "АВТОСОХРАНЕНИЕ";
+      }
+      if (note) {
+        note.addEventListener("input", () => {
+          try {
+            localStorage.setItem(noteKey(), note.value);
+            if (noteStatus) noteStatus.textContent = "СОХРАНЕНО";
+          } catch {
+            if (noteStatus) noteStatus.textContent = "НЕ УДАЛОСЬ СОХРАНИТЬ";
+          }
+        });
+      }
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+      loadNote();
+      if (caseName) {
+        const observer = new MutationObserver(() => {
+          loadNote();
+          const title = caseName.textContent.trim();
+          if (title) notify("Открыто дело: " + title);
+          const connection = document.getElementById("system-connection-status");
+          if (connection) connection.textContent = "ДАННЫЕ ПОЛУЧЕНЫ";
+          const archive = document.getElementById("system-archive-status");
+          if (archive) archive.textContent = "ЗАГРУЖЕН";
+        });
+        observer.observe(caseName, { childList: true, characterData: true, subtree: true });
+      }
+      area.addEventListener("click", event => {
+        const opener = event.target.closest("[data-open-window]");
+        if (!opener) return;
+        const label = opener.getAttribute("aria-label") || opener.title || "Приложение";
+        notify("Открыто приложение: " + label, false);
+      });
+      const mailBadge = document.getElementById("desktop-mail-badge");
+      if (mailBadge) {
+        const observer = new MutationObserver(() => {
+          const value = mailBadge.textContent.trim();
+          if (value && value !== "ВХОДЯЩИЕ" && /НОВЫХ/.test(value)) notify("Почта: " + value.toLowerCase(), false);
+        });
+        observer.observe(mailBadge, { childList: true, characterData: true, subtree: true });
+      }
+    })();
   </script>
 
   <script>

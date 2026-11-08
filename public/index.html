@@ -1036,7 +1036,7 @@
 
       function draw(time) {
         frame = requestAnimationFrame(draw);
-        if (document.hidden || canvas.offsetParent === null) return;
+        if (document.hidden) return;
         if (time - last < (reducedMotion ? 500 : 32)) return;
         const dt = Math.min((time - (last || time)) / 1000, .05);
         last = time;

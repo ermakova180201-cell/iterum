@@ -1232,3 +1232,107 @@ body.is-workstation .desktop-area {
     padding: 16px 18px;
   }
 }
+
+
+/* ITERUM access screen — minimal approved copy */
+@media (min-width: 621px) {
+  body:not(:has(#workspace:not([hidden]))) .topbar {
+    justify-content: center;
+    min-height: 82px;
+    border-bottom-color: rgba(216,208,191,.08);
+  }
+  body:not(:has(#workspace:not([hidden]))) .brand-mark,
+  body:not(:has(#workspace:not([hidden]))) .brand-name small,
+  body:not(:has(#workspace:not([hidden]))) .topbar-right,
+  body:not(:has(#workspace:not([hidden]))) > main > .intro,
+  body:not(:has(#workspace:not([hidden]))) > main > .notice {
+    display: none !important;
+  }
+  body:not(:has(#workspace:not([hidden]))) .brand-name {
+    font: 600 20px/1 var(--mono);
+    letter-spacing: .24em;
+  }
+  body:not(:has(#workspace:not([hidden]))) main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(100% - 48px, 520px);
+    padding: 54px 0 40px;
+  }
+  body:not(:has(#workspace:not([hidden]))) .auth-panel {
+    max-width: 460px;
+    justify-self: auto;
+    padding: clamp(30px, 4vw, 46px);
+  }
+  body:not(:has(#workspace:not([hidden]))) .auth-copy {
+    margin-bottom: 28px;
+  }
+  body:not(:has(#workspace:not([hidden]))) .auth-copy h2 {
+    margin: 0 0 12px;
+    font: 500 25px/1.25 var(--sans);
+    letter-spacing: .055em;
+    text-align: center;
+  }
+  body:not(:has(#workspace:not([hidden]))) .auth-copy > p:last-child {
+    max-width: none;
+    margin: 0;
+    text-align: center;
+    font-size: 11px;
+  }
+  body:not(:has(#workspace:not([hidden]))) .auth-panel label {
+    color: #d8d2c7;
+    font: 500 11px/1.4 var(--sans);
+    letter-spacing: .01em;
+  }
+  body:not(:has(#workspace:not([hidden]))) #auth-confirm-wrap {
+    display: grid;
+    gap: 10px;
+  }
+  body:not(:has(#workspace:not([hidden]))) #auth-confirm-wrap[hidden] {
+    display: none !important;
+  }
+  body:not(:has(#workspace:not([hidden]))) footer {
+    justify-content: center;
+    border-top-color: rgba(216,208,191,.08);
+    color: rgba(216,208,191,.48);
+    font: 9px var(--mono);
+    letter-spacing: .12em;
+  }
+}
+@media (max-width: 620px) {
+  body:not(:has(#workspace:not([hidden]))) .topbar {
+    justify-content: center;
+  }
+  body:not(:has(#workspace:not([hidden]))) .brand-mark,
+  body:not(:has(#workspace:not([hidden]))) .brand-name small,
+  body:not(:has(#workspace:not([hidden]))) .topbar-right,
+  body:not(:has(#workspace:not([hidden]))) > main > .intro,
+  body:not(:has(#workspace:not([hidden]))) > main > .notice {
+    display: none !important;
+  }
+  body:not(:has(#workspace:not([hidden]))) .brand-name {
+    font: 600 18px/1 var(--mono);
+    letter-spacing: .22em;
+  }
+  body:not(:has(#workspace:not([hidden]))) .auth-copy h2 {
+    margin: 0 0 10px;
+    font-size: 21px;
+    text-align: center;
+  }
+  body:not(:has(#workspace:not([hidden]))) .auth-copy > p:last-child {
+    text-align: center;
+  }
+  body:not(:has(#workspace:not([hidden]))) #auth-confirm-wrap {
+    display: grid;
+    gap: 10px;
+  }
+  body:not(:has(#workspace:not([hidden]))) #auth-confirm-wrap[hidden] {
+    display: none !important;
+  }
+  body:not(:has(#workspace:not([hidden]))) footer {
+    justify-content: center;
+    color: rgba(216,208,191,.48);
+    font: 9px var(--mono);
+    letter-spacing: .1em;
+  }
+}

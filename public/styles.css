@@ -3171,3 +3171,22 @@ body.is-workstation .desktop-notice-toast {
   }
   .system-log-entry { grid-template-columns: 1fr; gap: 3px; }
 }
+
+
+/* Keep desktop folder names visible directly beneath their icons */
+body.is-workstation .desktop-icon {
+  height: auto;
+  min-height: 88px;
+  overflow: visible;
+}
+body.is-workstation .desktop-icon > .icon-caption {
+  display: block !important;
+  visibility: visible !important;
+  width: 100%;
+  margin-top: 2px;
+  color: #e3ddce;
+  font: 10px/1.3 var(--sans);
+  text-align: center;
+  white-space: normal;
+  text-shadow: 0 1px 4px rgba(0,0,0,.95);
+}

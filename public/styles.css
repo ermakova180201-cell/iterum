@@ -2206,3 +2206,86 @@ body:not(.is-workstation) .available-case-list > .player-empty {
   body:not(.is-workstation) .available-case-card,
   body:not(.is-workstation) .case-start-button { transition:none; }
 }
+
+
+/* ITERUM case picker — compact, focused layout */
+body:not(.is-workstation) #workspace > .section-heading,
+body:not(.is-workstation) #workspace > .member-summary {
+  display:none;
+}
+body:not(.is-workstation) #workspace {
+  width:min(1040px,calc(100% - 48px));
+  padding-top:clamp(42px,8vh,92px);
+}
+body:not(.is-workstation) .available-cases {
+  margin:0 auto 42px;
+  padding:clamp(24px,4vw,42px);
+  border:1px solid rgba(104,151,116,.24);
+  background:linear-gradient(145deg,rgba(7,17,10,.9),rgba(4,11,7,.88));
+  box-shadow:0 22px 70px rgba(0,0,0,.24);
+}
+body:not(.is-workstation) .available-cases::before { opacity:.55; }
+body:not(.is-workstation) .case-selection-heading {
+  margin:0 0 24px;
+  padding:0 0 18px;
+  border-bottom:1px solid rgba(104,151,116,.18);
+}
+body:not(.is-workstation) .case-selection-heading h2 {
+  margin:0;
+  color:#d5e2d5;
+  font:500 clamp(26px,3.2vw,35px)/1.2 var(--mono);
+  letter-spacing:.02em;
+}
+body:not(.is-workstation) .case-selection-heading .archive-stamp,
+body:not(.is-workstation) .case-selection-copy {
+  display:none;
+}
+body:not(.is-workstation) .available-case-list {
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));
+  gap:12px;
+}
+body:not(.is-workstation) .available-case-card {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  min-height:0;
+  padding:20px;
+  border-color:rgba(107,151,115,.22);
+  background:rgba(9,21,13,.76);
+  box-shadow:none;
+}
+body:not(.is-workstation) .available-case-card::after { display:none; }
+body:not(.is-workstation) .available-case-card:hover {
+  transform:translateY(-1px);
+  background:rgba(15,32,19,.9);
+}
+body:not(.is-workstation) .available-case-top {
+  display:flex;
+  width:100%;
+  justify-content:space-between;
+  gap:12px;
+  margin:0 0 16px;
+}
+body:not(.is-workstation) .available-case-card h3 {
+  margin:0 0 8px;
+  font-size:20px;
+}
+body:not(.is-workstation) .available-case-card p {
+  margin:0 0 16px;
+}
+body:not(.is-workstation) .case-start-button {
+  margin-top:auto;
+  padding:12px 15px;
+}
+@media(max-width:620px) {
+  body:not(.is-workstation) #workspace {
+    width:calc(100% - 28px);
+    padding:28px 0 30px;
+  }
+  body:not(.is-workstation) .available-cases {
+    margin-bottom:26px;
+    padding:20px 15px;
+  }
+  body:not(.is-workstation) .case-selection-heading { margin-bottom:18px; }
+  body:not(.is-workstation) .available-case-card { padding:17px; }
+}

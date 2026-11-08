@@ -2904,3 +2904,14 @@ body:not(.is-workstation) .available-case-list > .player-empty {
   .desktop-icon-art { width: 50px; height: 50px; flex-basis: 50px; }
   .search-art, .folder-art { width: 50px; height: 50px; }
 }
+
+
+/* Draggable app title bars */
+.desktop-area .window-drag-handle {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.desktop-area .window-drag-handle.is-dragging { cursor: grabbing; }
+.desktop-area .window-drag-handle .window-close { cursor: pointer; }

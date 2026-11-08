@@ -1732,3 +1732,55 @@ body:has(#workspace:not([hidden])) .system-console { display:none; }
 @media(prefers-reduced-motion:reduce) {
   .system-console-led { box-shadow:none; }
 }
+
+
+/* Full-screen digital rain for the ITERUM access screen */
+#ambient-network {
+  position:fixed;inset:0;z-index:1;display:block;pointer-events:none;
+  opacity:.94;mix-blend-mode:screen;
+}
+body:not(:has(#workspace:not([hidden]))) {
+  background:#020806 !important;
+}
+body:not(:has(#workspace:not([hidden])))::before {
+  background:radial-gradient(ellipse at 50% 45%,rgba(12,45,24,.18),transparent 58%),
+    linear-gradient(180deg,#020806 0%,#030a07 55%,#010503 100%);
+}
+body:not(:has(#workspace:not([hidden])))::after {
+  background:linear-gradient(90deg,rgba(0,0,0,.26),transparent 18% 82%,rgba(0,0,0,.3)),
+    radial-gradient(ellipse at center,transparent 20%,rgba(0,0,0,.42) 100%);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-panel {
+  grid-template-columns:1fr !important;
+  background:rgba(5,13,9,.88) !important;
+  border-color:rgba(94,167,111,.3);
+  box-shadow:0 24px 90px rgba(0,0,0,.76),0 0 55px rgba(42,137,72,.1),inset 0 1px rgba(178,222,183,.045);
+  backdrop-filter:blur(7px);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-panel::before {
+  background:#9b554b !important;
+  box-shadow:0 0 14px rgba(166,72,65,.28);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-copy h2 { color:#d9e8d9; }
+body:not(:has(#workspace:not([hidden]))) .auth-copy > p:last-child { color:#9bb39e; }
+body:not(:has(#workspace:not([hidden]))) .auth-panel label { color:#bdcdbd; }
+body:not(:has(#workspace:not([hidden]))) .auth-panel input {
+  color:#e2eee2;border-color:rgba(105,164,117,.3);background:rgba(1,7,4,.82);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-panel input:focus {
+  border-color:rgba(125,205,143,.65);box-shadow:0 0 0 2px rgba(89,183,111,.11);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-submit {
+  color:#07110a;background:linear-gradient(110deg,#a9c9a9,#6f9e7b);
+  border-color:rgba(174,216,175,.48);box-shadow:0 5px 24px rgba(72,152,91,.16);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-switch { color:#a8c3aa; }
+body:not(:has(#workspace:not([hidden]))) footer { color:rgba(157,190,160,.45); }
+body:has(#workspace:not([hidden])) #ambient-network { display:none; }
+@media(max-width:620px) {
+  #ambient-network { opacity:.76; }
+  body:not(:has(#workspace:not([hidden]))) .auth-panel { backdrop-filter:blur(5px); }
+}
+@media(prefers-reduced-motion:reduce) {
+  #ambient-network { opacity:.68; }
+}

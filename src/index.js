@@ -66,6 +66,24 @@ async function handleApi(request, env) {
   }
 
 
+  const playerReadRoute = url.pathname.match(/^\/api\/player\/materials\/([a-f0-9]+)\/read$/);
+  if (request.method === "POST" && playerReadRoute) {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    const materialId = playerReadRoute[1];
+    const material = await env.DB.prepare("SELECT id, case_id, delivery_mode FROM materials WHERE id = ? AND is_published = 1").bind(materialId).first();
+    if (!material) return json({ error: "Материал не найден или ещё не опубликован." }, 404);
+    const activeCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ? AND status = 'active'").bind(material.case_id).first();
+    if (!activeCase) return json({ error: "Дело сейчас недоступно." }, 403);
+    if (material.delivery_mode === "triggered") {
+      const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ?").bind(user.id, materialId).first();
+      if (!unlocked) return json({ error: "Этот материал ещё не открыт." }, 403);
+    }
+    await env.DB.prepare("INSERT OR IGNORE INTO player_material_reads (user_id, material_id) VALUES (?, ?)").bind(user.id, materialId).run();
+    await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id) SELECT ?, id FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1").bind(user.id, materialId).run();
+    return json({ ok: true });
+  }
+
   if (request.method === "GET" && url.pathname === "/api/player/archive") {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
@@ -73,8 +91,8 @@ async function handleApi(request, env) {
       "SELECT id, title, case_code, description FROM cases WHERE status = 'active' ORDER BY created_at"
     ).all();
     const materials = await env.DB.prepare(
-      "SELECT materials.id, materials.case_id, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id WHERE cases.status = 'active' AND materials.is_published = 1 ORDER BY cases.created_at, materials.release_order, materials.created_at"
-    ).all();
+      "SELECT materials.id, materials.case_id, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at, EXISTS(SELECT 1 FROM player_material_reads r WHERE r.user_id = ? AND r.material_id = materials.id) AS is_read FROM materials JOIN cases ON cases.id = materials.case_id WHERE cases.status = 'active' AND materials.is_published = 1 AND (materials.delivery_mode = 'automatic' OR EXISTS(SELECT 1 FROM material_unlocks u WHERE u.user_id = ? AND u.material_id = materials.id)) ORDER BY cases.created_at, materials.release_order, materials.created_at"
+    ).bind(user.id, user.id).all();
     return json({ cases: cases.results || [], materials: materials.results || [] });
   }
 
@@ -90,7 +108,7 @@ async function handleApi(request, env) {
         "SELECT id, title, case_code, description, status, created_at FROM cases ORDER BY created_at DESC"
       ).all();
       const materials = await env.DB.prepare(
-        "SELECT materials.id, materials.case_id, cases.title AS case_title, materials.material_type, materials.title, materials.summary, materials.release_order, materials.is_published, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id ORDER BY materials.created_at DESC"
+        "SELECT materials.id, materials.case_id, cases.title AS case_title, materials.material_type, materials.title, materials.summary, materials.release_order, materials.is_published, materials.delivery_mode, materials.trigger_material_id, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id ORDER BY materials.created_at DESC"
       ).all();
       return json({ cases: cases.results || [], materials: materials.results || [] });
     }
@@ -114,7 +132,7 @@ async function handleApi(request, env) {
       const isPublishRoute = materialRoute[2] === "publish";
       if (request.method === "GET" && !isPublishRoute) {
         const material = await env.DB.prepare(
-          "SELECT id, case_id, material_type, title, summary, content, release_order, is_published FROM materials WHERE id = ?"
+          "SELECT id, case_id, material_type, title, summary, content, release_order, is_published, delivery_mode, trigger_material_id FROM materials WHERE id = ?"
         ).bind(materialId).first();
         if (!material) return json({ error: "Материал не найден." }, 404);
         return json({ material });
@@ -129,9 +147,12 @@ async function handleApi(request, env) {
         const summary = String(body.summary || "").trim();
         const content = String(body.content || "").trim();
         const releaseOrder = Number(body.releaseOrder ?? 0);
+        const deliveryMode = String(body.deliveryMode || "automatic");
+        const triggerMaterialId = String(body.triggerMaterialId || "") || null;
         const allowedTypes = ["email", "publication", "document", "photo", "audio", "map", "other"];
         if (!caseId || !allowedTypes.includes(type) || !title || title.length > 200 ||
             summary.length > 1000 || content.length > 50000 ||
+            !["automatic", "triggered"].includes(deliveryMode) || (deliveryMode === "triggered" && (!triggerMaterialId || triggerMaterialId === materialId)) ||
             !Number.isInteger(releaseOrder) || releaseOrder < 0 || releaseOrder > 100000) {
           return json({ error: "Проверьте тип, название, текст и порядок открытия материала." }, 400);
         }
@@ -139,9 +160,13 @@ async function handleApi(request, env) {
         if (!targetCase) return json({ error: "Выбранное дело не найдено." }, 404);
         const existing = await env.DB.prepare("SELECT id FROM materials WHERE id = ?").bind(materialId).first();
         if (!existing) return json({ error: "Материал не найден." }, 404);
+        if (deliveryMode === "triggered") {
+          const prerequisite = await env.DB.prepare("SELECT id FROM materials WHERE id = ? AND case_id = ?").bind(triggerMaterialId, caseId).first();
+          if (!prerequisite) return json({ error: "Выберите существующий материал из этого дела как условие открытия." }, 400);
+        }
         await env.DB.prepare(
-          "UPDATE materials SET case_id = ?, material_type = ?, title = ?, summary = ?, content = ?, release_order = ? WHERE id = ?"
-        ).bind(caseId, type, title, summary, content, releaseOrder, materialId).run();
+          "UPDATE materials SET case_id = ?, material_type = ?, title = ?, summary = ?, content = ?, release_order = ?, delivery_mode = ?, trigger_material_id = ? WHERE id = ?"
+        ).bind(caseId, type, title, summary, content, releaseOrder, deliveryMode, deliveryMode === "triggered" ? triggerMaterialId : null, materialId).run();
         return json({ ok: true });
       }
 
@@ -186,18 +211,25 @@ async function handleApi(request, env) {
       const summary = String(body.summary || "").trim();
       const content = String(body.content || "").trim();
       const releaseOrder = Number(body.releaseOrder ?? 0);
+      const deliveryMode = String(body.deliveryMode || "automatic");
+      const triggerMaterialId = String(body.triggerMaterialId || "") || null;
       const allowedTypes = ["email", "publication", "document", "photo", "audio", "map", "other"];
       if (!caseId || !allowedTypes.includes(type) || !title || title.length > 200 ||
           summary.length > 1000 || content.length > 50000 ||
+          !["automatic", "triggered"].includes(deliveryMode) || (deliveryMode === "triggered" && !triggerMaterialId) ||
           !Number.isInteger(releaseOrder) || releaseOrder < 0 || releaseOrder > 100000) {
         return json({ error: "Проверьте тип, название, текст и порядок открытия материала." }, 400);
       }
       const targetCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseId).first();
       if (!targetCase) return json({ error: "Выбранное дело не найдено." }, 404);
+      if (deliveryMode === "triggered") {
+        const prerequisite = await env.DB.prepare("SELECT id FROM materials WHERE id = ? AND case_id = ?").bind(triggerMaterialId, caseId).first();
+        if (!prerequisite) return json({ error: "Выберите существующий материал из этого дела как условие открытия." }, 400);
+      }
       const id = randomToken(16);
       await env.DB.prepare(
-        "INSERT INTO materials (id, case_id, material_type, title, summary, content, release_order, is_published) VALUES (?, ?, ?, ?, ?, ?, ?, 0)"
-      ).bind(id, caseId, type, title, summary, content, releaseOrder).run();
+        "INSERT INTO materials (id, case_id, material_type, title, summary, content, release_order, is_published, delivery_mode, trigger_material_id) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)"
+      ).bind(id, caseId, type, title, summary, content, releaseOrder, deliveryMode, deliveryMode === "triggered" ? triggerMaterialId : null).run();
       return json({ ok: true, id });
     }
 

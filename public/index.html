@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/search.css">
+  <link rel="stylesheet" href="/materials.css">
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -293,6 +294,7 @@
     <span>ITERUM <b>—</b> CASE ARCHIVE</span>
     <span>ЧАСТНОЕ РАССЛЕДОВАНИЕ <b>·</b> 2025</span>
   </footer>
+  <script src="/materials.js"></script>
   <script src="/search.js"></script>
   <script>
     const authForm = document.getElementById("auth-form");
@@ -555,42 +557,7 @@
         }
 
         const otherMaterials = data.materials.filter(item => item.material_type !== "email");
-        if (!otherMaterials.length) {
-          const empty = document.createElement("p");
-          empty.className = "player-empty";
-          empty.textContent = "Других открытых материалов пока нет.";
-          playerMaterialList.append(empty);
-        } else {
-          for (const item of otherMaterials) {
-            const card = document.createElement("article");
-            card.className = "player-material";
-            const type = document.createElement("span");
-            const labels = { publication: "ПУБЛИКАЦИЯ", document: "ДОКУМЕНТ", photo: "ФОТОГРАФИЯ", audio: "АУДИОЗАПИСЬ", map: "КАРТА / СХЕМА", other: "МАТЕРИАЛ" };
-            type.className = "player-material-type";
-            type.textContent = labels[item.material_type] || "МАТЕРИАЛ";
-            const title = document.createElement("h3");
-            title.textContent = item.title;
-            const summary = document.createElement("p");
-            summary.textContent = item.summary || "";
-            const content = document.createElement("div");
-            content.className = "player-material-content";
-            content.textContent = item.content || "Содержание не добавлено.";
-            card.append(type, title, summary, content);
-            if (!item.is_read) {
-              const readButton = document.createElement("button");
-              readButton.type = "button";
-              readButton.className = "admin-mini-button";
-              readButton.textContent = "ОТМЕТИТЬ КАК ПРОЧИТАННОЕ";
-              readButton.addEventListener("click", async () => {
-                readButton.disabled = true;
-                try { await markMaterialRead(item.id); await loadPlayerArchive(); }
-                catch { readButton.disabled = false; }
-              });
-              card.append(readButton);
-            }
-            playerMaterialList.append(card);
-          }
-        }
+        if (window.renderMaterialsArchive) window.renderMaterialsArchive(otherMaterials);
       } catch {
         playerArchive.hidden = true;
       }

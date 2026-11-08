@@ -2987,7 +2987,6 @@ body.is-workstation .desktop-date-panel {
   gap: 5px;
 }
 .desktop-panel-kicker,
-.desktop-widget-heading,
 .desktop-panel-heading {
   color: #89a88b;
   font: 8px/1.4 var(--mono);

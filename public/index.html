@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-18">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-19">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -241,17 +241,6 @@
         <button class="auth-switch" id="auth-switch" type="button">СОЗДАТЬ УЧЁТНУЮ ЗАПИСЬ</button>
         <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
       </form>
-
-      <div class="system-interactions" id="system-interactions" aria-label="Инструменты системы">
-        <div class="system-control-row">
-          <button type="button" class="system-tool-button" id="system-diagnostics">ПРОВЕРИТЬ СОЕДИНЕНИЕ</button>
-          <button type="button" class="system-tool-button" id="system-scan">СКАНИРОВАНИЕ</button>
-        </div>
-        <button type="button" class="system-status-trigger" id="system-status-trigger" aria-live="polite">
-          <span class="system-status-light"></span><span id="system-status-label">СИСТЕМА ГОТОВА</span><span class="system-status-hint">· открыть журнал</span>
-        </button>
-        <div class="system-output" id="system-output" role="status" aria-live="polite" hidden></div>
-      </div>
 
       <div class="auth-user" id="auth-user" hidden>
         <p id="auth-user-email"></p>
@@ -1002,288 +991,95 @@
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      let width = 0, height = 0, ratio = 1, frame = 0, lastFrame = 0;
-      const signals = Array.from({ length: 34 }, (_, i) => ({
-        x: ((i * 37) % 97) / 100,
-        y: ((i * 61) % 89) / 100,
-        length: 24 + (i % 5) * 17,
-        phase: i * 1.73,
-        speed: .00012 + (i % 4) * .000045
-      }));
-      const panels = [
-        {x:.055,y:.19,w:.19,h:.17,label:"NETWORK / 01"},
-        {x:.755,y:.16,w:.18,h:.22,label:"MEMORY / LINK"},
-        {x:.07,y:.72,w:.22,h:.13,label:"ARCHIVE STATUS"},
-        {x:.79,y:.68,w:.15,h:.16,label:"SIGNAL / 04"}
+      const layer = document.createElement("div");
+      layer.className = "ambient-node-layer";
+      layer.setAttribute("aria-label", "Интерактивная сеть");
+      document.body.appendChild(layer);
+      const nodes = [
+        {x:.66,y:.27,label:"УЗЕЛ 01",detail:"Канал связи стабилен."},
+        {x:.91,y:.28,label:"УЗЕЛ 02",detail:"Сигнал проходит без потерь."},
+        {x:.94,y:.68,label:"УЗЕЛ 03",detail:"Архивный сектор отвечает."},
+        {x:.69,y:.76,label:"УЗЕЛ 04",detail:"Связь с локальным контуром активна."},
+        {x:.79,y:.48,label:"УЗЕЛ 05",detail:"Обнаружен неизвестный маршрут."}
       ];
-
-      function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        ratio = Math.min(window.devicePixelRatio || 1, 1.5);
-        canvas.width = Math.round(width * ratio);
-        canvas.height = Math.round(height * ratio);
-        canvas.style.width = width + "px";
-        canvas.style.height = height + "px";
-        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      let width=0,height=0,ratio=1,frame=0,last=0,selected=-1;
+      const buttons=[];
+      function center(){ return {x:width*(width<620?.5:.81),y:height*(width<620?.23:.51)}; }
+      function resize(){
+        width=innerWidth;height=innerHeight;ratio=Math.min(devicePixelRatio||1,1.5);
+        canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);
+        canvas.style.width=width+"px";canvas.style.height=height+"px";
+        ctx.setTransform(ratio,0,0,ratio,0,0);
+        layer.replaceChildren();buttons.length=0;
+        nodes.forEach((node,i)=>{
+          const b=document.createElement("button");
+          b.type="button";b.className="ambient-node";
+          b.setAttribute("aria-label","Открыть "+node.label);
+          b.innerHTML='<span></span><em>'+node.label+'</em>';
+          b.addEventListener("click",()=>{selected=selected===i?-1:i;buttons.forEach((item,j)=>item.classList.toggle("is-selected",j===selected));});
+          layer.appendChild(b);buttons.push(b);
+        });
+        placeNodes();
       }
-
-      function line(x1,y1,x2,y2,alpha) {
-        ctx.strokeStyle = "rgba(91,190,190," + alpha + ")";
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      function placeNodes(){
+        const c=center();
+        nodes.forEach((n,i)=>{
+          const x=width*(width<620?(.16+i*.17):n.x);
+          const y=height*(width<620?(.42+(i%2)*.12):n.y);
+          buttons[i].style.left=x+"px";buttons[i].style.top=y+"px";
+        });
       }
-
-      function draw(time) {
-        frame = requestAnimationFrame(draw);
-        if (document.hidden) return;
-        if (!reduced && time - lastFrame < 38) return;
-        lastFrame = time;
-        const t = reduced ? 0 : time;
+      function draw(time){
+        frame=requestAnimationFrame(draw);
+        if(document.hidden)return;
+        if(!reduced&&time-last<32)return;last=time;
+        const t=reduced?0:time,c=center(),r=Math.min(178,height*.27,width*.19);
         ctx.clearRect(0,0,width,height);
-
-        // Restrained technical grid, fading toward the centre so the access form stays clear.
-        const spacing = width < 620 ? 46 : 64;
-        ctx.lineWidth = 1;
-        for (let x = 0; x <= width; x += spacing) {
-          const a = .035 + .025 * (Math.sin(x * .012 + t * .00018) + 1);
-          line(x,0,x,height,a);
-        }
-        for (let y = 0; y <= height; y += spacing) line(0,y,width,y,.035);
-
-        // Fine circuit paths and connection points around the perimeter.
+        // Fine network paths with a soft fade toward the login form.
         ctx.save();
-        for (let i = 0; i < signals.length; i++) {
-          const p = signals[i];
-          const drift = reduced ? 0 : Math.sin(t * p.speed + p.phase) * 13;
-          const x = p.x * width + drift;
-          const y = p.y * height;
-          const edgeFade = Math.min(1, Math.abs(x - width * .5) / (width * .22) + .18);
-          const alpha = (.055 + (i % 4) * .018) * edgeFade;
-          ctx.strokeStyle = "rgba(83,181,184," + alpha + ")";
-          ctx.beginPath();
-          ctx.moveTo(x,y);
-          ctx.lineTo(x + p.length,y);
-          ctx.lineTo(x + p.length,y + 12 + (i % 3) * 7);
-          ctx.stroke();
-          ctx.fillStyle = "rgba(121,211,207," + (alpha * 2.1) + ")";
-          ctx.beginPath(); ctx.arc(x,y,1.3,0,Math.PI*2); ctx.fill();
+        nodes.forEach((n,i)=>{
+          const p=buttons[i];if(!p)return;
+          const x=parseFloat(p.style.left),y=parseFloat(p.style.top);
+          const a=i===selected?.32:.12;
+          ctx.strokeStyle="rgba(91,190,190,"+a+")";ctx.lineWidth=1;
+          ctx.beginPath();ctx.moveTo(x,y);
+          const bendX=(x+c.x)/2+(i%2?18:-18);
+          ctx.lineTo(bendX,(y+c.y)/2);ctx.lineTo(c.x,c.y);ctx.stroke();
+          ctx.fillStyle="rgba(105,211,205,"+(i===selected?.8:.38)+")";
+          ctx.beginPath();ctx.arc(x,y,2.2,0,Math.PI*2);ctx.fill();
+          const pulse=reduced?0:(Math.sin(t*.0015+i*1.7)+1)*.5;
+          ctx.beginPath();ctx.arc(x,y,4+pulse*5,0,Math.PI*2);
+          ctx.strokeStyle="rgba(91,201,194,"+(.08+pulse*.13)+")";ctx.stroke();
+        });
+        // Radar rings and rotating sweep.
+        ctx.translate(c.x,c.y);
+        for(let k=1;k<=4;k++){
+          ctx.beginPath();ctx.arc(0,0,r*k/4,0,Math.PI*2);
+          ctx.strokeStyle="rgba(91,190,190,"+(k===4?.19:.12)+")";ctx.lineWidth=1;ctx.stroke();
         }
+        ctx.strokeStyle="rgba(91,190,190,.12)";
+        ctx.beginPath();ctx.moveTo(-r,0);ctx.lineTo(r,0);ctx.moveTo(0,-r);ctx.lineTo(0,r);ctx.stroke();
+        const angle=reduced?-.7:t*.00032;
+        const grad=ctx.createConicGradient(angle,0,0);
+        grad.addColorStop(0,"rgba(85,205,198,.22)");grad.addColorStop(.16,"rgba(85,205,198,.025)");grad.addColorStop(.17,"rgba(85,205,198,0)");grad.addColorStop(1,"rgba(85,205,198,0)");
+        ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,0,Math.PI*2);ctx.closePath();ctx.fill();
+        ctx.save();ctx.rotate(angle);ctx.strokeStyle="rgba(117,224,215,.58)";ctx.lineWidth=1.2;
+        ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(r,0);ctx.stroke();ctx.restore();
+        ctx.fillStyle="rgba(125,220,211,.7)";ctx.beginPath();ctx.arc(0,0,2.5,0,Math.PI*2);ctx.fill();
         ctx.restore();
-
-        // Quiet diagnostic panels; intentionally kept away from the centre.
-        if (width > 760) {
-          ctx.save();
-          ctx.font = "9px monospace";
-          for (let i = 0; i < panels.length; i++) {
-            const p = panels[i], x = p.x * width, y = p.y * height;
-            const w = p.w * width, h = p.h * height;
-            ctx.fillStyle = "rgba(4,15,21,.22)";
-            ctx.fillRect(x,y,w,h);
-            ctx.strokeStyle = "rgba(83,174,178,.17)";
-            ctx.strokeRect(x + .5,y + .5,w,h);
-            ctx.fillStyle = "rgba(126,190,190,.42)";
-            ctx.fillText(p.label,x + 10,y + 16);
-            for (let k = 0; k < 3; k++) {
-              const yy = y + 34 + k * 17;
-              ctx.fillStyle = "rgba(104,169,171,.16)";
-              ctx.fillRect(x + 10,yy,w * (.35 + ((i + k) % 4) * .12),2);
-              ctx.fillStyle = "rgba(105,203,198,.24)";
-              ctx.fillRect(x + w - 25,yy - 2,3,5);
-            }
-          }
-          ctx.restore();
-        }
-
-        // A slow scanner passes through the field, with a short-lived glow.
-        const scanY = reduced ? height * .48 : ((t * .018) % (height + 180)) - 90;
-        const scan = ctx.createLinearGradient(0,scanY - 24,0,scanY + 24);
-        scan.addColorStop(0,"rgba(64,188,190,0)");
-        scan.addColorStop(.5,"rgba(64,188,190,.075)");
-        scan.addColorStop(1,"rgba(64,188,190,0)");
-        ctx.fillStyle = scan;
-        ctx.fillRect(0,scanY - 24,width,48);
-        line(0,scanY,width,scanY,.12);
-
-        // Small status marks and a restrained warning pulse.
-        const pulse = reduced ? .04 : .035 + .025 * (1 + Math.sin(t * .0012));
-        ctx.fillStyle = "rgba(190,104,91," + pulse + ")";
-        ctx.fillRect(width * .91,height * .11,5,5);
-        const vignette = ctx.createRadialGradient(width*.5,height*.48,Math.min(width,height)*.12,width*.5,height*.48,Math.max(width,height)*.72);
-        vignette.addColorStop(0,"rgba(0,5,10,0)");
-        vignette.addColorStop(1,"rgba(0,3,8,.62)");
-        ctx.fillStyle = vignette;
-        ctx.fillRect(0,0,width,height);
+        // Keep the centre of the page quiet behind the access form.
+        const fade=ctx.createRadialGradient(width*.5,height*.48,Math.min(width,height)*.12,width*.5,height*.48,Math.max(width,height)*.7);
+        fade.addColorStop(0,"rgba(0,5,10,0)");fade.addColorStop(1,"rgba(0,3,8,.58)");
+        ctx.fillStyle=fade;ctx.fillRect(0,0,width,height);
       }
-
       window.addEventListener("resize",resize,{passive:true});
-      window.addEventListener("pagehide",() => cancelAnimationFrame(frame),{once:true});
-      resize();
-      frame = requestAnimationFrame(draw);
+      window.addEventListener("pagehide",()=>cancelAnimationFrame(frame),{once:true});
+      resize();frame=requestAnimationFrame(draw);
     })();
   </script>
 
 
-  <script>
-    (() => {
-      const panel = document.getElementById("system-interactions");
-      if (!panel) return;
-      const diagnostics = document.getElementById("system-diagnostics");
-      const scan = document.getElementById("system-scan");
-      const status = document.getElementById("system-status-trigger");
-      const statusLabel = document.getElementById("system-status-label");
-      const output = document.getElementById("system-output");
-      const dataPanels = [];
-      let stage = 0;
-      let scanActive = false;
-      let diagnosticTimer = null;
 
-      const normalPanels = [
-        ["NETWORK / 01","Канал связи активен. Потери пакетов не обнаружены."],
-        ["MEMORY / LINK","Архив подключён. Содержимое закрыто."],
-        ["ARCHIVE STATUS","Контрольная сумма ожидает проверки."],
-        ["SIGNAL / 04","Входящий сигнал отсутствует."]
-      ];
-      const anomalyPanels = [
-        ["NETWORK / 01","Соединение установлено до начала авторизации."],
-        ["MEMORY / LINK","Обнаружена активная пользовательская сессия."],
-        ["ARCHIVE STATUS","Незавершённая запись. Дата: [НЕТ ДАННЫХ]."],
-        ["SIGNAL / 04","Источник сигнала: ЛОКАЛЬНЫЙ."]
-      ];
-
-      function showOutput(lines, kind) {
-        output.replaceChildren();
-        lines.forEach(line => {
-          const row = document.createElement("div");
-          row.textContent = line;
-          output.appendChild(row);
-        });
-        output.hidden = false;
-        output.className = "system-output" + (kind ? " " + kind : "");
-      }
-      function updatePanels(data) {
-        dataPanels.forEach((button,index) => {
-          button.textContent = data[index][0];
-          button.setAttribute("data-system-detail",data[index][1]);
-          button.classList.toggle("is-corrupted",stage >= 1 && index > 0);
-        });
-      }
-      function revealAnomaly() {
-        stage = Math.max(stage,1);
-        document.body.classList.add("system-anomaly");
-        status.classList.add("has-alert");
-        statusLabel.textContent = "ОБНАРУЖЕНА АКТИВНАЯ СЕССИЯ";
-        diagnostics.textContent = "ПОВТОРИТЬ ДИАГНОСТИКУ";
-        diagnostics.disabled = false;
-        updatePanels(anomalyPanels);
-        showOutput([
-          "ПРЕДУПРЕЖДЕНИЕ / 01",
-          "Обнаружена незавершённая сессия.",
-          "Пользователь уже находится внутри системы.",
-          "Повторная авторизация не требуется."
-        ],"is-warning");
-      }
-      function runDiagnostics() {
-        clearTimeout(diagnosticTimer);
-        diagnostics.disabled = true;
-        diagnostics.textContent = "ИДЁТ ПРОВЕРКА…";
-        statusLabel.textContent = "ВЫПОЛНЯЕТСЯ ДИАГНОСТИКА";
-        const steps = [
-          "[OK] Инициализация интерфейса",
-          "[OK] Проверка каналов связи",
-          "[OK] Проверка целостности",
-          "[OK] Подключение к архиву"
-        ];
-        let index=0;
-        showOutput([steps[0]],"is-running");
-        const advance=()=>{
-          index++;
-          if(index<steps.length){
-            showOutput(steps.slice(0,index+1),"is-running");
-            diagnosticTimer=setTimeout(advance,650);
-          } else {
-            diagnosticTimer=setTimeout(revealAnomaly,850);
-          }
-        };
-        diagnosticTimer=setTimeout(advance,650);
-      }
-      diagnostics.addEventListener("click",runDiagnostics);
-
-      scan.addEventListener("click",()=>{
-        scanActive=!scanActive;
-        document.body.classList.toggle("system-scan-active",scanActive);
-        scan.textContent=scanActive?"ОСТАНОВИТЬ СКАНИРОВАНИЕ":"СКАНИРОВАНИЕ";
-        if(scanActive && stage===0){
-          showOutput(["СКАНИРОВАНИЕ ПОВЕРХНОСТИ…","Скрытые области не обнаружены.","Для полной проверки запустите диагностику."],"is-running");
-        } else if(scanActive && stage>=1){
-          stage=2;
-          document.body.classList.add("system-deep-scan");
-          showOutput([
-            "СКРЫТАЯ ЗАПИСЬ / ФРАГМЕНТ 01",
-            "Сеанс начат: [ДАННЫЕ ПОВРЕЖДЕНЫ]",
-            "Последняя команда: НЕ ЗАВЕРШАТЬ",
-            "Источник: ВНУТРЕННИЙ КОНТУР"
-          ],"is-warning");
-          statusLabel.textContent="СКРЫТАЯ ЗАПИСЬ ОБНАРУЖЕНА";
-        } else if(!scanActive){
-          document.body.classList.remove("system-deep-scan");
-          showOutput(["Сканирование остановлено.","Найденные данные сохранены в журнале текущего сеанса."],stage>=1?"is-warning":"");
-        }
-      });
-
-      status.addEventListener("click",()=>{
-        if(stage>=2){
-          showOutput([
-            "ЖУРНАЛ СИСТЕМЫ / ПОСЛЕДНИЕ СОБЫТИЯ",
-            "Сессия пользователя: АКТИВНА",
-            "Попытка завершения: НЕ УДАЛАСЬ",
-            "Причина: НЕТ ПРАВА НА ПРЕРЫВАНИЕ",
-            " ",
-            "Система ожидает дальнейших действий."
-          ],"is-warning");
-        } else if(stage===1){
-          showOutput([
-            "ЖУРНАЛ СИСТЕМЫ",
-            "Обнаружена незавершённая сессия.",
-            "Пользователь уже находится внутри системы.",
-            "Подробности доступны после сканирования."
-          ],"is-warning");
-        } else {
-          showOutput(["ЖУРНАЛ СИСТЕМЫ","Критических ошибок не зарегистрировано.","Ожидание команды пользователя."],"");
-        }
-      });
-
-      const aura=document.createElement("div");
-      aura.className="system-cursor-aura";
-      aura.setAttribute("aria-hidden","true");
-      document.body.appendChild(aura);
-      window.addEventListener("pointermove",event=>{
-        if(event.pointerType==="touch")return;
-        aura.style.setProperty("--cursor-x",event.clientX+"px");
-        aura.style.setProperty("--cursor-y",event.clientY+"px");
-        aura.classList.add("is-visible");
-      },{passive:true});
-      window.addEventListener("pointerleave",()=>aura.classList.remove("is-visible"));
-
-      if(window.innerWidth>760){
-        normalPanels.forEach((item,index)=>{
-          const button=document.createElement("button");
-          button.type="button";
-          button.className="system-data-panel system-data-panel-"+index;
-          button.textContent=item[0];
-          button.setAttribute("aria-label","Открыть сведения: "+item[0]);
-          button.addEventListener("click",()=>{
-            const detail=button.getAttribute("data-system-detail");
-            showOutput(["ДИАГНОСТИЧЕСКИЙ УЗЕЛ",detail,stage>=1?"Запись связана с активной сессией.":"Узел отвечает штатно."],stage>=1?"is-warning":"");
-          });
-          document.body.appendChild(button);
-          dataPanels.push(button);
-        });
-        updatePanels(normalPanels);
-      }
-
-  </script>
 </body>
 </html>

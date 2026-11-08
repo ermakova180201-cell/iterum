@@ -937,3 +937,26 @@ body.is-workstation .desktop-taskbar {
     font-size: 12px;
   }
 }
+
+
+/* Keep the mail symbol fully visible inside its app tile */
+.desktop-icon-art {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+.desktop-icon-art span {
+  display: block;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+.mail-art {
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+.mail-art span {
+  font-size: 31px;
+  line-height: 1;
+  white-space: nowrap;
+}

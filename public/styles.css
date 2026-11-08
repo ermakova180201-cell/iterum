@@ -830,3 +830,18 @@ footer { border-top-color: rgba(216,208,191,.16); }
   .mail-reader { padding: 17px 14px; min-height: 180px; }
   .mail-reader-subject { font-size: 20px; }
 }
+
+
+/* Case selection and navigation */
+.available-cases { margin: 34px 0 42px; }
+.available-case-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; }
+.available-case-card { border:1px solid var(--line, #393936); background:rgba(255,255,255,.025); padding:24px; display:flex; flex-direction:column; min-height:250px; }
+.available-case-top { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:24px; }
+.available-case-card h3 { font-family:"Playfair Display",serif; font-size:25px; font-weight:500; margin:0 0 12px; }
+.available-case-card p { color:var(--muted, #aaa); line-height:1.6; }
+.available-case-meta { margin-top:auto; font:10px "DM Mono",monospace; letter-spacing:.08em; }
+.case-start-button,.all-cases-button { border:1px solid rgba(190,170,125,.55); color:#d7c59b; background:transparent; padding:12px 16px; font:11px "DM Mono",monospace; letter-spacing:.08em; cursor:pointer; }
+.case-start-button { margin-top:14px; width:100%; }
+.case-start-button:hover,.all-cases-button:hover { background:rgba(190,170,125,.1); }
+.desktop-toolbar { flex-wrap:wrap; }
+.all-cases-button { margin-left:auto; padding:8px 12px; }

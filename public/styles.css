@@ -1025,3 +1025,38 @@ body.is-workstation .desktop-taskbar {
   transform: rotate(-34deg);
   transform-origin: right center;
 }
+
+/* Workstation scrolling: keep the toolbar reachable when reopening a case */
+body.is-workstation {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+body.is-workstation #workspace {
+  height: auto;
+  min-height: 100dvh;
+}
+body.is-workstation #player-archive {
+  height: auto;
+  min-height: 100dvh;
+}
+body.is-workstation .desktop-shell {
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
+}
+body.is-workstation .desktop-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+body.is-workstation .desktop-area {
+  flex: 1 0 485px;
+  min-height: 485px;
+  overflow: visible;
+}
+@media (max-width: 620px) {
+  body.is-workstation .desktop-area {
+    flex-basis: 485px;
+    min-height: 485px;
+  }
+}

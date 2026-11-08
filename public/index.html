@@ -233,6 +233,10 @@
             <textarea id="material-summary" name="summary" maxlength="1000" rows="2" placeholder="Краткая пометка для архива"></textarea>
             <label for="material-content">СОДЕРЖАНИЕ</label>
             <textarea id="material-content" name="content" maxlength="50000" rows="6" placeholder="Текст материала"></textarea>
+            <label for="material-files">ВЛОЖЕНИЯ К МАТЕРИАЛУ</label>
+            <input id="material-files" name="files" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.mp3,.wav,.ogg,application/pdf,image/jpeg,image/png,image/webp,image/gif,audio/mpeg,audio/wav,audio/ogg">
+            <p class="admin-help">PDF, JPG, PNG, WEBP, GIF, MP3, WAV, OGG. До 15 МБ на файл, максимум 8 за одну загрузку. Сначала сохраните материал — файлы прикрепятся после сохранения.</p>
+            <div id="material-files-list" class="admin-file-list"><span>У этого материала пока нет вложений.</span></div>
             <label for="material-order">ПОРЯДОК ОТОБРАЖЕНИЯ</label>
             <input id="material-order" name="releaseOrder" type="number" min="0" max="100000" value="0" required>
             <label for="delivery-mode">КОГДА МАТЕРИАЛ ПОЯВИТСЯ У ИГРОКОВ</label>
@@ -879,7 +883,7 @@
       showAdminMessage(materialMessage, materialId ? "Сохраняем изменения…" : "Сохраняем черновик…");
       const form = new FormData(materialForm);
       try {
-        await adminRequest(materialId
+        const savedMaterial = await adminRequest(materialId
           ? "/api/admin/materials/" + encodeURIComponent(materialId)
           : "/api/admin/materials", {
           method: materialId ? "PUT" : "POST",
@@ -898,6 +902,18 @@
             sentAt: form.get("sentAt")
           })
         });
+        const savedId = materialId || savedMaterial.id;
+        const selectedFiles = document.getElementById("material-files").files;
+        if (selectedFiles.length && savedId) {
+          showAdminMessage(materialMessage, "Материал сохранён. Загружаем вложения…");
+          const uploadForm = new FormData();
+          for (const file of selectedFiles) uploadForm.append("files", file);
+          const uploadResponse = await fetch("/api/admin/materials/" + encodeURIComponent(savedId) + "/files", {
+            method: "POST", body: uploadForm, credentials: "same-origin"
+          });
+          const uploadData = await uploadResponse.json().catch(() => ({}));
+          if (!uploadResponse.ok) throw new Error(uploadData.error || "Материал сохранён, но вложения загрузить не удалось.");
+        }
         resetMaterialEditor();
         showAdminMessage(materialMessage, materialId ? "Изменения сохранены." : "Черновик сохранён. Игрокам он пока не доступен.");
         await loadAdminOverview();

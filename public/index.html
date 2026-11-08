@@ -102,6 +102,63 @@
           <span class="module-lock">ЗАКРЫТО</span>
         </article>
       </div>
+
+      <section class="admin-panel" id="admin-panel" hidden>
+        <div class="section-heading admin-heading">
+          <div>
+            <p class="section-kicker">СЛУЖЕБНЫЙ РАЗДЕЛ</p>
+            <h2>Управление архивом</h2>
+          </div>
+          <span class="archive-stamp">АДМИНИСТРАТОР</span>
+        </div>
+        <p class="admin-intro">Здесь можно создавать дела и добавлять к ним материалы. Новые материалы сохраняются как черновики и не открываются игрокам автоматически.</p>
+
+        <div class="admin-columns">
+          <form class="admin-form" id="case-form">
+            <h3>Новое дело</h3>
+            <label for="case-title">НАЗВАНИЕ ДЕЛА</label>
+            <input id="case-title" name="title" required maxlength="160" placeholder="Название дела">
+            <label for="case-code">КОД ДЕЛА</label>
+            <input id="case-code" name="caseCode" required maxlength="32" pattern="[A-Za-z0-9_-]{2,32}" placeholder="CASE-001">
+            <label for="case-description">КРАТКОЕ ОПИСАНИЕ</label>
+            <textarea id="case-description" name="description" maxlength="1000" rows="3" placeholder="Внутреннее описание дела"></textarea>
+            <button class="admin-submit" type="submit">СОЗДАТЬ ДЕЛО</button>
+            <p class="admin-message" id="case-message" role="status"></p>
+          </form>
+
+          <form class="admin-form" id="material-form">
+            <h3>Новый материал</h3>
+            <label for="material-case">ДЕЛО</label>
+            <select id="material-case" name="caseId" required><option value="">Сначала создайте дело</option></select>
+            <label for="material-type">ТИП МАТЕРИАЛА</label>
+            <select id="material-type" name="type">
+              <option value="email">Письмо</option>
+              <option value="publication">Публикация</option>
+              <option value="document">Документ</option>
+              <option value="photo">Фотография</option>
+              <option value="audio">Аудиозапись / расшифровка</option>
+              <option value="map">Карта / схема</option>
+              <option value="other">Другое</option>
+            </select>
+            <label for="material-title">НАЗВАНИЕ</label>
+            <input id="material-title" name="title" required maxlength="200" placeholder="Название материала">
+            <label for="material-summary">КОРОТКОЕ ОПИСАНИЕ</label>
+            <textarea id="material-summary" name="summary" maxlength="1000" rows="2" placeholder="Краткая пометка для архива"></textarea>
+            <label for="material-content">СОДЕРЖАНИЕ</label>
+            <textarea id="material-content" name="content" maxlength="50000" rows="6" placeholder="Текст материала"></textarea>
+            <label for="material-order">ПОРЯДОК ОТКРЫТИЯ</label>
+            <input id="material-order" name="releaseOrder" type="number" min="0" max="100000" value="0" required>
+            <button class="admin-submit" type="submit">СОХРАНИТЬ ЧЕРНОВИК</button>
+            <p class="admin-message" id="material-message" role="status"></p>
+          </form>
+        </div>
+
+        <div class="admin-inventory">
+          <h3>Созданные материалы</h3>
+          <div id="admin-material-list" class="admin-material-list"><p class="admin-empty">Пока материалов нет.</p></div>
+        </div>
+      </section>
+      <p class="admin-setup-note" id="admin-setup-note" hidden>Управление архивом ещё не настроено. Администратор должен быть назначен в настройках Worker.</p>
     </section>
 
     <section class="auth-panel" aria-label="Вход в архив">
@@ -151,6 +208,14 @@
     const workspace = document.getElementById("workspace");
     const topbarStatus = document.getElementById("topbar-status");
     const authLogout = document.getElementById("auth-logout");
+    const adminPanel = document.getElementById("admin-panel");
+    const adminSetupNote = document.getElementById("admin-setup-note");
+    const caseForm = document.getElementById("case-form");
+    const materialForm = document.getElementById("material-form");
+    const caseMessage = document.getElementById("case-message");
+    const materialMessage = document.getElementById("material-message");
+    const materialCase = document.getElementById("material-case");
+    const adminMaterialList = document.getElementById("admin-material-list");
     let registering = false;
 
     function showMessage(message, error = false) {
@@ -184,8 +249,13 @@
           authForm.hidden = true;
           authUser.hidden = false;
           authUserEmail.textContent = "Вы вошли как " + data.user.email;
+          adminPanel.hidden = !data.isAdmin;
+          adminSetupNote.hidden = data.adminConfigured || data.isAdmin;
+          if (data.isAdmin) await loadAdminOverview();
         } else {
           workspace.hidden = true;
+          adminPanel.hidden = true;
+          adminSetupNote.hidden = true;
           topbarStatus.textContent = "ОЖИДАНИЕ АВТОРИЗАЦИИ";
           authForm.hidden = false;
           authUser.hidden = true;
@@ -225,6 +295,120 @@
         showMessage("Не удалось связаться с сервером. Попробуйте ещё раз.", true);
       } finally {
         authSubmit.disabled = false;
+      }
+    });
+
+    async function adminRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", ...(options.headers || {}) }
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Не удалось выполнить запрос.");
+      return data;
+    }
+
+    function showAdminMessage(element, message, error = false) {
+      element.textContent = message;
+      element.classList.toggle("is-error", error);
+    }
+
+    async function loadAdminOverview() {
+      try {
+        const data = await adminRequest("/api/admin/overview");
+        const previous = materialCase.value;
+        materialCase.replaceChildren();
+        if (!data.cases.length) {
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "Сначала создайте дело";
+          materialCase.append(option);
+        } else {
+          for (const item of data.cases) {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = item.title + " · " + item.case_code;
+            materialCase.append(option);
+          }
+          if (data.cases.some(item => item.id === previous)) materialCase.value = previous;
+        }
+
+        adminMaterialList.replaceChildren();
+        if (!data.materials.length) {
+          const empty = document.createElement("p");
+          empty.className = "admin-empty";
+          empty.textContent = "Пока материалов нет.";
+          adminMaterialList.append(empty);
+        } else {
+          for (const item of data.materials) {
+            const card = document.createElement("article");
+            card.className = "admin-material";
+            const heading = document.createElement("strong");
+            heading.textContent = item.title;
+            const details = document.createElement("span");
+            details.textContent = item.case_title + " · " + item.material_type + " · порядок " + item.release_order;
+            const status = document.createElement("small");
+            status.textContent = item.is_published ? "ОПУБЛИКОВАНО" : "ЧЕРНОВИК";
+            card.append(heading, details, status);
+            adminMaterialList.append(card);
+          }
+        }
+      } catch (error) {
+        showAdminMessage(materialMessage, error.message, true);
+      }
+    }
+
+    caseForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const submit = caseForm.querySelector("button[type=submit]");
+      submit.disabled = true;
+      showAdminMessage(caseMessage, "Сохраняем дело…");
+      const form = new FormData(caseForm);
+      try {
+        await adminRequest("/api/admin/cases", {
+          method: "POST",
+          body: JSON.stringify({
+            title: form.get("title"),
+            caseCode: form.get("caseCode"),
+            description: form.get("description")
+          })
+        });
+        caseForm.reset();
+        showAdminMessage(caseMessage, "Дело создано.");
+        await loadAdminOverview();
+      } catch (error) {
+        showAdminMessage(caseMessage, error.message, true);
+      } finally {
+        submit.disabled = false;
+      }
+    });
+
+    materialForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const submit = materialForm.querySelector("button[type=submit]");
+      submit.disabled = true;
+      showAdminMessage(materialMessage, "Сохраняем черновик…");
+      const form = new FormData(materialForm);
+      try {
+        await adminRequest("/api/admin/materials", {
+          method: "POST",
+          body: JSON.stringify({
+            caseId: form.get("caseId"),
+            type: form.get("type"),
+            title: form.get("title"),
+            summary: form.get("summary"),
+            content: form.get("content"),
+            releaseOrder: Number(form.get("releaseOrder"))
+          })
+        });
+        materialForm.reset();
+        showAdminMessage(materialMessage, "Черновик сохранён. Игрокам он пока не доступен.");
+        await loadAdminOverview();
+      } catch (error) {
+        showAdminMessage(materialMessage, error.message, true);
+      } finally {
+        submit.disabled = false;
       }
     });
 

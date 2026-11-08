@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=system-diagnostics-01">
+  <link rel="stylesheet" href="/styles.css?v=connection-puzzle-01">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -91,6 +91,10 @@
                 <span class="desktop-icon-art diagnostics-art" aria-hidden="true"><span>⌁</span></span>
                 <span class="icon-caption">Самодиагностика</span>
               </button>
+              <button class="desktop-icon" type="button" data-open-window="connection-game-window" aria-label="Восстановление соединения" title="Восстановление соединения">
+                <span class="desktop-icon-art connection-art" aria-hidden="true"><span>⌘</span></span>
+                <span class="icon-caption">Восстановление соединения</span>
+              </button>
             </div>
             <button class="desktop-icon desktop-help-shortcut" type="button" data-open-window="help-window" aria-label="Помощь" title="Помощь">
               <span class="desktop-icon-art folder-art help-art" aria-hidden="true"><span class="help-question">?</span></span>
@@ -165,6 +169,7 @@
             <p><strong>Материалы дела</strong> — изучение доступных документов и улик.</p>
             <p><strong>Системный архив</strong> — журнал событий текущего сеанса.</p>
             <p><strong>Самодиагностика</strong> — проверка состояния компонентов системы.</p>
+            <p><strong>Восстановление соединения</strong> — мини-игра по восстановлению системного канала.</p>
             <p>Чтобы открыть приложение, нажмите на его значок. Окна можно перемещать за верхнюю панель, а закрыть — кнопкой ×.</p>
           </div>
         </section>
@@ -194,6 +199,37 @@
           <div class="diagnostics-actions">
             <button type="button" class="admin-mini-button" id="diagnostics-run">НАЧАТЬ ПРОВЕРКУ</button>
             <span id="diagnostics-footnote">Проверка не изменяет материалы дела.</span>
+          </div>
+        </section>
+
+        <section id="connection-game-window" class="player-tool-section desktop-window connection-game-window" aria-labelledby="connection-game-heading" hidden>
+          <div class="player-tool-heading window-drag-handle">
+            <div><span class="section-kicker">СИСТЕМНАЯ УТИЛИТА / 06</span><h2 id="connection-game-heading">Восстановление соединения</h2></div>
+            <button class="window-close" type="button" data-close-window="connection-game-window" aria-label="Закрыть окно">×</button>
+          </div>
+          <p class="connection-game-intro">Поверните фрагменты схемы так, чтобы восстановить непрерывный маршрут от входного узла к выходному.</p>
+          <div class="connection-game-status"><span>УЗЕЛ ВХОДА <b>IN-01</b></span><span id="connection-game-state" aria-live="polite">СВЯЗЬ НЕ УСТАНОВЛЕНА</span><span>УЗЕЛ ВЫХОДА <b>OUT-09</b></span></div>
+          <div class="connection-board" id="connection-board" role="group" aria-label="Схема соединений">
+            <span class="connection-terminal connection-terminal-in">IN</span>
+            <span class="connection-terminal connection-terminal-out">OUT</span>
+            <button class="connection-tile" type="button" data-tile="0" data-type="corner" data-rotation="1" aria-label="Фрагмент 1, повернуть"><i></i><i></i><i></i><i></i></button>
+            <button class="connection-tile" type="button" data-tile="1" data-type="straight" data-rotation="0" aria-label="Фрагмент 2, повернуть"><i></i><i></i><i></i><i></i></button>
+            <button class="connection-tile" type="button" data-tile="2" data-type="corner" data-rotation="2" aria-label="Фрагмент 3, повернуть"><i></i><i></i><i></i><i></i></button>
+            <button class="connection-tile" type="button" data-tile="3" data-type="corner" data-rotation="2" aria-label="Фрагмент 4, повернуть"><i></i><i></i><i></i><i></i></button>
+            <button class="connection-tile" type="button" data-tile="4" data-type="empty" data-rotation="0" aria-label="Пустой фрагмент"></button>
+            <button class="connection-tile" type="button" data-tile="5" data-type="corner" data-rotation="3" aria-label="Фрагмент 6, повернуть"><i></i><i></i><i></i><i></i></button>
+            <button class="connection-tile" type="button" data-tile="6" data-type="empty" data-rotation="0" aria-label="Пустой фрагмент"></button>
+            <button class="connection-tile" type="button" data-tile="7" data-type="empty" data-rotation="0" aria-label="Пустой фрагмент"></button>
+            <button class="connection-tile" type="button" data-tile="8" data-type="empty" data-rotation="0" aria-label="Пустой фрагмент"></button>
+          </div>
+          <div class="connection-game-bottom">
+            <span id="connection-moves">ПОВОРОТОВ: 0</span>
+            <button type="button" class="admin-mini-button" id="connection-reset">СБРОСИТЬ СХЕМУ</button>
+          </div>
+          <div id="connection-success" class="connection-success" hidden>
+            <strong>СОЕДИНЕНИЕ ВОССТАНОВЛЕНО</strong>
+            <p>Канал передачи данных активен. Обнаружен неизвестный пакет в очереди.</p>
+            <span>ПАКЕТ: UNIDENTIFIED / 00:00:07</span>
           </div>
         </section>
 
@@ -1348,6 +1384,71 @@
   </script>
 
 
+
+
+  <script>
+    (() => {
+      const board = document.getElementById("connection-board");
+      const reset = document.getElementById("connection-reset");
+      if (!board || !reset) return;
+      const tiles = [...board.querySelectorAll(".connection-tile")];
+      const state = document.getElementById("connection-game-state");
+      const movesLabel = document.getElementById("connection-moves");
+      const success = document.getElementById("connection-success");
+      const initial = tiles.map(tile => Number(tile.dataset.rotation));
+      const basePorts = { corner: ["N","E"], straight: ["E","W"], empty: [] };
+      const order = ["N","E","S","W"];
+      let moves = 0;
+      function ports(tile) {
+        const base = basePorts[tile.dataset.type] || [];
+        const rotation = Number(tile.dataset.rotation);
+        return base.map(port => order[(order.indexOf(port) + rotation) % 4]);
+      }
+      function draw() {
+        tiles.forEach(tile => {
+          const active = ports(tile);
+          [...tile.children].forEach((arm,index) => {
+            arm.className = active.includes(order[index]) ? "is-active" : "";
+          });
+          tile.classList.toggle("is-empty", tile.dataset.type === "empty");
+        });
+        movesLabel.textContent = "ПОВОРОТОВ: " + moves;
+        const connected = new Set([3]);
+        const queue = [3];
+        while(queue.length) {
+          const current = queue.shift();
+          const row = Math.floor(current / 3), col = current % 3;
+          for (const [direction, next, opposite] of [
+            ["N",current-3,"S"],["E",current+1,"W"],["S",current+3,"N"],["W",current-1,"E"]
+          ]) {
+            if ((direction==="N"&&row===0)||(direction==="S"&&row===2)||(direction==="W"&&col===0)||(direction==="E"&&col===2)) continue;
+            if (!ports(tiles[current]).includes(direction) || !ports(tiles[next]).includes(opposite) || connected.has(next)) continue;
+            connected.add(next); queue.push(next);
+          }
+        }
+        const solved = connected.has(5) && ports(tiles[5]).includes("E");
+        board.classList.toggle("is-connected",solved);
+        state.textContent = solved ? "СВЯЗЬ УСТАНОВЛЕНА" : "СВЯЗЬ НЕ УСТАНОВЛЕНА";
+        success.hidden = !solved;
+        if (solved) tiles.forEach(tile => tile.disabled = true);
+        return solved;
+      }
+      tiles.forEach(tile => {
+        if(tile.dataset.type==="empty") { tile.disabled=true; return; }
+        tile.addEventListener("click", () => {
+          if(!success.hidden) return;
+          tile.dataset.rotation = String((Number(tile.dataset.rotation)+1)%4);
+          moves++;
+          draw();
+        });
+      });
+      reset.addEventListener("click", () => {
+        tiles.forEach((tile,index) => { tile.dataset.rotation = String(initial[index]); tile.disabled=tile.dataset.type==="empty"; });
+        moves=0; success.hidden=true; board.classList.remove("is-connected"); draw();
+      });
+      draw();
+    })();
+  </script>
 
 </body>
 </html>

@@ -1077,9 +1077,9 @@
 
         // The room gently breathes; the cursor shifts the ghost reflection.
         pointer.x+=(pointer.tx-pointer.x)*.035; pointer.y+=(pointer.ty-pointer.y)*.035;
-        const dx=(pointer.x-.5)*12, dy=(pointer.y-.5)*8;
+        const cursorDx=(pointer.x-.5)*12, cursorDy=(pointer.y-.5)*8;
         if(!reduced){
-          ctx.save();ctx.globalAlpha=.12;ctx.translate(-dx*.5,dy*.4);
+          ctx.save();ctx.globalAlpha=.12;ctx.translate(-cursorDx*.5,cursorDy*.4);
           stroke([[mx,my],[mx+mw,my],[mx+mw,my+mh]],"rgba(184,196,181,.6)",1);
           ctx.restore();
         }

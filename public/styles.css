@@ -1336,3 +1336,52 @@ body.is-workstation .desktop-area {
     letter-spacing: .1em;
   }
 }
+
+
+/* Atmospheric layered background for the unauthenticated ITERUM portal only */
+body:not(:has(#workspace:not([hidden]))) {
+  position: relative;
+  isolation: isolate;
+  background: #141515 !important;
+}
+body:not(:has(#workspace:not([hidden])))::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 16% 18%, rgba(118,91,69,.22), transparent 34%),
+    radial-gradient(ellipse at 82% 24%, rgba(111,53,55,.19), transparent 32%),
+    radial-gradient(ellipse at 52% 100%, rgba(71,78,74,.16), transparent 48%),
+    linear-gradient(118deg, transparent 0 36%, rgba(211,194,165,.025) 48%, transparent 60%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.018) 0 1px, transparent 1px 5px),
+    #141515;
+  opacity: .96;
+}
+body:not(:has(#workspace:not([hidden])))::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 34%, rgba(0,0,0,.38) 100%),
+    linear-gradient(90deg, rgba(0,0,0,.13), transparent 24% 76%, rgba(0,0,0,.18));
+}
+body:not(:has(#workspace:not([hidden]))) > .topbar,
+body:not(:has(#workspace:not([hidden]))) > main,
+body:not(:has(#workspace:not([hidden]))) > footer {
+  position: relative;
+  z-index: 1;
+}
+body:not(:has(#workspace:not([hidden]))) .auth-panel {
+  background:
+    linear-gradient(145deg, rgba(37,38,36,.91), rgba(21,23,22,.94)) !important;
+  border-color: rgba(184,157,126,.28);
+  box-shadow:
+    0 28px 85px rgba(0,0,0,.42),
+    0 0 70px rgba(112,65,57,.09),
+    inset 0 1px rgba(255,255,255,.035);
+}

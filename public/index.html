@@ -256,6 +256,7 @@
   <script src="/materials.js"></script>
   <script src="/search.js"></script>
   <script>
+    const authPanel = document.querySelector(".auth-panel");
     const authForm = document.getElementById("auth-form");
     const authTitle = document.getElementById("auth-title");
     const authDescription = document.getElementById("auth-description");
@@ -327,6 +328,7 @@
         const response = await fetch("/api/me", { credentials: "same-origin" });
         const data = await response.json();
         if (data.authenticated) {
+          authPanel.hidden = true;
           workspace.hidden = false;
           topbarStatus.textContent = "ЛИЧНЫЙ ДОСТУП АКТИВЕН";
           memberEmail.textContent = data.user.email;
@@ -344,6 +346,7 @@
           await loadPlayerArchive();
           if (data.isAdmin) await loadAdminOverview();
         } else {
+          authPanel.hidden = false;
           workspace.hidden = true;
           isAdminSession = false;
           adminPanel.hidden = true;

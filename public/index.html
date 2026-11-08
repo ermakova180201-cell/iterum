@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-1">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-2">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -17,8 +17,7 @@
   <div class="grain" aria-hidden="true"></div>
   <header class="topbar">
     <a class="brand" href="#" aria-label="ITERUM — главная">
-      <span class="brand-mark">I<span>.</span></span>
-      <span class="brand-name">ITERUM<small>CASE ARCHIVE</small></span>
+      <span class="brand-name">ITERUM</span>
     </a>
     <div class="topbar-right">
       <span class="status-dot"></span>
@@ -222,20 +221,23 @@
       <p class="admin-setup-note" id="admin-setup-note" hidden>Управление архивом ещё не настроено. Администратор должен быть назначен в настройках Worker.</p>
     </section>
 
-    <section class="auth-panel" aria-label="Вход в архив">
+    <section class="auth-panel" aria-label="Доступ к системе">
       <div class="auth-copy">
-        <p class="section-kicker">ЛИЧНЫЙ ДОСТУП</p>
-        <h2 id="auth-title">Войти в архив</h2>
-        <p id="auth-description">Войдите в свою учётную запись или создайте новую, чтобы начать работу с делом.</p>
+        <h2 id="auth-title">ДОСТУП К СИСТЕМЕ</h2>
+        <p id="auth-description">Для продолжения требуется авторизация</p>
       </div>
 
       <form id="auth-form">
-        <label for="auth-email">ЭЛЕКТРОННАЯ ПОЧТА</label>
-        <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="name@example.com">
-        <label for="auth-password">ПАРОЛЬ</label>
-        <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="10" maxlength="200" placeholder="Не менее 10 символов">
-        <button class="auth-submit" id="auth-submit" type="submit">ВОЙТИ</button>
-        <button class="auth-switch" id="auth-switch" type="button">Создать учётную запись</button>
+        <label for="auth-email">Электронная почта</label>
+        <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="Введите email">
+        <label for="auth-password">Пароль</label>
+        <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="10" maxlength="200" placeholder="Введите пароль">
+        <div id="auth-confirm-wrap" hidden>
+          <label for="auth-confirm-password">Повторите пароль</label>
+          <input id="auth-confirm-password" name="confirmPassword" type="password" autocomplete="new-password" minlength="10" maxlength="200" placeholder="Повторите пароль">
+        </div>
+        <button class="auth-submit" id="auth-submit" type="submit">ПОЛУЧИТЬ ДОСТУП</button>
+        <button class="auth-switch" id="auth-switch" type="button">СОЗДАТЬ УЧЁТНУЮ ЗАПИСЬ</button>
         <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
       </form>
 
@@ -252,8 +254,7 @@
   </main>
 
   <footer>
-    <span>ITERUM <b>—</b> CASE ARCHIVE</span>
-    <span>ЧАСТНОЕ РАССЛЕДОВАНИЕ <b>·</b> 2025</span>
+    <span>ITERUM © 2026</span>
   </footer>
   <script src="/materials.js"></script>
   <script src="/search.js"></script>
@@ -264,6 +265,8 @@
     const authSwitch = document.getElementById("auth-switch");
     const authSubmit = document.getElementById("auth-submit");
     const authMessage = document.getElementById("auth-message");
+    const authConfirmWrap = document.getElementById("auth-confirm-wrap");
+    const authConfirmPassword = document.getElementById("auth-confirm-password");
     const authUser = document.getElementById("auth-user");
     const authUserEmail = document.getElementById("auth-user-email");
     const memberEmail = document.getElementById("member-email");
@@ -311,12 +314,14 @@
 
     function setMode(isRegistering) {
       registering = isRegistering;
-      authTitle.textContent = registering ? "Создать учётную запись" : "Войти в архив";
-      authDescription.textContent = registering
-        ? "Создайте личную учётную запись для доступа к архиву."
-        : "Войдите в свою учётную запись или создайте новую, чтобы начать работу с делом.";
-      authSubmit.textContent = registering ? "ЗАРЕГИСТРИРОВАТЬСЯ" : "ВОЙТИ";
-      authSwitch.textContent = registering ? "У меня уже есть учётная запись" : "Создать учётную запись";      document.getElementById("auth-password").autocomplete = registering ? "new-password" : "current-password";
+      authTitle.textContent = registering ? "СОЗДАНИЕ УЧЁТНОЙ ЗАПИСИ" : "ДОСТУП К СИСТЕМЕ";
+      authDescription.textContent = registering ? "" : "Для продолжения требуется авторизация";
+      authConfirmWrap.hidden = !registering;
+      authConfirmPassword.required = registering;
+      authConfirmPassword.value = "";
+      authSubmit.textContent = "ПОЛУЧИТЬ ДОСТУП";
+      authSwitch.textContent = registering ? "Уже есть учётная запись? Войти" : "СОЗДАТЬ УЧЁТНУЮ ЗАПИСЬ";
+      document.getElementById("auth-password").autocomplete = registering ? "new-password" : "current-password";
       showMessage("");
     }
 
@@ -363,6 +368,11 @@
         email: document.getElementById("auth-email").value,
         password: document.getElementById("auth-password").value
       };
+      if (registering && payload.password !== authConfirmPassword.value) {
+        showMessage("Пароли не совпадают.", true);
+        authSubmit.disabled = false;
+        return;
+      }
       try {
         const response = await fetch(registering ? "/api/register" : "/api/login", {
           method: "POST",

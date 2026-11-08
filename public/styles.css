@@ -1844,3 +1844,13 @@ body:not(:has(#workspace:not([hidden]))) .brand-name small {
     letter-spacing: .1em;
   }
 }
+
+
+/* Subtle investigative workstation atmosphere for the login screen */
+body:not(:has(#workspace:not([hidden]))) #ambient-network {
+  opacity:.76;
+  mix-blend-mode:screen;
+}
+@media(max-width:620px) {
+  body:not(:has(#workspace:not([hidden]))) #ambient-network { opacity:.56; }
+}

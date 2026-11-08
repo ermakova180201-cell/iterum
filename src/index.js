@@ -89,8 +89,10 @@ async function handleApi(request, env) {
   if (request.method === "GET" && privateFileRoute) {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    // Read only metadata first. The file BLOB is sliced into small pieces below
+    // so a single large D1 result does not have to be held in Worker memory.
     const file = await env.DB.prepare(
-      "SELECT f.id, f.file_data, f.file_name, f.content_type, m.id AS material_id, m.is_published, m.delivery_mode, c.status AS case_status FROM material_files f JOIN materials m ON m.id = f.material_id JOIN cases c ON c.id = m.case_id WHERE f.id = ?"
+      "SELECT f.id, f.file_name, f.content_type, f.file_size, m.id AS material_id, m.is_published, m.delivery_mode, c.status AS case_status FROM material_files f JOIN materials m ON m.id = f.material_id JOIN cases c ON c.id = m.case_id WHERE f.id = ?"
     ).bind(privateFileRoute[1]).first();
     if (!file) return json({ error: "Файл не найден." }, 404);
     const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
@@ -99,11 +101,45 @@ async function handleApi(request, env) {
       const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ?").bind(user.id, file.material_id).first();
       if (!unlocked) return json({ error: "Файл ещё не открыт." }, 403);
     }
-    if (!file.file_data) return json({ error: "Файл отсутствует в хранилище." }, 404);
-    const safeName = file.file_name.replace(/[\r\n"]/g, "_");
-    return new Response(file.file_data, {
+    const safeName = String(file.file_name || "attachment").replace(/[\\r\\n"]/g, "_");
+    const totalSize = Number(file.file_size) || 0;
+    if (!totalSize) return json({ error: "Файл отсутствует в хранилище." }, 404);
+    const chunkSize = 64 * 1024;
+    let offset = 0;
+    const body = new ReadableStream({
+      async pull(controller) {
+        try {
+          if (offset >= totalSize) {
+            controller.close();
+            return;
+          }
+          // SQLite substr() uses 1-based offsets and preserves the BLOB type.
+          const row = await env.DB.prepare(
+            "SELECT substr(file_data, ?, ?) AS chunk FROM material_files WHERE id = ?"
+          ).bind(offset + 1, Math.min(chunkSize, totalSize - offset), file.id).first();
+          if (!row || row.chunk == null) {
+            controller.error(new Error("Не удалось прочитать часть файла из D1."));
+            return;
+          }
+          let bytes = row.chunk;
+          if (bytes instanceof ArrayBuffer) bytes = new Uint8Array(bytes);
+          else if (!(bytes instanceof Uint8Array)) bytes = new Uint8Array(bytes);
+          if (!bytes.byteLength) {
+            controller.error(new Error("Получена пустая часть файла из D1."));
+            return;
+          }
+          offset += bytes.byteLength;
+          controller.enqueue(bytes);
+          if (offset >= totalSize) controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      }
+    });
+    return new Response(body, {
       headers: {
-        "content-type": file.content_type,
+        "content-type": file.content_type || "application/octet-stream",
+        "content-length": String(totalSize),
         "content-disposition": "inline; filename*=UTF-8''" + encodeURIComponent(safeName),
         "cache-control": "private, no-store",
         "x-content-type-options": "nosniff",

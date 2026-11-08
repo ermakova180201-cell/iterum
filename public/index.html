@@ -1066,7 +1066,7 @@
             const fade=1-j/c.length;
             const alpha=Math.max(.025,fade*fade*(c.bright?.78:.56));
             ctx.fillStyle=c.phrase
-              ? "rgba(155,225,170,"+(alpha*1.22)+")"
+              ? "rgba(235,82,72,"+(alpha*1.3)+")"
               : c.tint
                 ? "rgba(190,75,65,"+(alpha*.78)+")"
                 : "rgba(87,170,116,"+alpha+")";
@@ -1090,7 +1090,7 @@
           for(const p of phraseMarks){
             const pulse=.45+.55*Math.sin(time*.00045+p.phase);
             ctx.font="9px 'DM Mono',monospace";
-            ctx.fillStyle=p.red?"rgba(188,91,80,"+(p.alpha*pulse)+")":"rgba(137,194,147,"+(p.alpha*pulse)+")";
+            ctx.fillStyle="rgba(188,65,58,"+(p.alpha*pulse)+")";
             ctx.fillText(p.text,p.x,p.y);
           }
         }

@@ -50,6 +50,7 @@
           <p class="member-email" id="member-email"></p>
         </div>
         <span class="member-status"><i></i> ДОСТУП АКТИВЕН</span>
+        <span class="member-status" id="database-status">ПРОВЕРКА БАЗЫ…</span>
       </div>
 
       <div class="case-card">
@@ -146,6 +147,7 @@
     const authUser = document.getElementById("auth-user");
     const authUserEmail = document.getElementById("auth-user-email");
     const memberEmail = document.getElementById("member-email");
+    const databaseStatus = document.getElementById("database-status");
     const workspace = document.getElementById("workspace");
     const topbarStatus = document.getElementById("topbar-status");
     const authLogout = document.getElementById("auth-logout");
@@ -176,6 +178,9 @@
           workspace.hidden = false;
           topbarStatus.textContent = "ЛИЧНЫЙ ДОСТУП АКТИВЕН";
           memberEmail.textContent = data.user.email;
+          databaseStatus.textContent = data.databaseConnected
+            ? "БАЗА ДАННЫХ ПОДКЛЮЧЕНА"
+            : "НЕТ СВЯЗИ С БАЗОЙ";
           authForm.hidden = true;
           authUser.hidden = false;
           authUserEmail.textContent = "Вы вошли как " + data.user.email;

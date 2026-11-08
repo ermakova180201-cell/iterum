@@ -1387,14 +1387,14 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
 }
 
 
-/* Interactive cursor-reactive network on the public access screen */
+/* Floating memory fragments on the public access screen */
 #ambient-network {
   position: fixed;
   inset: 0;
   z-index: 1;
   display: block;
   pointer-events: none;
-  opacity: .92;
+  opacity: .9;
   mix-blend-mode: screen;
 }
 body:has(#workspace:not([hidden])) #ambient-network {

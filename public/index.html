@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=desktop-icons-01">
+  <link rel="stylesheet" href="/styles.css?v=desktop-window-drag-01">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -87,7 +87,7 @@
             </div>
             <div class="desktop-wallpaper-mark">ITERUM</div>
         <section id="search-window" class="player-tool-section desktop-window" aria-labelledby="search-heading" hidden>
-          <div class="player-tool-heading">
+          <div class="player-tool-heading window-drag-handle">
             <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 02</span><h2 id="search-heading">Поиск данных</h2></div>
             <button class="window-close" type="button" data-close-window="search-window" aria-label="Закрыть окно">×</button>
           </div>
@@ -102,7 +102,7 @@
         </section>
 
         <section id="mail-window" class="player-tool-section desktop-window" aria-labelledby="mail-heading" hidden>
-          <div class="player-tool-heading">
+          <div class="player-tool-heading window-drag-handle">
             <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 01</span><h2 id="mail-heading">Почта</h2><span class="modules-note" id="player-mail-count"></span></div>
             <button class="window-close" type="button" data-close-window="mail-window" aria-label="Закрыть окно">×</button>
           </div>
@@ -110,7 +110,7 @@
         </section>
 
         <section id="materials-window" class="player-tool-section desktop-window" aria-labelledby="materials-heading" hidden>
-          <div class="player-tool-heading">
+          <div class="player-tool-heading window-drag-handle">
             <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 03</span><h2 id="materials-heading">Материалы дела</h2></div>
             <button class="window-close" type="button" data-close-window="materials-window" aria-label="Закрыть окно">×</button>
           </div>
@@ -577,6 +577,54 @@
           if (win) win.hidden = true;
           desktopShell.querySelectorAll('[data-open-window="' + closer.dataset.closeWindow + '"]').forEach(related => related.classList.remove("is-selected"));
         }
+      });
+      // Allow application windows to be moved around the desktop by their title bars.
+      let topWindowZ = 20;
+      desktopShell.querySelectorAll(".desktop-window").forEach(win => {
+        const handle = win.querySelector(".window-drag-handle");
+        if (!handle) return;
+        handle.addEventListener("pointerdown", event => {
+          if (event.target.closest("button, input, textarea, select, a")) return;
+          if (event.button !== 0 && event.pointerType === "mouse") return;
+          const area = desktopShell.querySelector(".desktop-area");
+          if (!area) return;
+          const areaRect = area.getBoundingClientRect();
+          const winRect = win.getBoundingClientRect();
+          const startX = event.clientX;
+          const startY = event.clientY;
+          const startLeft = winRect.left - areaRect.left;
+          const startTop = winRect.top - areaRect.top;
+          const width = winRect.width;
+          const height = winRect.height;
+          win.style.left = startLeft + "px";
+          win.style.top = startTop + "px";
+          win.style.right = "auto";
+          win.style.bottom = "auto";
+          win.style.width = width + "px";
+          win.style.height = height + "px";
+          win.style.zIndex = String(++topWindowZ);
+          handle.setPointerCapture(event.pointerId);
+          handle.classList.add("is-dragging");
+          event.preventDefault();
+          const move = moveEvent => {
+            const maxLeft = Math.max(0, area.clientWidth - win.offsetWidth);
+            const maxTop = Math.max(0, area.clientHeight - win.offsetHeight);
+            const left = Math.min(maxLeft, Math.max(0, startLeft + moveEvent.clientX - startX));
+            const top = Math.min(maxTop, Math.max(0, startTop + moveEvent.clientY - startY));
+            win.style.left = left + "px";
+            win.style.top = top + "px";
+          };
+          const finish = finishEvent => {
+            if (handle.hasPointerCapture(finishEvent.pointerId)) handle.releasePointerCapture(finishEvent.pointerId);
+            handle.classList.remove("is-dragging");
+            handle.removeEventListener("pointermove", move);
+            handle.removeEventListener("pointerup", finish);
+            handle.removeEventListener("pointercancel", finish);
+          };
+          handle.addEventListener("pointermove", move);
+          handle.addEventListener("pointerup", finish);
+          handle.addEventListener("pointercancel", finish);
+        });
       });
       const clock = document.getElementById("desktop-clock");
       const updateDesktopClock = () => {

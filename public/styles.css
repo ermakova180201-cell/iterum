@@ -1569,3 +1569,19 @@ body.system-scan-active::after {
   body.system-scan-active::after { animation:none; }
   .system-cursor-aura { display:none; }
 }
+
+/* Narrative states for the system access sequence */
+.system-data-panel.is-corrupted { color:rgba(197,132,119,.78); border-color:rgba(174,91,81,.25); }
+body.system-anomaly .system-data-panel-1,
+body.system-anomaly .system-data-panel-2 { animation:system-data-flicker 4.5s ease-in-out infinite; }
+body.system-anomaly .system-data-panel-3 { color:rgba(197,132,119,.7); }
+body.system-anomaly .system-status-light { animation:system-alert-pulse 1.8s ease-in-out infinite; }
+body.system-deep-scan .system-data-panel { border-color:rgba(180,103,91,.5); color:#d0a39a; }
+body.system-deep-scan .system-output { box-shadow:0 0 24px rgba(139,63,58,.1); }
+@keyframes system-alert-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+@keyframes system-data-flicker { 0%,92%,96%,100%{opacity:1} 93%,95%{opacity:.48} }
+.system-output { min-height:0; }
+@media (prefers-reduced-motion:reduce) {
+  body.system-anomaly .system-data-panel,
+  body.system-anomaly .system-status-light { animation:none; }
+}

@@ -171,3 +171,30 @@ footer b { color: #9b625c; font-weight: 400; }
 .admin-case strong { color: #d4cbbb; font-size: 11px; }
 .admin-case small { color: #b08b82; font: 7px var(--mono); letter-spacing: .07em; }
 @media (max-width: 620px) { .admin-case { align-items: flex-start; flex-direction: column; } }
+
+
+.unlock-recipient {
+  display: grid;
+  gap: 9px;
+  max-width: 520px;
+  margin: 0 0 22px;
+}
+.unlock-recipient label {
+  color: var(--muted, #99958d);
+  font: 10px "DM Mono", monospace;
+  letter-spacing: .12em;
+}
+.unlock-recipient select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  color: var(--text, #e8e2d8);
+  background: #211f1c;
+  border: 1px solid #49443d;
+  border-radius: 2px;
+  font: inherit;
+}
+.admin-mini-button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}

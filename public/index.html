@@ -419,8 +419,8 @@
         addSystemLog("ПОЛЕ ИДЕНТИФИКАТОРА АКТИВИРОВАНО", "RUN");
       }, { once: true });
       authSwitch.addEventListener("click", () => {
-        addSystemLog(registering ? "ПОДГОТОВКА НОВОЙ УЧЁТНОЙ ЗАПИСИ" : "ВОЗВРАТ К ПРОВЕРКЕ ДОСТУПА", "INFO");
-        if (systemConsoleState) systemConsoleState.textContent = registering ? "РЕЖИМ РЕГИСТРАЦИИ" : "ОЖИДАНИЕ АВТОРИЗАЦИИ";
+        addSystemLog(registering ? "ВОЗВРАТ К ПРОВЕРКЕ ДОСТУПА" : "ПОДГОТОВКА НОВОЙ УЧЁТНОЙ ЗАПИСИ", "INFO");
+        if (systemConsoleState) systemConsoleState.textContent = registering ? "ОЖИДАНИЕ АВТОРИЗАЦИИ" : "РЕЖИМ РЕГИСТРАЦИИ";
       });
       authForm.addEventListener("submit", () => {
         addSystemLog("ПОЛУЧЕН ЗАПРОС НА АУТЕНТИФИКАЦИЮ", "RUN");

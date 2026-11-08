@@ -1,4 +1,5 @@
 const encoder = new TextEncoder();
+const ADMIN_EMAIL = "ermakova18.02.01@gmail.com";
 
 function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
@@ -54,22 +55,20 @@ async function handleApi(request, env) {
     if (!user) return json({ authenticated: false, user: null });
     // A lightweight read confirms that the Worker can reach the migrated D1 schema.
     await env.DB.prepare("SELECT COUNT(*) AS total FROM cases").first();
-    const isAdmin = Boolean(env.ADMIN_EMAIL) &&
-      user.email.toLowerCase() === String(env.ADMIN_EMAIL).trim().toLowerCase();
+    const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
     return json({
       authenticated: true,
       user: { email: user.email },
       databaseConnected: true,
       isAdmin,
-      adminConfigured: Boolean(env.ADMIN_EMAIL)
+      adminConfigured: true
     });
   }
 
   if (url.pathname.startsWith("/api/admin/")) {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
-    const adminEmail = String(env.ADMIN_EMAIL || "").trim().toLowerCase();
-    if (!adminEmail || user.email.toLowerCase() !== adminEmail) {
+    if (user.email.toLowerCase() !== ADMIN_EMAIL) {
       return json({ error: "Доступ к панели администратора запрещён." }, 403);
     }
 

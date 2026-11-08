@@ -8,6 +8,12 @@
     "directory": "./public",
     "binding": "ASSETS"
   },
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "iterum-files"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",

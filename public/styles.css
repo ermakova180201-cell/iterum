@@ -2594,3 +2594,156 @@ body:not(.is-workstation) .available-case-list > .player-empty {
   .topbar-right .topbar-version,
   .topbar-right .topbar-divider { display:none; }
 }
+
+
+/* ITERUM MAIL CLIENT — archive correspondence interface */
+#mail-window {
+  padding: 0;
+  margin: 0;
+  border: 1px solid rgba(112,157,119,.28);
+  background: rgba(8,14,11,.94);
+  box-shadow: 0 18px 48px rgba(0,0,0,.36), inset 0 1px rgba(190,218,190,.035);
+}
+#mail-window .player-tool-heading {
+  align-items: center;
+  margin: 0;
+  padding: 17px 20px;
+  border-bottom: 1px solid rgba(112,157,119,.24);
+  background: linear-gradient(100deg, rgba(27,43,32,.94), rgba(14,23,18,.96));
+}
+#mail-window .player-tool-heading h2 {
+  color: #e0e9dc;
+  font: 500 22px/1.2 var(--sans);
+  letter-spacing: .015em;
+}
+#mail-window .player-tool-heading .section-kicker {
+  color: #91ad91;
+  font: 8px var(--mono);
+  letter-spacing: .16em;
+}
+#mail-window .modules-note {
+  display: inline-block;
+  margin: 6px 0 0 1px;
+  color: #a6b9a2;
+  font: 8px var(--mono);
+  letter-spacing: .1em;
+}
+#mail-window .window-close {
+  border-color: rgba(133,171,135,.25);
+  color: #a9bda6;
+}
+#mail-window .window-close:hover {
+  border-color: rgba(151,193,153,.55);
+  background: rgba(104,150,109,.12);
+  color: #e2eee0;
+}
+#mail-window .player-mail-list {
+  grid-template-columns: minmax(215px, .78fr) minmax(0, 1.7fr);
+  min-height: 390px;
+  margin: 0;
+  border: 0;
+  background: rgba(7,12,9,.62);
+}
+#mail-window .mail-inbox-list {
+  max-height: min(570px, 68vh);
+  overflow-y: auto;
+  border-right: 1px solid rgba(112,157,119,.2);
+  background: rgba(10,17,12,.78);
+  scrollbar-color: #405c45 #111a13;
+  scrollbar-width: thin;
+}
+#mail-window .mail-inbox-entry {
+  gap: 7px 10px;
+  padding: 15px 15px 14px 17px;
+  border-bottom: 1px solid rgba(112,157,119,.13);
+  transition: background .16s ease, box-shadow .16s ease;
+}
+#mail-window .mail-inbox-entry:hover { background: rgba(104,145,105,.09); }
+#mail-window .mail-inbox-entry.is-active {
+  background: linear-gradient(90deg, rgba(72,111,76,.23), rgba(46,74,50,.1));
+  box-shadow: inset 2px 0 #8eae88;
+}
+#mail-window .mail-entry-sender {
+  color: #b5c7ae;
+  font: 9px var(--mono);
+  letter-spacing: .025em;
+}
+#mail-window .mail-inbox-entry time {
+  color: #7f927c;
+  font: 8px var(--mono);
+}
+#mail-window .mail-inbox-entry strong {
+  color: #e0e9dc;
+  font: 500 13px/1.35 var(--sans);
+}
+#mail-window .mail-inbox-entry small {
+  color: #899987;
+  font: 9px/1.55 var(--sans);
+}
+#mail-window .mail-inbox-entry.is-unread .mail-entry-sender:before {
+  width: 6px;
+  height: 6px;
+  background: #a5c58e;
+  box-shadow: 0 0 7px rgba(165,197,142,.42);
+}
+#mail-window .mail-reader {
+  padding: 25px clamp(18px, 4vw, 42px);
+  background:
+    radial-gradient(ellipse at 88% 0%, rgba(65,99,66,.13), transparent 38%),
+    linear-gradient(145deg, rgba(22,32,24,.96), rgba(13,20,15,.98));
+}
+#mail-window .mail-reader-top {
+  padding-bottom: 15px;
+  border-bottom-color: rgba(123,160,119,.2);
+}
+#mail-window .mail-reader-top .section-kicker {
+  color: #92ad8e;
+  font: 8px var(--mono);
+  letter-spacing: .14em;
+}
+#mail-window .mail-reader-top time {
+  color: #8a9b85;
+  font: 8px var(--mono);
+}
+#mail-window .mail-reader-subject {
+  margin: 24px 0 16px;
+  color: #e5ecdf;
+  font: 500 clamp(20px, 2.4vw, 27px)/1.3 var(--sans);
+  letter-spacing: -.015em;
+}
+#mail-window .mail-reader-from {
+  display: inline-block;
+  padding: 9px 11px;
+  border: 1px solid rgba(123,160,119,.16);
+  background: rgba(7,13,9,.32);
+  color: #a9bba3;
+  font: 9px/1.7 var(--mono);
+}
+#mail-window .mail-reader-divider {
+  margin: 22px 0;
+  background: rgba(123,160,119,.18);
+}
+#mail-window .mail-reader-body {
+  max-width: 760px;
+  color: #d0dbcc;
+  font: 12px/2 var(--sans);
+}
+#mail-window .player-empty {
+  align-self: center;
+  margin: 0;
+  padding: 28px;
+  color: #91a18c;
+  font: 10px/1.8 var(--mono);
+}
+@media (max-width: 720px) {
+  #mail-window .player-mail-list { grid-template-columns: minmax(0, 1fr); }
+  #mail-window .mail-inbox-list {
+    display: flex;
+    max-height: 230px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(112,157,119,.2);
+  }
+  #mail-window .mail-inbox-entry { padding: 12px 13px; }
+  #mail-window .mail-reader { min-height: 220px; padding: 20px 16px; }
+  #mail-window .mail-reader-subject { margin-top: 18px; }
+}

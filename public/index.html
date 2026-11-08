@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=workstation-03">
+  <link rel="stylesheet" href="/styles.css?v=workstation-04">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -535,16 +535,12 @@
         for (const item of archiveCases) {
           const card = document.createElement("article");
           card.className = "available-case-card";
-          const top = document.createElement("div"); top.className = "available-case-top";
-          const code = document.createElement("span"); code.className = "micro-label"; code.textContent = item.case_code;
-          const state = document.createElement("span"); state.className = "case-state"; state.textContent = item.status === "draft" ? "ЧЕРНОВИК" : "ДОСТУПНО";
-          top.append(code, state);
           const title = document.createElement("h3"); title.textContent = item.title;
           const description = document.createElement("p");
           if (item.description) description.textContent = item.description;
-          const start = document.createElement("button"); start.type = "button"; start.className = "case-start-button"; start.textContent = "НАЧАТЬ РАССЛЕДОВАНИЕ";
+          const start = document.createElement("button"); start.type = "button"; start.className = "case-start-button"; start.textContent = "Открыть дело";
           start.addEventListener("click", () => openCase(item.id));
-          card.append(top, title);
+          card.append(title);
           if (item.description) card.append(description);
           card.append(start);
           availableCaseList.append(card);

@@ -1374,7 +1374,7 @@ body:not(:has(#workspace:not([hidden]))) > .topbar,
 body:not(:has(#workspace:not([hidden]))) > main,
 body:not(:has(#workspace:not([hidden]))) > footer {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 body:not(:has(#workspace:not([hidden]))) .auth-panel {
   background:
@@ -1391,10 +1391,10 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
 #ambient-network {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
   display: block;
   pointer-events: none;
-  opacity: .78;
+  opacity: .92;
   mix-blend-mode: screen;
 }
 body:has(#workspace:not([hidden])) #ambient-network {

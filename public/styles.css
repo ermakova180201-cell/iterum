@@ -1800,3 +1800,47 @@ body:not(:has(#workspace:not([hidden]))) .brand-name small {
     letter-spacing: .09em;
   }
 }
+
+
+/* ITERUM digital-system header identity */
+body:not(:has(#workspace:not([hidden]))) .topbar {
+  background: linear-gradient(90deg, rgba(2, 10, 7, .96), rgba(5, 15, 10, .91), rgba(2, 10, 7, .96));
+  border-bottom-color: rgba(104, 158, 113, .2);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+}
+body:not(:has(#workspace:not([hidden]))) .brand-name {
+  color: #c8ddca;
+  font: 500 23px/1 var(--mono);
+  letter-spacing: .32em;
+  text-shadow: 0 0 18px rgba(104, 190, 125, .16);
+}
+body:not(:has(#workspace:not([hidden]))) .brand-name::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 17px;
+  margin: 0 13px 1px 0;
+  vertical-align: middle;
+  background: #a34e48;
+  box-shadow: 0 0 10px rgba(190, 66, 57, .38);
+}
+body:not(:has(#workspace:not([hidden]))) .brand-name small {
+  color: rgba(145, 177, 150, .72);
+  font-size: 8px;
+  letter-spacing: .16em;
+  text-shadow: none;
+}
+@media (max-width: 620px) {
+  body:not(:has(#workspace:not([hidden]))) .brand-name {
+    font-size: 19px;
+    letter-spacing: .27em;
+  }
+  body:not(:has(#workspace:not([hidden]))) .brand-name::before {
+    height: 14px;
+    margin-right: 10px;
+  }
+  body:not(:has(#workspace:not([hidden]))) .brand-name small {
+    font-size: 7px;
+    letter-spacing: .1em;
+  }
+}

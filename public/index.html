@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-21">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-22">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -242,6 +242,26 @@
         <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
       </form>
 
+      <aside class="system-console" id="system-console" aria-label="Системный протокол">
+        <div class="system-console-head">
+          <span><i class="system-console-led"></i> СИСТЕМНЫЙ ПРОТОКОЛ</span>
+          <span class="system-console-live">LIVE / LOCAL NODE</span>
+        </div>
+        <div class="system-console-body">
+          <div class="system-console-log" id="system-console-log" aria-live="polite">
+            <p><time>--:--:--</time><span>ИНИЦИАЛИЗАЦИЯ СРЕДЫ</span><b>OK</b></p>
+            <p><time>--:--:--</time><span>ПРОВЕРКА ЦЕЛОСТНОСТИ ДАННЫХ</span><b>OK</b></p>
+            <p><time>--:--:--</time><span>ОЖИДАНИЕ ИДЕНТИФИКАЦИИ</span><b class="is-pending">WAIT</b></p>
+          </div>
+          <div class="system-console-metrics">
+            <div><span>УЗЕЛ</span><strong>ITERUM—01</strong></div>
+            <div><span>КАНАЛ</span><strong>ЗАЩИЩЁН</strong></div>
+            <div><span>ПАМЯТЬ</span><strong class="system-metric-alert">НЕ ПРОВЕРЕНА</strong></div>
+          </div>
+        </div>
+        <div class="system-console-foot"><span>СЛУЖЕБНЫЙ КАНАЛ АКТИВЕН</span><span id="system-console-state">СЕАНС НЕ ОТКРЫТ</span></div>
+      </aside>
+
       <div class="auth-user" id="auth-user" hidden>
         <p id="auth-user-email"></p>
         <button class="auth-submit" id="auth-logout" type="button">ВЫЙТИ</button>
@@ -358,6 +378,54 @@
       } catch {
         showMessage("Не удалось проверить доступ. Обновите страницу.", true);
       }
+    }
+
+    const systemConsoleLog = document.getElementById("system-console-log");
+    const systemConsoleState = document.getElementById("system-console-state");
+    const systemLogMessages = [
+      ["КОНТУР НАБЛЮДЕНИЯ АКТИВЕН", "OK"],
+      ["ОБНАРУЖЕН ЗАПРОС НА ДОСТУП", "INFO"],
+      ["СВЕРКА ЛОКАЛЬНОГО ПРОФИЛЯ", "RUN"],
+      ["ОБНАРУЖЕН НЕСВЕРЕННЫЙ ФРАГМЕНТ", "WARN"],
+      ["ПОВТОРНАЯ ПРОВЕРКА НЕ ТРЕБУЕТСЯ", "OK"],
+      ["ОЖИДАНИЕ ДЕЙСТВИЯ ПОЛЬЗОВАТЕЛЯ", "WAIT"]
+    ];
+    let systemLogIndex = 0;
+    function addSystemLog(message, status = "INFO") {
+      if (!systemConsoleLog) return;
+      const row = document.createElement("p");
+      const time = document.createElement("time");
+      const label = document.createElement("span");
+      const state = document.createElement("b");
+      time.textContent = new Date().toLocaleTimeString("ru-RU", { hour12: false });
+      label.textContent = message;
+      state.textContent = status;
+      if (status === "WARN" || status === "ERR") state.className = "is-warning";
+      else if (status === "WAIT" || status === "RUN") state.className = "is-pending";
+      row.append(time, label, state);
+      systemConsoleLog.append(row);
+      while (systemConsoleLog.children.length > 4) systemConsoleLog.firstElementChild.remove();
+    }
+    if (systemConsoleLog) {
+      systemConsoleLog.querySelectorAll("time").forEach(node => {
+        node.textContent = new Date().toLocaleTimeString("ru-RU", { hour12: false });
+      });
+      window.setInterval(() => {
+        const [message, status] = systemLogMessages[systemLogIndex % systemLogMessages.length];
+        systemLogIndex += 1;
+        addSystemLog(message, status);
+      }, 6500);
+      document.getElementById("auth-email").addEventListener("focus", () => {
+        addSystemLog("ПОЛЕ ИДЕНТИФИКАТОРА АКТИВИРОВАНО", "RUN");
+      }, { once: true });
+      authSwitch.addEventListener("click", () => {
+        addSystemLog(registering ? "ПОДГОТОВКА НОВОЙ УЧЁТНОЙ ЗАПИСИ" : "ВОЗВРАТ К ПРОВЕРКЕ ДОСТУПА", "INFO");
+        if (systemConsoleState) systemConsoleState.textContent = registering ? "РЕЖИМ РЕГИСТРАЦИИ" : "ОЖИДАНИЕ АВТОРИЗАЦИИ";
+      });
+      authForm.addEventListener("submit", () => {
+        addSystemLog("ПОЛУЧЕН ЗАПРОС НА АУТЕНТИФИКАЦИЮ", "RUN");
+        if (systemConsoleState) systemConsoleState.textContent = "ПРОВЕРКА ДАННЫХ";
+      });
     }
 
     authSwitch.addEventListener("click", () => setMode(!registering));

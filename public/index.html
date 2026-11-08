@@ -934,6 +934,7 @@
         resetMaterialEditor();
         showAdminMessage(materialMessage, materialId ? "Изменения сохранены." : "Черновик сохранён. Игрокам он пока не доступен.");
         await loadAdminOverview();
+        await loadPlayerArchive();
       } catch (error) {
         showAdminMessage(materialMessage, error.message, true);
       } finally {

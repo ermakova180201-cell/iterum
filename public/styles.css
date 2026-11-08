@@ -107,3 +107,11 @@ footer b { color: #9b625c; font-weight: 400; }
 @media (max-width: 620px) {
   .auth-panel { grid-template-columns: 1fr; gap: 20px; padding: 19px; margin-bottom: 38px; }
 }
+
+
+.member-summary { display: flex; justify-content: space-between; align-items: center; gap: 18px; border: 1px solid #35342f; background: rgba(31,31,29,.55); padding: 15px 18px; margin: 0 0 15px; }
+.member-summary .section-kicker { margin-bottom: 5px; }
+.member-email { margin: 0; color: #d4cbbb; font-size: 12px; }
+.member-status { display: inline-flex; align-items: center; gap: 8px; color: #9da88e; font: 8px var(--mono); letter-spacing: .1em; white-space: nowrap; }
+.member-status i { width: 6px; height: 6px; border-radius: 50%; background: #879778; display: inline-block; }
+@media (max-width: 620px) { .member-summary { align-items: flex-start; flex-direction: column; gap: 10px; } }

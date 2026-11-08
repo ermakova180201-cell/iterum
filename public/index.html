@@ -1001,16 +1001,16 @@
         "WHO IS WATCHING?","RESTORE FAILED","SESSION REPEATED"
       ];
       const hiddenMessages = [
-        "WHO ARE YOU",
-        "MEMORY IS NOT YOURS",
-        "YOU HAVE BEEN HERE BEFORE",
-        "DO NOT TRUST THE SYSTEM",
-        "SHE IS WAITING",
-        "REMEMBER THE ACCIDENT",
-        "THIS IS NOT THE FIRST TIME",
-        "WAKE UP ILYA",
-        "YOU CANNOT LEAVE",
-        "SOMETHING IS WRONG"
+        "ТЫ УЖЕ БЫЛ ЗДЕСЬ",
+        "НЕ ДОВЕРЯЙ СИСТЕМЕ",
+        "ТВОЯ ПАМЯТЬ НЕ ТВОЯ",
+        "ОНА ЖДЁТ ТЕБЯ",
+        "ВСПОМНИ АВАРИЮ",
+        "ЭТО НЕ ПЕРВЫЙ ЦИКЛ",
+        "ПРОСНИСЬ ИЛЬЯ",
+        "ТЫ НЕ МОЖЕШЬ УЙТИ",
+        "КТО ТЫ НА САМОМ ДЕЛЕ",
+        "СИСТЕМА СКРЫВАЕТ ПРАВДУ"
       ];
       function makeStream(){
         const phrase=Math.random()<.075
@@ -1023,7 +1023,7 @@
           size:15+Math.random()*5,
           length,
           phrase,
-          symbols:Array.from({length:60},(_,j)=>phrase?(phrase[j]||" "):glyphs[Math.floor(Math.random()*glyphs.length)]),
+          symbols:Array.from({length:60},(_,j)=>phrase?(phrase[phrase.length-1-j]||" "):glyphs[Math.floor(Math.random()*glyphs.length)]),
           bright:Math.random()>.84,
           tint:Math.random()>.965
         };

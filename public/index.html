@@ -399,7 +399,8 @@
             readButton.addEventListener("click", async () => {
               readButton.disabled = true;
               try {
-                await fetch("/api/player/materials/" + encodeURIComponent(item.id) + "/read", { method: "POST", credentials: "same-origin" });
+                const response = await fetch("/api/player/materials/" + encodeURIComponent(item.id) + "/read", { method: "POST", credentials: "same-origin" });
+                if (!response.ok) throw new Error("Не удалось отметить материал.");
                 await loadPlayerArchive();
               } catch {
                 readButton.disabled = false;
@@ -428,6 +429,16 @@
       } catch (error) {
         showAdminMessage(caseMessage, error.message, true);
       }
+    }
+
+    function refreshTriggerOptions(selectedId = "") {
+      const caseId = materialCase.value;
+      const available = Array.from(materialTrigger.options).filter(option => option.value && option.dataset.caseId === caseId);
+      const placeholder = materialTrigger.options[0];
+      materialTrigger.replaceChildren(placeholder);
+      for (const option of available) materialTrigger.append(option);
+      if (available.some(option => option.value === selectedId)) materialTrigger.value = selectedId;
+      materialTrigger.disabled = deliveryMode.value !== "triggered" || available.length === 0;
     }
 
     async function loadAdminOverview() {
@@ -459,10 +470,11 @@
         for (const material of data.materials) {
           const option = document.createElement("option");
           option.value = material.id;
+          option.dataset.caseId = material.case_id;
           option.textContent = material.title + " · " + material.case_title;
           materialTrigger.append(option);
         }
-        materialTrigger.disabled = deliveryMode.value !== "triggered" || !data.materials.length;
+        refreshTriggerOptions();
 
         adminCaseList.replaceChildren();
         if (!data.cases.length) {
@@ -567,8 +579,7 @@
         document.getElementById("material-content").value = item.content;
         document.getElementById("material-order").value = item.release_order;
         deliveryMode.value = item.delivery_mode || "automatic";
-        materialTrigger.value = item.trigger_material_id || "";
-        materialTrigger.disabled = deliveryMode.value !== "triggered";
+        refreshTriggerOptions(item.trigger_material_id || "");
         document.getElementById("material-form-title").textContent = "Редактирование материала";
         materialForm.querySelector("button[type=submit]").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
         materialForm.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -598,7 +609,7 @@
     });
 
     materialCase.addEventListener("change", () => {
-      materialTrigger.value = "";
+      refreshTriggerOptions();
     });
 
     function resetMaterialEditor() {

@@ -1784,3 +1784,19 @@ body:has(#workspace:not([hidden])) #ambient-network { display:none; }
 @media(prefers-reduced-motion:reduce) {
   #ambient-network { opacity:.68; }
 }
+
+
+/* ITERUM login brand subtitle */
+body:not(:has(#workspace:not([hidden]))) .brand-name small {
+  display: block !important;
+  margin-top: 5px;
+  color: rgba(150, 171, 153, .72);
+  font: 8px/1.4 var(--mono);
+  letter-spacing: .13em;
+}
+@media (max-width: 620px) {
+  body:not(:has(#workspace:not([hidden]))) .brand-name small {
+    font-size: 7px;
+    letter-spacing: .09em;
+  }
+}

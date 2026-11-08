@@ -172,6 +172,10 @@
         </div>
         <div class="admin-inventory">
           <h3>Созданные материалы</h3>
+          <div class="unlock-recipient">
+            <label for="unlock-user-select">ИГРОК, КОТОРОМУ ОТКРЫТЬ МАТЕРИАЛ</label>
+            <select id="unlock-user-select"><option value="">Загрузка списка игроков…</option></select>
+          </div>
           <div id="admin-material-list" class="admin-material-list"><p class="admin-empty">Пока материалов нет.</p></div>
         </div>
       </section>
@@ -235,6 +239,8 @@
 
     const adminMaterialList = document.getElementById("admin-material-list");
     const adminCaseList = document.getElementById("admin-case-list");
+    const unlockUserSelect = document.getElementById("unlock-user-select");
+    let adminUsers = [];
     const playerArchive = document.getElementById("player-archive");
     const playerCaseList = document.getElementById("player-case-list");
     const playerMaterialList = document.getElementById("player-material-list");
@@ -409,6 +415,24 @@
     async function loadAdminOverview() {
       try {
         const data = await adminRequest("/api/admin/overview");
+        const userData = await adminRequest("/api/admin/users");
+        adminUsers = userData.users || [];
+        const selectedUser = unlockUserSelect.value;
+        unlockUserSelect.replaceChildren();
+        if (!adminUsers.length) {
+          const noUsers = document.createElement("option");
+          noUsers.value = "";
+          noUsers.textContent = "Игроков пока нет";
+          unlockUserSelect.append(noUsers);
+        } else {
+          for (const user of adminUsers) {
+            const option = document.createElement("option");
+            option.value = user.id;
+            option.textContent = user.email;
+            unlockUserSelect.append(option);
+          }
+          if (adminUsers.some(user => user.id === selectedUser)) unlockUserSelect.value = selectedUser;
+        }
         const previous = materialCase.value;
         materialCase.replaceChildren();
         if (!data.cases.length) {
@@ -483,7 +507,14 @@
             publish.className = "admin-mini-button";
             publish.textContent = item.is_published ? "СНЯТЬ С ПУБЛИКАЦИИ" : "ОПУБЛИКОВАТЬ";
             publish.addEventListener("click", () => setMaterialPublished(item.id, !item.is_published));
-            actions.append(edit, publish);
+            const unlock = document.createElement("button");
+            unlock.type = "button";
+            unlock.className = "admin-mini-button";
+            unlock.textContent = "ОТКРЫТЬ ИГРОКУ";
+            unlock.disabled = !item.is_published || !adminUsers.length;
+            unlock.title = item.is_published ? "Открыть этот материал выбранному игроку" : "Сначала опубликуйте материал";
+            unlock.addEventListener("click", () => unlockMaterial(item.id));
+            actions.append(edit, publish, unlock);
             card.append(info, actions);
             adminMaterialList.append(card);
           }
@@ -533,6 +564,25 @@
         materialForm.querySelector("button[type=submit]").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
         materialForm.scrollIntoView({ behavior: "smooth", block: "center" });
         showAdminMessage(materialMessage, "Материал загружен для редактирования.");
+      } catch (error) {
+        showAdminMessage(materialMessage, error.message, true);
+      }
+    }
+
+    async function unlockMaterial(id) {
+      const userId = unlockUserSelect.value;
+      if (!userId) {
+        showAdminMessage(materialMessage, "Сначала выберите игрока.", true);
+        return;
+      }
+      const user = adminUsers.find(item => item.id === userId);
+      if (!window.confirm("Открыть этот материал игроку " + (user ? user.email : "") + "?")) return;
+      try {
+        await adminRequest("/api/admin/materials/" + encodeURIComponent(id) + "/unlock", {
+          method: "POST",
+          body: JSON.stringify({ userId })
+        });
+        showAdminMessage(materialMessage, "Материал открыт выбранному игроку.");
       } catch (error) {
         showAdminMessage(materialMessage, error.message, true);
       }

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=workstation-04">
+  <link rel="stylesheet" href="/styles.css?v=case-gallery-01">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -52,6 +52,7 @@
       <section class="available-cases" id="available-cases" aria-label="Выбор дела">
         <div class="case-selection-heading">
           <div>
+            <p class="case-selection-kicker">АРХИВ ДЕЛ</p>
             <h2>Выберите дело</h2>
           </div>
         </div>
@@ -527,16 +528,18 @@
           return;
         }
         for (const item of archiveCases) {
-          const card = document.createElement("article");
+          const card = document.createElement("button");
+          card.type = "button";
           card.className = "available-case-card";
-          const title = document.createElement("h3"); title.textContent = item.title;
-          const description = document.createElement("p");
-          if (item.description) description.textContent = item.description;
-          const start = document.createElement("button"); start.type = "button"; start.className = "case-start-button"; start.textContent = "Открыть дело";
-          start.addEventListener("click", () => openCase(item.id));
-          card.append(title);
-          if (item.description) card.append(description);
-          card.append(start);
+          card.setAttribute("aria-label", "Открыть дело: " + item.title);
+          const cover = document.createElement("span");
+          cover.className = "available-case-cover";
+          cover.setAttribute("aria-hidden", "true");
+          const title = document.createElement("span");
+          title.className = "available-case-title";
+          title.textContent = item.title;
+          card.append(cover, title);
+          card.addEventListener("click", () => openCase(item.id));
           availableCaseList.append(card);
         }
         // После каждой авторизации пользователь явно выбирает дело.

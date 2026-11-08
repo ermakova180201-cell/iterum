@@ -380,3 +380,148 @@ footer { border-top-color: rgba(216,208,191,.16); }
   .intro::after { font-size: 7px; bottom: 26px; }
   h1 { font-size: clamp(42px, 12vw, 58px); }
 }
+
+
+/* Desktop workspace — the case is handled like a private investigator's computer */
+.desktop-shell {
+  position: relative;
+  overflow: hidden;
+  margin: 24px 0 28px;
+  border: 1px solid #5a4d3e;
+  background: #151715;
+  box-shadow: 0 24px 65px rgba(0,0,0,.34);
+}
+.desktop-toolbar {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 15px;
+  color: #b6a990;
+  background: linear-gradient(90deg, #28251f, #1b1c1a);
+  border-bottom: 1px solid #514536;
+  font: 8px var(--mono);
+  letter-spacing: .12em;
+}
+.desktop-window-title, .desktop-toolbar-right { display: flex; align-items: center; gap: 10px; }
+.desktop-toolbar-right { color: #8e8372; text-align: right; }
+.desktop-led { width: 6px; height: 6px; border-radius: 50%; background: #9c6552; box-shadow: 0 0 9px rgba(156,101,82,.55); }
+.desktop-area {
+  min-height: 350px;
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+  background:
+    radial-gradient(ellipse at 78% 18%, rgba(145,99,56,.2), transparent 32%),
+    radial-gradient(ellipse at 45% 110%, rgba(70,82,78,.22), transparent 45%),
+    linear-gradient(135deg, #242622 0%, #171a18 48%, #20201c 100%);
+}
+.desktop-area:before, .desktop-area:after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid rgba(202,177,139,.08);
+  transform: rotate(-18deg);
+}
+.desktop-area:before { width: 540px; height: 230px; right: -90px; top: 35px; }
+.desktop-area:after { width: 430px; height: 180px; right: -35px; top: 60px; }
+.desktop-icons { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(2, 92px); gap: 20px 16px; width: 205px; }
+.desktop-icon {
+  width: 92px;
+  min-height: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  padding: 7px 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #e0d7c7;
+  cursor: pointer;
+  font: 10px var(--sans);
+  text-shadow: 0 1px 4px #000;
+}
+.desktop-icon:hover, .desktop-icon.is-selected {
+  border-color: rgba(198,164,119,.34);
+  background: rgba(191,158,113,.09);
+}
+.desktop-icon-art {
+  width: 53px; height: 48px;
+  display: grid; place-items: center;
+  border: 1px solid rgba(206,180,142,.48);
+  background: linear-gradient(145deg, rgba(111,89,62,.65), rgba(37,37,32,.9));
+  box-shadow: 0 8px 18px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.08);
+  color: #e5d5bc;
+}
+.desktop-icon-art span { font: 28px Georgia, serif; }
+.mail-art { border-radius: 5px; background: linear-gradient(145deg, #59433a, #292521); }
+.search-art { border-radius: 50%; width: 46px; height: 46px; margin: 1px 0; background: linear-gradient(145deg, #46504d, #252a27); }
+.search-art span { font: 36px Georgia, serif; }
+.folder-art { border-radius: 3px 7px 4px 4px; background: linear-gradient(145deg, #806744, #3b3024); }
+.desktop-icon small { color: #b49b7c; font: 7px var(--mono); letter-spacing: .1em; }
+.desktop-case-shortcut {
+  position: absolute; z-index: 1; right: 7%; bottom: 45px;
+  display: flex; align-items: center; gap: 13px;
+  max-width: 290px; padding: 14px 17px;
+  border: 1px solid rgba(194,166,127,.25);
+  background: rgba(13,15,14,.42);
+  backdrop-filter: blur(5px);
+}
+.desktop-case-glyph {
+  width: 42px; height: 48px; display: grid; place-items: center;
+  border: 1px solid #80634b; color: #d0b18a;
+  font: 17px var(--serif);
+}
+.desktop-case-shortcut div:last-child { display: grid; gap: 5px; }
+.desktop-case-shortcut span, .desktop-case-shortcut small { color: #a58e70; font: 7px var(--mono); letter-spacing: .12em; }
+.desktop-case-shortcut strong { color: #e2d7c5; font: 500 13px var(--serif); }
+.desktop-wallpaper-mark {
+  position: absolute; right: 7%; top: 45px;
+  color: rgba(224,211,189,.055); font: 500 clamp(52px, 10vw, 112px) var(--serif);
+  letter-spacing: .12em; pointer-events: none;
+}
+.desktop-taskbar {
+  min-height: 39px; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 0 14px; border-top: 1px solid #514536;
+  background: linear-gradient(90deg, #25231e, #191a18);
+  color: #948875; font: 8px var(--mono); letter-spacing: .08em;
+}
+.taskbar-start { color: #d2c3aa; display: flex; align-items: center; gap: 8px; }
+.taskbar-start b { display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid #80634b; color: #d9c3a3; font: 12px var(--serif); }
+.taskbar-hint { color: #746d60; }
+.taskbar-clock { color: #b4a48b; white-space: nowrap; }
+.desktop-window {
+  position: relative;
+  margin: 18px 0;
+  padding: 19px 21px 21px;
+  border: 1px solid #655542;
+  background: linear-gradient(135deg, rgba(35,34,30,.98), rgba(20,22,21,.98));
+  box-shadow: 0 17px 42px rgba(0,0,0,.28);
+}
+.desktop-window:before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 0; height: 3px;
+  background: linear-gradient(90deg, #9b6450, #62533f 45%, transparent);
+}
+.desktop-window .player-tool-heading { align-items: flex-start; }
+.window-close {
+  width: 29px; height: 29px; flex: 0 0 auto;
+  border: 1px solid #665342; background: #29231e;
+  color: #d4b9a0; cursor: pointer; font: 18px/1 var(--sans);
+}
+.window-close:hover { background: #613a34; border-color: #a76b5d; color: #fff0df; }
+.desktop-window[hidden] { display: none !important; }
+.player-archive > .modules-heading, .player-archive > .player-case-list { display: none; }
+@media (max-width: 620px) {
+  .desktop-toolbar { align-items: flex-start; flex-direction: column; padding: 10px 12px; gap: 7px; }
+  .desktop-area { min-height: 400px; padding: 14px 8px; }
+  .desktop-icons { grid-template-columns: repeat(2, 82px); gap: 10px 5px; width: 175px; }
+  .desktop-icon { width: 82px; }
+  .desktop-case-shortcut { right: 10px; bottom: 18px; left: 10px; max-width: none; }
+  .desktop-wallpaper-mark { top: 165px; right: 8px; font-size: 46px; }
+  .desktop-taskbar { flex-wrap: wrap; padding: 8px 10px; }
+  .taskbar-hint { display: none; }
+  .desktop-window { padding: 17px 13px; }
+}

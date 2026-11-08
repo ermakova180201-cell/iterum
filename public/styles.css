@@ -3484,3 +3484,66 @@ body.is-workstation .connection-art span { font: 29px/1 var(--mono); }
   .connection-level-meta { font-size:7px; }
   .connection-board[data-size="5"] { gap:4px; padding:9px 12px; }
 }
+
+
+/* Periodic system access lock */
+.desktop-area { position:relative; }
+.system-lock-overlay {
+  position:absolute; z-index:1000; inset:0; display:flex; align-items:center; justify-content:center;
+  padding:18px; overflow:auto; background:rgba(3,8,5,.94);
+  backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px);
+}
+.system-lock-overlay[hidden] { display:none; }
+.system-lock-panel {
+  width:min(100%,510px); padding:clamp(18px,4vw,30px);
+  border:1px solid rgba(170,91,78,.58);
+  background:linear-gradient(145deg,rgba(27,34,29,.99),rgba(12,18,14,.99));
+  box-shadow:0 18px 70px rgba(0,0,0,.55),inset 0 0 38px rgba(136,63,52,.07);
+  color:#d8e1d7; position:relative;
+}
+.system-lock-panel:before {
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,#b75f52,#78463e 55%,transparent);
+}
+.system-lock-top { display:flex; justify-content:space-between; gap:10px; margin-bottom:25px; color:#819587; font:8px var(--mono); letter-spacing:.1em; }
+.system-lock-indicator { color:#d17b6e; }
+.system-lock-panel .section-kicker { color:#b8796f; font:8px var(--mono); letter-spacing:.12em; }
+.system-lock-panel h2 { margin:8px 0 12px; color:#e3b0a7; font:clamp(21px,4vw,29px) var(--mono); letter-spacing:.035em; }
+.system-lock-copy { margin:0 0 17px; max-width:420px; color:#a8b5a8; font:11px/1.7 var(--sans); }
+.system-lock-meta { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:10px 0; border-top:1px solid rgba(163,104,93,.2); border-bottom:1px solid rgba(163,104,93,.2); color:#829184; font:7px var(--mono); }
+.system-lock-meta b { color:#d6c3b8; font-weight:500; }
+.system-lock-board {
+  position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px;
+  width:min(100%,260px); margin:20px auto 14px; padding:12px 17px;
+  border:1px solid rgba(176,104,91,.28);
+  background:linear-gradient(rgba(162,106,91,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(162,106,91,.05) 1px,transparent 1px),rgba(4,10,6,.8);
+  background-size:20px 20px;
+}
+.system-lock-tile {
+  position:relative; aspect-ratio:1; min-width:0; padding:0;
+  border:1px solid rgba(150,166,146,.25); border-radius:2px;
+  background:rgba(50,67,52,.45); cursor:pointer;
+}
+.system-lock-tile:focus-visible { outline:2px solid #d49b8e; outline-offset:2px; }
+.system-lock-tile i { position:absolute; display:block; left:calc(50% - 2px); top:0; width:4px; height:50%; }
+.system-lock-tile i:nth-child(2) { left:50%; top:calc(50% - 2px); width:50%; height:4px; }
+.system-lock-tile i:nth-child(3) { left:calc(50% - 2px); top:50%; width:4px; height:50%; }
+.system-lock-tile i:nth-child(4) { left:0; top:calc(50% - 2px); width:50%; height:4px; }
+.system-lock-tile i.is-active { background:#d18b7d; box-shadow:0 0 7px rgba(209,139,125,.65); }
+.system-lock-tile:disabled { cursor:default; }
+.system-lock-terminal { position:absolute; top:calc(50% - 7px); z-index:2; color:#e0a69a; font:8px var(--mono); }
+.system-lock-in { left:0; transform:translateX(-100%); padding-right:4px; }
+.system-lock-out { right:0; transform:translateX(100%); padding-left:4px; }
+.system-lock-board.is-restored .system-lock-tile i.is-active { background:#a8d2a5; box-shadow:0 0 9px rgba(160,219,157,.8); }
+.system-lock-footer { display:flex; justify-content:space-between; gap:10px; color:#b27d72; font:8px var(--mono); }
+.system-lock-restored { margin-top:17px; padding:13px; border:1px solid rgba(125,177,125,.45); background:rgba(47,81,48,.2); }
+.system-lock-restored strong { color:#c6e0c0; font:10px var(--mono); }
+.system-lock-restored p { color:#b0c2ad; font:10px/1.6 var(--sans); }
+.system-lock-restored button { margin-top:5px; border-color:#739a72; background:#29442e; color:#e0eadc; }
+.system-lock-footnote { margin:17px 0 0; color:#6e8171; font:7px var(--mono); letter-spacing:.06em; text-align:center; }
+@media(max-width:620px) {
+  .system-lock-overlay { padding:10px; }
+  .system-lock-panel { padding:18px 14px; }
+  .system-lock-top { margin-bottom:18px; }
+  .system-lock-copy { font-size:10px; }
+}

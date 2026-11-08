@@ -145,3 +145,10 @@ footer b { color: #9b625c; font-weight: 400; }
   .admin-material { grid-template-columns: 1fr; }
   .admin-material small { grid-column: 1; grid-row: auto; }
 }
+
+.admin-material { align-items: center; }
+.admin-material > div:first-child { display: grid; gap: 5px; }
+.admin-material-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.admin-mini-button { border: 1px solid #62564a; background: #282623; color: #c9bdab; padding: 8px 10px; font: 7px var(--mono); letter-spacing: .06em; cursor: pointer; }
+.admin-mini-button:hover { border-color: #98706a; color: #eee4d4; }
+@media (max-width: 700px) { .admin-material-actions { justify-content: flex-start; } }

@@ -109,7 +109,7 @@ async function handleApi(request, env) {
         "content-disposition": "inline; filename*=UTF-8''" + encodeURIComponent(safeName),
         "cache-control": "private, no-store",
         "x-content-type-options": "nosniff",
-        "content-security-policy": "default-src 'none'; sandbox"
+        "content-security-policy": "default-src 'none'; frame-ancestors 'self'"
       }
     });
   }

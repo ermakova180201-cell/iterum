@@ -88,6 +88,10 @@
                 <span class="icon-caption">Системный архив</span>
               </button>
             </div>
+            <button class="desktop-icon desktop-help-shortcut" type="button" data-open-window="help-window" aria-label="Помощь" title="Помощь">
+              <span class="desktop-icon-art folder-art help-art" aria-hidden="true"><span class="help-question">?</span></span>
+              <span class="icon-caption">Помощь</span>
+            </button>
             <section class="desktop-date-panel" aria-label="Дата и время">
               <span class="desktop-panel-kicker">ЛОКАЛЬНОЕ ВРЕМЯ</span>
               <strong id="desktop-date">—</strong>
@@ -143,6 +147,21 @@
           </div>
           <p class="system-log-intro">История действий и уведомлений в рамках текущего сеанса.</p>
           <div class="system-log-list" id="system-log-list" aria-live="polite"><p class="player-empty">Событий пока нет.</p></div>
+        </section>
+
+        <section id="help-window" class="player-tool-section desktop-window help-window" aria-labelledby="help-heading" hidden>
+          <div class="player-tool-heading window-drag-handle">
+            <div><span class="section-kicker">СПРАВОЧНЫЙ РАЗДЕЛ</span><h2 id="help-heading">Помощь</h2></div>
+            <button class="window-close" type="button" data-close-window="help-window" aria-label="Закрыть окно">×</button>
+          </div>
+          <div class="help-window-content">
+            <h3>Работа с системой</h3>
+            <p><strong>Почта</strong> — сообщения и новые материалы по делу.</p>
+            <p><strong>Поиск данных</strong> — поиск сведений и зацепок.</p>
+            <p><strong>Материалы дела</strong> — изучение доступных документов и улик.</p>
+            <p><strong>Системный архив</strong> — журнал событий текущего сеанса.</p>
+            <p>Чтобы открыть приложение, нажмите на его значок. Окна можно перемещать за верхнюю панель, а закрыть — кнопкой ×.</p>
+          </div>
         </section>
 
           </div>

@@ -207,21 +207,15 @@
             <div><span class="section-kicker">СИСТЕМНАЯ УТИЛИТА / 06</span><h2 id="connection-game-heading">Восстановление соединения</h2></div>
             <button class="window-close" type="button" data-close-window="connection-game-window" aria-label="Закрыть окно">×</button>
           </div>
-          <p class="connection-game-intro">Поверните фрагменты схемы так, чтобы восстановить непрерывный маршрут от входного узла к выходному.</p>
-          <div class="connection-game-status"><span>УЗЕЛ ВХОДА <b>IN-01</b></span><span id="connection-game-state" aria-live="polite">СВЯЗЬ НЕ УСТАНОВЛЕНА</span><span>УЗЕЛ ВЫХОДА <b>OUT-09</b></span></div>
-          <div class="connection-board" id="connection-board" role="group" aria-label="Схема соединений">
-            <span class="connection-terminal connection-terminal-in">IN</span>
-            <span class="connection-terminal connection-terminal-out">OUT</span>
-            <button class="connection-tile" type="button" data-tile="0" data-type="corner" data-rotation="0" aria-label="Фрагмент 1, повернуть"><i></i><i></i><i></i><i></i></button>
-            <button class="connection-tile" type="button" data-tile="1" data-type="straight" data-rotation="1" aria-label="Фрагмент 2, повернуть"><i></i><i></i><i></i><i></i></button>
-            <button class="connection-tile" type="button" data-tile="2" data-type="corner" data-rotation="0" aria-label="Фрагмент 3, повернуть"><i></i><i></i><i></i><i></i></button>
-            <button class="connection-tile" type="button" data-tile="3" data-type="corner" data-rotation="1" aria-label="Фрагмент 4, повернуть"><i></i><i></i><i></i><i></i></button>
-            <button class="connection-tile" type="button" data-tile="4" data-type="empty" data-rotation="0" aria-label="Пустой фрагмент"></button>
-            <button class="connection-tile" type="button" data-tile="5" data-type="corner" data-rotation="2" aria-label="Фрагмент 6, повернуть"><i></i><i></i><i></i><i></i></button>
-            <button class="connection-tile" type="button" data-tile="6" data-type="empty" data-rotation="0" aria-label="Пустой фрагмент"></button>
-            <button class="connection-tile" type="button" data-tile="7" data-type="empty" data-rotation="0" aria-label="Пустой фрагмент"></button>
-            <button class="connection-tile" type="button" data-tile="8" data-type="empty" data-rotation="0" aria-label="Пустой фрагмент"></button>
+          <p class="connection-game-intro">Поверните фрагменты схемы и восстановите непрерывный маршрут от входного узла к выходному. Каждый следующий уровень сложнее предыдущего.</p>
+          <div class="connection-levels" role="group" aria-label="Выбор уровня">
+            <button type="button" class="connection-level is-active" data-level="0">01 <span>ОБХОД</span></button>
+            <button type="button" class="connection-level" data-level="1" disabled>02 <span>РАЗВИЛКА</span></button>
+            <button type="button" class="connection-level" data-level="2" disabled>03 <span>ПЕРЕХВАТ</span></button>
           </div>
+          <div class="connection-level-meta"><span id="connection-level-name">УРОВЕНЬ 01 / ОБХОД</span><span id="connection-level-size">СЕТКА 3 × 3</span></div>
+          <div class="connection-game-status"><span>УЗЕЛ ВХОДА <b>IN-01</b></span><span id="connection-game-state" aria-live="polite">СВЯЗЬ НЕ УСТАНОВЛЕНА</span><span>УЗЕЛ ВЫХОДА <b>OUT-09</b></span></div>
+          <div class="connection-board" id="connection-board" role="group" aria-label="Схема соединений"></div>
           <div class="connection-game-bottom">
             <span id="connection-moves">ПОВОРОТОВ: 0</span>
             <button type="button" class="admin-mini-button" id="connection-reset">СБРОСИТЬ СХЕМУ</button>
@@ -1388,65 +1382,90 @@
 
   <script>
     (() => {
-      const board = document.getElementById("connection-board");
-      const reset = document.getElementById("connection-reset");
-      if (!board || !reset) return;
-      const tiles = [...board.querySelectorAll(".connection-tile")];
-      const state = document.getElementById("connection-game-state");
-      const movesLabel = document.getElementById("connection-moves");
-      const success = document.getElementById("connection-success");
-      const initial = tiles.map(tile => Number(tile.dataset.rotation));
-      const basePorts = { corner: ["N","E"], straight: ["E","W"], empty: [] };
-      const order = ["N","E","S","W"];
-      let moves = 0;
-      function ports(tile) {
-        const base = basePorts[tile.dataset.type] || [];
-        const rotation = Number(tile.dataset.rotation);
-        return base.map(port => order[(order.indexOf(port) + rotation) % 4]);
+      const board=document.getElementById("connection-board"), reset=document.getElementById("connection-reset");
+      if(!board||!reset)return;
+      const state=document.getElementById("connection-game-state"), movesLabel=document.getElementById("connection-moves");
+      const success=document.getElementById("connection-success"), levelName=document.getElementById("connection-level-name");
+      const levelSize=document.getElementById("connection-level-size"), levelButtons=[...document.querySelectorAll(".connection-level")];
+      const dirs=["N","E","S","W"], opposite={N:"S",E:"W",S:"N",W:"E"};
+      const levels=[
+        {name:"ОБХОД",size:3,path:[3,0,1,2,5]},
+        {name:"РАЗВИЛКА",size:4,path:[4,0,1,2,3,7,11]},
+        {name:"ПЕРЕХВАТ",size:5,path:[10,5,0,1,2,3,4,9,14,19]}
+      ];
+      let current=0,tiles=[],moves=0,unlocked=0,solved=false;
+      function dir(a,b,size){if(b===a-size)return"N";if(b===a+1)return"E";if(b===a+size)return"S";if(b===a-1)return"W";return null;}
+      function wantedPorts(path,pos,size){return[pos===0?"W":dir(path[pos],path[pos-1],size),pos===path.length-1?"E":dir(path[pos],path[pos+1],size)];}
+      function config(wanted,seed){
+        for(const type of ["corner","straight"])for(let rotation=0;rotation<4;rotation++){
+          const base=type==="corner"?["N","E"]:["E","W"];
+          const got=base.map(p=>dirs[(dirs.indexOf(p)+rotation)%4]);
+          if(wanted.every(p=>got.includes(p))&&got.every(p=>wanted.includes(p)))
+            return{type,solution:rotation,scramble:(rotation+1+seed%3)%4};
+        }
+        throw Error("Bad route segment");
       }
-      function draw() {
-        tiles.forEach(tile => {
-          const active = ports(tile);
-          [...tile.children].forEach((arm,index) => {
-            arm.className = active.includes(order[index]) ? "is-active" : "";
-          });
-          tile.classList.toggle("is-empty", tile.dataset.type === "empty");
-        });
-        movesLabel.textContent = "ПОВОРОТОВ: " + moves;
-        const connected = new Set([3]);
-        const queue = [3];
-        while(queue.length) {
-          const current = queue.shift();
-          const row = Math.floor(current / 3), col = current % 3;
-          for (const [direction, next, opposite] of [
-            ["N",current-3,"S"],["E",current+1,"W"],["S",current+3,"N"],["W",current-1,"E"]
-          ]) {
-            if ((direction==="N"&&row===0)||(direction==="S"&&row===2)||(direction==="W"&&col===0)||(direction==="E"&&col===2)) continue;
-            if (!ports(tiles[current]).includes(direction) || !ports(tiles[next]).includes(opposite) || connected.has(next)) continue;
-            connected.add(next); queue.push(next);
+      function ports(tile){
+        const base=tile.dataset.type==="corner"?["N","E"]:tile.dataset.type==="straight"?["E","W"]:[];
+        return base.map(p=>dirs[(dirs.indexOf(p)+Number(tile.dataset.rotation))%4]);
+      }
+      function connected(){
+        const size=levels[current].size,start=levels[current].path[0],seen=new Set([start]),queue=[start];
+        while(queue.length){
+          const id=queue.shift(),row=Math.floor(id/size),col=id%size;
+          for(const [d,next,valid] of [["N",id-size,row>0],["E",id+1,col<size-1],["S",id+size,row<size-1],["W",id-1,col>0]]){
+            if(!valid||seen.has(next)||!ports(tiles[id]).includes(d)||!ports(tiles[next]).includes(opposite[d]))continue;
+            seen.add(next);queue.push(next);
           }
         }
-        const solved = connected.has(5) && ports(tiles[5]).includes("E");
-        board.classList.toggle("is-connected",solved);
-        state.textContent = solved ? "СВЯЗЬ УСТАНОВЛЕНА" : "СВЯЗЬ НЕ УСТАНОВЛЕНА";
-        success.hidden = !solved;
-        if (solved) tiles.forEach(tile => tile.disabled = true);
-        return solved;
+        return seen;
       }
-      tiles.forEach(tile => {
-        if(tile.dataset.type==="empty") { tile.disabled=true; return; }
-        tile.addEventListener("click", () => {
-          if(!success.hidden) return;
-          tile.dataset.rotation = String((Number(tile.dataset.rotation)+1)%4);
-          moves++;
-          draw();
-        });
-      });
-      reset.addEventListener("click", () => {
-        tiles.forEach((tile,index) => { tile.dataset.rotation = String(initial[index]); tile.disabled=tile.dataset.type==="empty"; });
-        moves=0; success.hidden=true; board.classList.remove("is-connected"); draw();
-      });
-      draw();
+      function draw(){
+        tiles.forEach(tile=>[...tile.children].forEach((arm,i)=>arm.classList.toggle("is-active",ports(tile).includes(dirs[i]))));
+        movesLabel.textContent="ПОВОРОТОВ: "+moves;
+        const path=levels[current].path,seen=connected();
+        solved=path.every(id=>seen.has(id))&&ports(tiles[path[path.length-1]]).includes("E");
+        board.classList.toggle("is-connected",solved);
+        state.textContent=solved?"СВЯЗЬ УСТАНОВЛЕНА":"СВЯЗЬ НЕ УСТАНОВЛЕНА";
+        success.hidden=!solved;
+        if(!solved)return;
+        tiles.forEach(tile=>tile.disabled=true);
+        unlocked=Math.max(unlocked,current+1);
+        levelButtons.forEach((b,i)=>b.disabled=i>unlocked);
+        const final=current===levels.length-1;
+        success.querySelector("strong").textContent=final?"ВСЕ КАНАЛЫ ВОССТАНОВЛЕНЫ":"СОЕДИНЕНИЕ ВОССТАНОВЛЕНО";
+        success.querySelector("p").textContent=final?"Все три уровня пройдены. В очереди обнаружен неизвестный пакет.":"Канал передачи данных активен. Следующий сегмент системы разблокирован.";
+        success.querySelector("span").textContent=final?"ПАКЕТ: UNIDENTIFIED / 00:00:07":"СЛЕДУЮЩИЙ УРОВЕНЬ ДОСТУПЕН";
+        let next=success.querySelector(".connection-next");
+        if(!next){next=document.createElement("button");next.type="button";next.className="admin-mini-button connection-next";next.addEventListener("click",()=>load(Math.min(current+1,2)));success.appendChild(next);}
+        next.hidden=final;next.textContent="ПЕРЕЙТИ К УРОВНЮ "+String(current+2).padStart(2,"0");
+      }
+      function load(index){
+        current=index;moves=0;solved=false;
+        const level=levels[index],map=new Map();
+        level.path.forEach((id,pos)=>map.set(id,config(wantedPorts(level.path,pos,level.size),id+index*7)));
+        board.style.gridTemplateColumns="repeat("+level.size+",minmax(0,1fr))";
+        board.innerHTML="";
+        for(let id=0;id<level.size*level.size;id++){
+          const tile=document.createElement("button"),item=map.get(id);
+          tile.type="button";tile.className="connection-tile";tile.dataset.tile=id;
+          tile.dataset.type=item?item.type:"empty";tile.dataset.rotation=item?item.scramble:0;
+          tile.setAttribute("aria-label",item?"Фрагмент "+(id+1)+", повернуть":"Пустой фрагмент");
+          if(item)for(let a=0;a<4;a++)tile.appendChild(document.createElement("i"));
+          else tile.disabled=true;
+          tile.addEventListener("click",()=>{if(solved||!item)return;tile.dataset.rotation=(Number(tile.dataset.rotation)+1)%4;moves++;draw();});
+          board.appendChild(tile);
+        }
+        tiles=[...board.querySelectorAll(".connection-tile")];
+        levelName.textContent="УРОВЕНЬ "+String(index+1).padStart(2,"0")+" / "+level.name;
+        levelSize.textContent="СЕТКА "+level.size+" × "+level.size;
+        levelButtons.forEach((b,i)=>b.classList.toggle("is-active",i===index));
+        success.hidden=true;const next=success.querySelector(".connection-next");if(next)next.hidden=true;
+        draw();
+      }
+      levelButtons.forEach(b=>b.addEventListener("click",()=>{const i=Number(b.dataset.level);if(i<=unlocked)load(i);}));
+      reset.addEventListener("click",()=>load(current));
+      load(0);
     })();
   </script>
 

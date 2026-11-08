@@ -78,15 +78,41 @@
 
 
       <section class="player-archive" id="player-archive" hidden>
-        <div class="modules-heading">
-          <span class="section-kicker">ОТКРЫТЫЕ ДЕЛА</span>
-          <span class="modules-note" id="player-archive-count"></span>
+        <div class="desktop-shell">
+          <div class="desktop-toolbar">
+            <div class="desktop-window-title"><span class="desktop-led"></span> ITERUM / РАБОЧАЯ СТАНЦИЯ</div>
+            <div class="desktop-toolbar-right"><span id="desktop-case-label">ДЕЛО ОТКРЫТО</span><span id="player-archive-count"></span></div>
+          </div>
+          <div class="desktop-area">
+            <div class="desktop-icons" aria-label="Приложения">
+              <button class="desktop-icon" type="button" data-open-window="mail-window">
+                <span class="desktop-icon-art mail-art"><span>✉</span></span><span>Почта</span><small id="desktop-mail-badge">ВХОДЯЩИЕ</small>
+              </button>
+              <button class="desktop-icon" type="button" data-open-window="search-window">
+                <span class="desktop-icon-art search-art"><span>⌕</span></span><span>Поиск данных</span><small>ДОСЬЕ</small>
+              </button>
+              <button class="desktop-icon" type="button" data-open-window="materials-window">
+                <span class="desktop-icon-art folder-art"><span>▤</span></span><span>Материалы дела</span><small>АРХИВ</small>
+              </button>
+            </div>
+            <div class="desktop-case-shortcut">
+              <div class="desktop-case-glyph">01</div>
+              <div><span>ТЕКУЩЕЕ ДЕЛО</span><strong id="desktop-case-name">Обстоятельства аварии Ильи</strong><small>ЛИЧНОЕ РАССЛЕДОВАНИЕ</small></div>
+            </div>
+            <div class="desktop-wallpaper-mark">ITERUM</div>
+          </div>
+          <div class="desktop-taskbar">
+            <span class="taskbar-start"><b>I.</b> ITERUM</span>
+            <span class="taskbar-hint">ВЫБЕРИТЕ ПРИЛОЖЕНИЕ НА РАБОЧЕМ СТОЛЕ</span>
+            <span class="taskbar-clock" id="desktop-clock">ЛОКАЛЬНАЯ СИСТЕМА</span>
+          </div>
         </div>
-        <div id="player-case-list" class="player-case-list"></div>
+        <div id="player-case-list" class="player-case-list" hidden></div>
 
-        <section class="player-tool-section" aria-labelledby="search-heading">
+        <section id="search-window" class="player-tool-section desktop-window" aria-labelledby="search-heading" hidden>
           <div class="player-tool-heading">
-            <div><span class="section-kicker">ИНФОРМАЦИОННАЯ СИСТЕМА</span><h2 id="search-heading">Поиск данных</h2></div>
+            <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 02</span><h2 id="search-heading">Поиск данных</h2></div>
+            <button class="window-close" type="button" data-close-window="search-window" aria-label="Закрыть окно">×</button>
           </div>
           <form id="player-search-form" class="player-search-form">
             <label for="player-search-query">ИМЯ, ФАМИЛИЯ ИЛИ КЛЮЧЕВОЕ СЛОВО</label>
@@ -98,17 +124,18 @@
           <div id="player-search-results" class="player-search-results" aria-live="polite"></div>
         </section>
 
-        <section class="player-tool-section" aria-labelledby="mail-heading">
+        <section id="mail-window" class="player-tool-section desktop-window" aria-labelledby="mail-heading" hidden>
           <div class="player-tool-heading">
-            <div><span class="section-kicker">ВНУТРЕННЯЯ КОРРЕСПОНДЕНЦИЯ</span><h2 id="mail-heading">Почта</h2></div>
-            <span class="modules-note" id="player-mail-count"></span>
+            <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 01</span><h2 id="mail-heading">Почта</h2><span class="modules-note" id="player-mail-count"></span></div>
+            <button class="window-close" type="button" data-close-window="mail-window" aria-label="Закрыть окно">×</button>
           </div>
           <div id="player-mail-list" class="player-mail-list"></div>
         </section>
 
-        <section class="player-tool-section" aria-labelledby="materials-heading">
+        <section id="materials-window" class="player-tool-section desktop-window" aria-labelledby="materials-heading" hidden>
           <div class="player-tool-heading">
-            <div><span class="section-kicker">АРХИВ РАССЛЕДОВАНИЯ</span><h2 id="materials-heading">Материалы</h2></div>
+            <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 03</span><h2 id="materials-heading">Материалы дела</h2></div>
+            <button class="window-close" type="button" data-close-window="materials-window" aria-label="Закрыть окно">×</button>
           </div>
           <div id="player-material-list" class="player-material-list"></div>
         </section>
@@ -524,6 +551,35 @@
       } catch {
         playerArchive.hidden = true;
       }
+    }
+
+    const desktopShell = document.querySelector(".desktop-shell");
+    if (desktopShell) {
+      desktopShell.addEventListener("click", event => {
+        const opener = event.target.closest("[data-open-window]");
+        const closer = event.target.closest("[data-close-window]");
+        if (opener) {
+          const win = document.getElementById(opener.dataset.openWindow);
+          if (win) {
+            win.hidden = false;
+            win.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            desktopShell.querySelectorAll(".desktop-icon").forEach(icon => icon.classList.toggle("is-selected", icon === opener));
+          }
+        }
+        if (closer) {
+          const win = document.getElementById(closer.dataset.closeWindow);
+          if (win) win.hidden = true;
+          const related = desktopShell.querySelector('[data-open-window="' + closer.dataset.closeWindow + '"]');
+          if (related) related.classList.remove("is-selected");
+        }
+      });
+      const clock = document.getElementById("desktop-clock");
+      const updateDesktopClock = () => {
+        if (!clock) return;
+        clock.textContent = new Intl.DateTimeFormat("ru-RU", { dateStyle: "medium", timeStyle: "short" }).format(new Date()).toUpperCase();
+      };
+      updateDesktopClock();
+      setInterval(updateDesktopClock, 60000);
     }
 
     playerSearchForm.addEventListener("submit", async event => {

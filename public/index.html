@@ -476,7 +476,8 @@
         const desktopCaseName = document.getElementById("desktop-case-name");
         if (desktopCaseName && data.cases[0]) desktopCaseName.textContent = data.cases[0].title;
         const desktopCaseLabel = document.getElementById("desktop-case-label");
-        if (desktopCaseLabel && data.cases[0]) desktopCaseLabel.textContent = data.cases[0].case_code;
+        const isDraftPreview = isAdminSession && data.materials.some(item => item.is_preview);
+        if (desktopCaseLabel && data.cases[0]) desktopCaseLabel.textContent = isDraftPreview ? "ЧЕРНОВИК / ПРЕДПРОСМОТР" : data.cases[0].case_code;
         for (const item of data.cases) {
           const caseLine = document.createElement("div");
           caseLine.className = "player-case";

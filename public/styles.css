@@ -225,3 +225,158 @@ footer b { color: #9b625c; font-weight: 400; }
   .player-tool-heading { align-items: flex-start; }
   .player-mail-meta { flex-direction: column; gap: 5px; }
 }
+
+
+/* ITERUM visual direction: noir minimalism with a warm detective-office atmosphere */
+:root {
+  --bg: #111211;
+  --panel: #1b1a18;
+  --panel-soft: #24211d;
+  --line: #494238;
+  --muted: #9a9182;
+  --paper: #e2d8c6;
+  --paper-dim: #b6aa96;
+  --red: #87413d;
+}
+html { background: #111211; }
+body {
+  background:
+    radial-gradient(ellipse 520px 420px at 82% 8%, rgba(117, 75, 43, .19), transparent 72%),
+    radial-gradient(ellipse 700px 500px at 8% 35%, rgba(50, 58, 61, .18), transparent 75%),
+    linear-gradient(135deg, #111211 0%, #191816 48%, #121313 100%);
+}
+.grain { opacity: .09; }
+.topbar {
+  height: 82px;
+  padding-inline: max(7vw, 26px);
+  border-bottom-color: rgba(210, 190, 160, .18);
+  background: linear-gradient(90deg, rgba(12,13,13,.92), rgba(25,22,19,.86));
+  backdrop-filter: blur(12px);
+}
+.brand { gap: 15px; }
+.brand-mark {
+  width: 38px; height: 38px;
+  border-color: #806b53;
+  background: linear-gradient(145deg, rgba(131,93,57,.16), transparent);
+}
+.brand-name { letter-spacing: .27em; color: #e7dece; }
+.topbar-right { color: #aaa08f; }
+main { width: min(1120px, calc(100% - 52px)); }
+.intro {
+  min-height: 390px;
+  padding: 82px 0 62px;
+  position: relative;
+  isolation: isolate;
+}
+.intro::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 26px -7vw 20px 36%;
+  background:
+    radial-gradient(ellipse at 72% 18%, rgba(181,126,72,.22), transparent 30%),
+    linear-gradient(115deg, transparent 10%, rgba(33,32,29,.25) 42%, rgba(8,9,9,.6) 100%);
+  border-bottom: 1px solid rgba(210,190,160,.12);
+  pointer-events: none;
+}
+.intro::after {
+  content: "CASE FILE  /  PRIVATE INVESTIGATION";
+  position: absolute;
+  right: 2px;
+  bottom: 39px;
+  color: rgba(190,174,148,.34);
+  font: 8px var(--mono);
+  letter-spacing: .2em;
+}
+.eyebrow { color: #b3a48e; }
+.eyebrow-line { width: 34px; background: #a45a4f; }
+.case-number { margin-top: 42px; color: #9a8c79; }
+h1 { max-width: 760px; font-size: clamp(46px, 7vw, 76px); text-shadow: 0 3px 28px rgba(0,0,0,.5); }
+.intro-copy { color: #b9ad9a; font-size: 14px; }
+.intro-rule { margin-top: 39px; background: linear-gradient(90deg, #76634d, rgba(118,99,77,0)); }
+.intro-rule span { background: #98544b; }
+.section-heading { margin-bottom: 24px; }
+h2 { letter-spacing: -.015em; }
+.archive-stamp { border-color: rgba(139,75,67,.65); color: #c08b7d; background: rgba(88,39,35,.12); }
+.member-summary {
+  border-color: #51483b;
+  background: linear-gradient(105deg, rgba(42,38,32,.88), rgba(24,24,22,.9));
+  box-shadow: 0 12px 35px rgba(0,0,0,.13);
+}
+.case-card {
+  border-color: #665342;
+  background:
+    radial-gradient(ellipse at 90% 0%, rgba(145,99,57,.16), transparent 42%),
+    linear-gradient(120deg, rgba(43,39,33,.98), rgba(23,24,23,.98) 72%);
+  box-shadow: 0 18px 48px rgba(0,0,0,.22);
+}
+.case-card:before {
+  content: "";
+  position: absolute;
+  width: 230px; height: 230px;
+  right: 3%; top: 8px;
+  border: 1px solid rgba(187,157,116,.10);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(187,157,116,.018), 0 0 0 38px rgba(187,157,116,.014);
+  pointer-events: none;
+}
+.case-card:after { color: rgba(216,208,191,.035); letter-spacing: .08em; }
+.case-index { border-color: #665746; background: rgba(13,14,13,.22); }
+.module-card, .player-case, .player-material, .player-search-result, .player-mail-item {
+  border-color: #494237;
+  background: linear-gradient(115deg, rgba(39,36,31,.9), rgba(25,25,23,.92));
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+.module-card:hover, .player-case:hover, .player-material:hover, .player-search-result:hover, .player-mail-item:hover {
+  border-color: #80634d;
+  background: linear-gradient(115deg, rgba(49,42,34,.94), rgba(27,27,25,.95));
+}
+.module-icon { border-color: #665746; color: #c0a98c; }
+.module-card h3, .player-material h3, .player-search-result h3, .player-mail-item h3 { color: #e2d7c5; }
+.module-lock { color: #a48c75; }
+.player-tool-section { border-top-color: #574a3c; }
+.player-search-row input,
+.auth-panel input,
+.admin-form input, .admin-form textarea, .admin-form select {
+  background: rgba(15,16,15,.88);
+  border-color: #554b3e;
+  color: #e3d9c8;
+}
+.player-search-row input:focus,
+.auth-panel input:focus,
+.admin-form input:focus, .admin-form textarea:focus, .admin-form select:focus {
+  border-color: #a77a5b;
+  box-shadow: 0 0 0 2px rgba(167,122,91,.12);
+}
+.admin-mini-button {
+  border-color: #755d48;
+  background: linear-gradient(135deg, #3a3027, #24211d);
+  color: #e0d2bd;
+}
+.admin-mini-button:hover { border-color: #b17b61; background: #453328; }
+.auth-panel, .admin-panel {
+  border-color: #5c4c3d;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(126,83,48,.12), transparent 48%),
+    linear-gradient(135deg, rgba(37,34,29,.97), rgba(22,23,22,.98));
+  box-shadow: 0 18px 48px rgba(0,0,0,.18);
+}
+.auth-submit, .admin-submit {
+  border-color: #98534a;
+  background: linear-gradient(135deg, #713c36, #492b29);
+  color: #f0e5d4;
+  transition: filter .2s ease, transform .2s ease;
+}
+.auth-submit:hover, .admin-submit:hover { filter: brightness(1.18); }
+.auth-switch { color: #c18d7e; }
+.notice { border-color: #4b4135; }
+footer { border-top-color: rgba(216,208,191,.16); }
+@media (max-width: 620px) {
+  main { width: min(100% - 34px, 1120px); }
+  .topbar { padding-inline: 18px; }
+  .intro { min-height: 340px; padding: 62px 0 48px; }
+  .intro::before { inset: 18px -17px 14px 12%; }
+  .intro::after { font-size: 7px; bottom: 26px; }
+  h1 { font-size: clamp(42px, 12vw, 58px); }
+}

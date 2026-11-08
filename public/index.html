@@ -55,10 +55,14 @@
         <span class="member-status" id="database-status">ПРОВЕРКА БАЗЫ…</span>
       </div>
 
-      <section class="available-cases" id="available-cases" aria-label="Доступные дела">
-        <div class="section-heading">
-          <div><p class="section-kicker">АРХИВ РАССЛЕДОВАНИЙ</p><h2>Доступные дела</h2></div>
-          <span class="archive-stamp">СПИСОК ДЕЛ</span>
+      <section class="available-cases" id="available-cases" aria-label="Выбор дела">
+        <div class="case-selection-heading">
+          <div>
+            <p class="section-kicker">АРХИВ РАССЛЕДОВАНИЙ / ДОСТУПНЫЕ МАТЕРИАЛЫ</p>
+            <h2>Выберите дело</h2>
+            <p class="case-selection-copy">Выберите расследование, чтобы открыть рабочую станцию и получить доступ к его материалам.</p>
+          </div>
+          <span class="archive-stamp">ВЫБОР ДЕЛА</span>
         </div>
         <div id="available-case-list" class="available-case-list"><p class="player-empty">Загружаем список дел…</p></div>
       </section>
@@ -548,10 +552,9 @@
           card.append(top, title, description, count, start);
           availableCaseList.append(card);
         }
-        let lastCase = null;
-        try { lastCase = localStorage.getItem("iterum:last-case:" + memberEmail.textContent); } catch {}
+        // После каждой авторизации пользователь явно выбирает дело.
+        // Последнее открытое дело остаётся сохранённым, но не запускается автоматически.
         showCaseList(true);
-        if (lastCase && archiveCases.some(item => item.id === lastCase)) openCase(lastCase);
       } catch {
         availableCaseList.textContent = "Не удалось загрузить список дел. Обновите страницу.";
         showCaseList();

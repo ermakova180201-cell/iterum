@@ -323,6 +323,7 @@
     const playerMailList = document.getElementById("player-mail-list");
     const playerMailCount = document.getElementById("player-mail-count");
     const openedMailIds = new Set();
+    let selectedMailId = null;
 
     const adminMaterialList = document.getElementById("admin-material-list");
     const adminCaseList = document.getElementById("admin-case-list");
@@ -493,56 +494,62 @@
         const desktopMailBadge = document.getElementById("desktop-mail-badge");
         if (desktopMailBadge) desktopMailBadge.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : "ВХОДЯЩИЕ";
         if (!emails.length) {
+          selectedMailId = null;
           const empty = document.createElement("p");
           empty.className = "player-empty";
           empty.textContent = "Входящих сообщений пока нет.";
           playerMailList.append(empty);
         } else {
+          if (!emails.some(item => item.id === selectedMailId)) selectedMailId = emails[0].id;
+          const list = document.createElement("div");
+          list.className = "mail-inbox-list";
+          const reader = document.createElement("article");
+          reader.className = "mail-reader";
           for (const item of emails) {
-            const card = document.createElement("article");
-            card.className = "player-mail-item" + (item.is_read ? " is-read" : " is-unread");
-            const head = document.createElement("div");
-            head.className = "player-mail-meta";
+            const entry = document.createElement("button");
+            entry.type = "button";
+            entry.className = "mail-inbox-entry" + (item.id === selectedMailId ? " is-active" : "") + (!item.is_read ? " is-unread" : "");
             const sender = document.createElement("span");
+            sender.className = "mail-entry-sender";
             sender.textContent = item.sender_name || "Неизвестный отправитель";
             const date = document.createElement("time");
             date.textContent = item.sent_at || "";
-            head.append(sender, date);
-            const subject = document.createElement("h3");
+            const subject = document.createElement("strong");
             subject.textContent = item.title;
-            const address = document.createElement("p");
-            address.className = "player-mail-address";
-            address.textContent = item.sender_address ? "От: " + item.sender_address : "";
-            const summary = document.createElement("p");
-            summary.className = "player-mail-summary";
-            summary.textContent = item.summary || "";
-            const body = document.createElement("div");
-            body.className = "player-material-content";
-            body.hidden = !openedMailIds.has(item.id);
-            body.textContent = item.content || "Содержание письма не добавлено.";
-            const open = document.createElement("button");
-            open.type = "button";
-            open.className = "admin-mini-button";
-            open.textContent = item.is_read ? "ОТКРЫТЬ ПИСЬМО" : "ПРОЧИТАТЬ ПИСЬМО";
-            open.addEventListener("click", async () => {
-              if (body.hidden) {
-                body.hidden = false;
-                openedMailIds.add(item.id);
-              } else {
-                body.hidden = true;
-                openedMailIds.delete(item.id);
-              }
+            const preview = document.createElement("small");
+            preview.textContent = item.summary || "Нет краткого описания";
+            entry.append(sender, date, subject, preview);
+            entry.addEventListener("click", async () => {
+              selectedMailId = item.id;
               if (!item.is_read) {
-                open.disabled = true;
-                try {
-                  await markMaterialRead(item.id);
-                  await loadPlayerArchive();
-                } catch { open.disabled = false; body.hidden = true; openedMailIds.delete(item.id); }
+                try { await markMaterialRead(item.id); } catch { return; }
               }
+              await loadPlayerArchive();
             });
-            card.append(head, subject, address, summary, open, body);
-            playerMailList.append(card);
+            list.append(entry);
           }
+          const selected = emails.find(item => item.id === selectedMailId) || emails[0];
+          const top = document.createElement("div");
+          top.className = "mail-reader-top";
+          const kicker = document.createElement("span");
+          kicker.className = "section-kicker";
+          kicker.textContent = "ВХОДЯЩЕЕ СООБЩЕНИЕ";
+          const date = document.createElement("time");
+          date.textContent = selected.sent_at || "";
+          top.append(kicker, date);
+          const subject = document.createElement("h3");
+          subject.className = "mail-reader-subject";
+          subject.textContent = selected.title;
+          const from = document.createElement("div");
+          from.className = "mail-reader-from";
+          from.textContent = (selected.sender_name || "Неизвестный отправитель") + (selected.sender_address ? "  ·  " + selected.sender_address : "");
+          const divider = document.createElement("div");
+          divider.className = "mail-reader-divider";
+          const body = document.createElement("div");
+          body.className = "mail-reader-body";
+          body.textContent = selected.content || "Содержание письма не добавлено.";
+          reader.append(top, subject, from, divider, body);
+          playerMailList.append(list, reader);
         }
 
         const otherMaterials = data.materials.filter(item => item.material_type !== "email");

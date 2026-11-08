@@ -3453,3 +3453,34 @@ body.is-workstation .connection-art span { font: 29px/1 var(--mono); }
   .connection-board { width:min(100%,285px); padding:10px 15px; gap:5px; }
   .connection-game-bottom { align-items:flex-start; flex-direction:column; }
 }
+
+
+/* Progressive connection puzzle levels */
+.connection-levels {
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin:0 0 12px;
+}
+.connection-level {
+  display:flex; flex-direction:column; align-items:flex-start; gap:4px;
+  padding:9px 11px; border:1px solid rgba(119,164,126,.25);
+  background:rgba(8,17,12,.62); color:#a8c2a8; cursor:pointer;
+  font:12px var(--mono); text-align:left;
+}
+.connection-level span { color:#6f8e73; font:7px var(--mono); letter-spacing:.08em; }
+.connection-level.is-active { border-color:#83ad87; background:rgba(61,99,65,.34); color:#e0eddd; }
+.connection-level:disabled { opacity:.34; cursor:not-allowed; }
+.connection-level:not(:disabled):hover { border-color:#a2c9a2; }
+.connection-level-meta {
+  display:flex; justify-content:space-between; gap:10px; margin:0 0 10px;
+  color:#8eaa91; font:8px var(--mono); letter-spacing:.07em;
+}
+.connection-board { width:min(100%,370px); }
+.connection-board[data-size="4"] { width:min(100%,370px); }
+.connection-board[data-size="5"] { width:min(100%,370px); gap:5px; }
+.connection-board[data-size="5"] .connection-tile { border-color:rgba(119,164,126,.21); }
+.connection-next { margin-top:12px; }
+@media(max-width:620px) {
+  .connection-level { padding:8px 7px; font-size:11px; }
+  .connection-level span { font-size:6px; }
+  .connection-level-meta { font-size:7px; }
+  .connection-board[data-size="5"] { gap:4px; padding:9px 12px; }
+}

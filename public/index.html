@@ -103,7 +103,11 @@
           </div>
           <div class="desktop-taskbar">
             <span class="taskbar-start"><b>I.</b> ITERUM</span>
-            <span class="taskbar-hint">ВЫБЕРИТЕ ПРИЛОЖЕНИЕ НА РАБОЧЕМ СТОЛЕ</span>
+            <nav class="taskbar-apps" aria-label="Открыть приложение">
+              <button type="button" data-open-window="mail-window" title="Почта">✉ <span>Почта</span></button>
+              <button type="button" data-open-window="search-window" title="Поиск данных">⌕ <span>Поиск</span></button>
+              <button type="button" data-open-window="materials-window" title="Материалы дела">▤ <span>Архив</span></button>
+            </nav>
             <span class="taskbar-clock" id="desktop-clock">ЛОКАЛЬНАЯ СИСТЕМА</span>
           </div>
         </div>

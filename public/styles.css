@@ -1387,22 +1387,63 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
 }
 
 
-/* Floating memory fragments on the public access screen */
+/* Night rain behind frosted glass — public access screen only */
 #ambient-network {
   position: fixed;
   inset: 0;
   z-index: 1;
   display: block;
   pointer-events: none;
-  opacity: .9;
+  opacity: .72;
   mix-blend-mode: screen;
 }
 body:has(#workspace:not([hidden])) #ambient-network {
   display: none;
 }
+body:not(:has(#workspace:not([hidden]))) {
+  background: #101516 !important;
+}
+body:not(:has(#workspace:not([hidden])))::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 79% 36%, rgba(105,133,137,.19), transparent 34%),
+    radial-gradient(ellipse at 18% 76%, rgba(130,91,65,.19), transparent 31%),
+    radial-gradient(ellipse at 51% 12%, rgba(67,87,91,.13), transparent 42%),
+    linear-gradient(112deg, rgba(5,10,12,.22), transparent 46%, rgba(3,7,8,.28)),
+    linear-gradient(180deg, #151b1d 0%, #111718 54%, #171817 100%);
+}
+body:not(:has(#workspace:not([hidden])))::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(4,8,9,.30), transparent 30% 72%, rgba(3,7,8,.34)),
+    radial-gradient(ellipse at center, transparent 28%, rgba(0,0,0,.52) 100%);
+}
+body:not(:has(#workspace:not([hidden]))) > .topbar,
+body:not(:has(#workspace:not([hidden]))) > main,
+body:not(:has(#workspace:not([hidden]))) > footer {
+  position: relative;
+  z-index: 2;
+}
+body:not(:has(#workspace:not([hidden]))) .auth-panel {
+  background:
+    linear-gradient(145deg, rgba(28,34,34,.91), rgba(15,20,21,.95)) !important;
+  border-color: rgba(155,169,158,.24);
+  box-shadow:
+    0 28px 85px rgba(0,0,0,.48),
+    0 0 80px rgba(72,104,105,.10),
+    inset 0 1px rgba(255,255,255,.035);
+}
 @media (max-width: 620px) {
-  #ambient-network { opacity: .5; }
+  #ambient-network { opacity: .48; }
 }
 @media (prefers-reduced-motion: reduce) {
-  #ambient-network { opacity: .45; }
+  #ambient-network { opacity: .38; }
 }

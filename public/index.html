@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-22">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-23">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -242,26 +242,6 @@
         <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
       </form>
 
-      <aside class="system-console" id="system-console" aria-label="Системный протокол">
-        <div class="system-console-head">
-          <span><i class="system-console-led"></i> СИСТЕМНЫЙ ПРОТОКОЛ</span>
-          <span class="system-console-live">LIVE / LOCAL NODE</span>
-        </div>
-        <div class="system-console-body">
-          <div class="system-console-log" id="system-console-log" aria-live="polite">
-            <p><time>--:--:--</time><span>ИНИЦИАЛИЗАЦИЯ СРЕДЫ</span><b>OK</b></p>
-            <p><time>--:--:--</time><span>ПРОВЕРКА ЦЕЛОСТНОСТИ ДАННЫХ</span><b>OK</b></p>
-            <p><time>--:--:--</time><span>ОЖИДАНИЕ ИДЕНТИФИКАЦИИ</span><b class="is-pending">WAIT</b></p>
-          </div>
-          <div class="system-console-metrics">
-            <div><span>УЗЕЛ</span><strong>ITERUM—01</strong></div>
-            <div><span>КАНАЛ</span><strong>ЗАЩИЩЁН</strong></div>
-            <div><span>ПАМЯТЬ</span><strong class="system-metric-alert">НЕ ПРОВЕРЕНА</strong></div>
-          </div>
-        </div>
-        <div class="system-console-foot"><span>СЛУЖЕБНЫЙ КАНАЛ АКТИВЕН</span><span id="system-console-state">СЕАНС НЕ ОТКРЫТ</span></div>
-      </aside>
-
       <div class="auth-user" id="auth-user" hidden>
         <p id="auth-user-email"></p>
         <button class="auth-submit" id="auth-logout" type="button">ВЫЙТИ</button>
@@ -378,54 +358,6 @@
       } catch {
         showMessage("Не удалось проверить доступ. Обновите страницу.", true);
       }
-    }
-
-    const systemConsoleLog = document.getElementById("system-console-log");
-    const systemConsoleState = document.getElementById("system-console-state");
-    const systemLogMessages = [
-      ["КОНТУР НАБЛЮДЕНИЯ АКТИВЕН", "OK"],
-      ["ОБНАРУЖЕН ЗАПРОС НА ДОСТУП", "INFO"],
-      ["СВЕРКА ЛОКАЛЬНОГО ПРОФИЛЯ", "RUN"],
-      ["ОБНАРУЖЕН НЕСВЕРЕННЫЙ ФРАГМЕНТ", "WARN"],
-      ["ПОВТОРНАЯ ПРОВЕРКА НЕ ТРЕБУЕТСЯ", "OK"],
-      ["ОЖИДАНИЕ ДЕЙСТВИЯ ПОЛЬЗОВАТЕЛЯ", "WAIT"]
-    ];
-    let systemLogIndex = 0;
-    function addSystemLog(message, status = "INFO") {
-      if (!systemConsoleLog) return;
-      const row = document.createElement("p");
-      const time = document.createElement("time");
-      const label = document.createElement("span");
-      const state = document.createElement("b");
-      time.textContent = new Date().toLocaleTimeString("ru-RU", { hour12: false });
-      label.textContent = message;
-      state.textContent = status;
-      if (status === "WARN" || status === "ERR") state.className = "is-warning";
-      else if (status === "WAIT" || status === "RUN") state.className = "is-pending";
-      row.append(time, label, state);
-      systemConsoleLog.append(row);
-      while (systemConsoleLog.children.length > 4) systemConsoleLog.firstElementChild.remove();
-    }
-    if (systemConsoleLog) {
-      systemConsoleLog.querySelectorAll("time").forEach(node => {
-        node.textContent = new Date().toLocaleTimeString("ru-RU", { hour12: false });
-      });
-      window.setInterval(() => {
-        const [message, status] = systemLogMessages[systemLogIndex % systemLogMessages.length];
-        systemLogIndex += 1;
-        addSystemLog(message, status);
-      }, 6500);
-      document.getElementById("auth-email").addEventListener("focus", () => {
-        addSystemLog("ПОЛЕ ИДЕНТИФИКАТОРА АКТИВИРОВАНО", "RUN");
-      }, { once: true });
-      authSwitch.addEventListener("click", () => {
-        addSystemLog(registering ? "ВОЗВРАТ К ПРОВЕРКЕ ДОСТУПА" : "ПОДГОТОВКА НОВОЙ УЧЁТНОЙ ЗАПИСИ", "INFO");
-        if (systemConsoleState) systemConsoleState.textContent = registering ? "ОЖИДАНИЕ АВТОРИЗАЦИИ" : "РЕЖИМ РЕГИСТРАЦИИ";
-      });
-      authForm.addEventListener("submit", () => {
-        addSystemLog("ПОЛУЧЕН ЗАПРОС НА АУТЕНТИФИКАЦИЮ", "RUN");
-        if (systemConsoleState) systemConsoleState.textContent = "ПРОВЕРКА ДАННЫХ";
-      });
     }
 
     authSwitch.addEventListener("click", () => setMode(!registering));
@@ -1060,112 +992,80 @@
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      let w=0,h=0,dpr=1,raf=0,last=0,pointerX=0,pointerY=0,pointerActive=false;
-      const cabinets = Array.from({length:9},(_,i)=>({
-        side:i%2===0?-1:1, depth:Math.floor(i/2), column:i%3,
-        phase:i*1.73, alert:i===3||i===7
-      }));
+      const glyphs = "アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&*+-=<>/\\";
+      const fragments = [
+        "MEMORY ACCESS DENIED","SUBJECT: ILYA","DATA CORRUPTED",
+        "ITERATION CONTINUES","IDENTITY NOT FOUND","RECALL PROTOCOL",
+        "ERROR 0X04A1","DO NOT TERMINATE","ARCHIVE LOCKED",
+        "WHO IS WATCHING?","RESTORE FAILED","SESSION REPEATED"
+      ];
+      let width=0,height=0,dpr=1,columns=[],raf=0,last=0,frame=0,phraseMarks=[];
       function resize(){
-        w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,1.5);
-        canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
-        canvas.style.width=w+"px";canvas.style.height=h+"px";
+        width=innerWidth;height=innerHeight;dpr=Math.min(devicePixelRatio||1,1.5);
+        canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
+        canvas.style.width=width+"px";canvas.style.height=height+"px";
         ctx.setTransform(dpr,0,0,dpr,0,0);
-      }
-      function path(points,fill,stroke,lineWidth=1){
-        ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
-        ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}
-        if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lineWidth;ctx.stroke();}
-      }
-      function line(points,color,width=1){
-        ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
-        ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
-      }
-      function drawCabinet(side,depth,time,index){
-        const vanishX=w*.5,vanishY=h*.43;
-        const nearX=side<0?0:w, nearTop=h*.08, nearBottom=h*.94;
-        const t=.16+depth*.105;
-        const x=vanishX+(nearX-vanishX)*t;
-        const top=vanishY+(nearTop-vanishY)*t;
-        const bottom=vanishY+(nearBottom-vanishY)*t;
-        const width=Math.abs(nearX-x)*.66;
-        const x2=side<0?x-width:x+width;
-        const farTop=top+(bottom-top)*.035, farBottom=bottom-(bottom-top)*.035;
-        const frontTop=top+(bottom-top)*.11, frontBottom=bottom-(bottom-top)*.1;
-        const left=side<0?x2:x, right=side<0?x:x2;
-        path([[left,frontTop],[right,frontTop+(frontTop-top)*.12],[right,frontBottom],[left,frontBottom-(frontBottom-top)*.05]],
-          "rgba(17,29,34,"+(.32+depth*.035)+")","rgba(132,157,153,.17)",1);
-        const rows=7,cols=3;
-        for(let row=0;row<rows;row++){
-          const y1=frontTop+(frontBottom-frontTop)*row/rows;
-          const y2=frontTop+(frontBottom-frontTop)*(row+1)/rows;
-          for(let col=0;col<cols;col++){
-            const a=col/cols,b=(col+1)/cols;
-            const xa=left+(right-left)*a,xb=left+(right-left)*b;
-            const inset=(y2-y1)*.1;
-            const active=(index*5+row*3+col)%19===0;
-            path([[xa+2,y1+inset],[xb-2,y1+inset],[xb-2,y2-inset],[xa+2,y2-inset]],
-              "rgba(37,49,52,.62)", "rgba(142,161,153,.12)", .8);
-            line([[xa+7,(y1+y2)*.5],[xb-7,(y1+y2)*.5]],"rgba(173,184,169,.13)",.8);
-            const glow=active?(.18+.12*Math.sin(time*.0012+index+row)):0;
-            if(glow>.035){
-              const gx=side<0?xb-11:xa+11,gy=(y1+y2)*.5;
-              ctx.beginPath();ctx.arc(gx,gy,1.5,0,Math.PI*2);
-              ctx.fillStyle=active&&index%3===0?"rgba(183,105,88,"+glow+")":"rgba(129,190,177,"+glow+")";ctx.fill();
-              ctx.beginPath();ctx.arc(gx,gy,6,0,Math.PI*2);
-              ctx.fillStyle="rgba(130,177,166,"+(glow*.12)+")";ctx.fill();
-            }
-          }
-        }
-        line([[left,frontTop],[left,frontBottom],[right,frontBottom],[right,frontTop]],"rgba(175,190,180,.18)",1);
+        const size=width<600?13:15;
+        const count=Math.ceil(width/(size*1.05));
+        columns=Array.from({length:count},(_,i)=>({
+          x:i*size*1.05,
+          y:Math.random()*height/size,
+          speed:.18+Math.random()*.72,
+          size:size+Math.random()*5,
+          bright:Math.random()>.84,
+          tint:Math.random()>.965
+        }));
+        phraseMarks=Array.from({length:9},()=>({
+          x:Math.random()*width,y:Math.random()*height,
+          text:fragments[Math.floor(Math.random()*fragments.length)],
+          alpha:.035+Math.random()*.07,
+          phase:Math.random()*Math.PI*2,
+          red:Math.random()>.78
+        }));
+        ctx.fillStyle="#030907";ctx.fillRect(0,0,width,height);
       }
       function draw(time){
         raf=requestAnimationFrame(draw);
         if(document.hidden)return;
-        if(!reduced&&time-last<32)return;last=time;
-        ctx.clearRect(0,0,w,h);
-        const px=pointerActive&&!reduced?(pointerX-w/2)*.008:0;
-        const py=pointerActive&&!reduced?(pointerY-h/2)*.006:0;
-        const horizonX=w*.5+px,horizonY=h*.43+py;
-        // Deep, almost invisible corridor and its impossible converging architecture.
-        const glow=ctx.createRadialGradient(horizonX,horizonY,0,horizonX,horizonY,Math.max(w,h)*.62);
-        glow.addColorStop(0,"rgba(103,143,137,.12)");glow.addColorStop(.48,"rgba(39,73,76,.055)");glow.addColorStop(1,"rgba(0,0,0,0)");
-        ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
-        path([[0,h*.04],[horizonX,horizonY],[w,h*.04],[w,h*.98],[horizonX,horizonY],[0,h*.98]],"rgba(7,15,19,.18)");
-        for(let i=0;i<6;i++){
-          const t=(i+1)/7;
-          const y=horizonY+(h-horizonY)*t*t;
-          line([[0,y],[w,y]],"rgba(134,155,148,"+(0.025+t*.025)+")",1);
+        if(!reduced&&time-last<42)return;
+        last=time;frame++;
+        ctx.fillStyle="rgba(2,8,6,.17)";
+        ctx.fillRect(0,0,width,height);
+        for(const c of columns){
+          const char=glyphs[Math.floor(Math.random()*glyphs.length)];
+          ctx.font=(c.size|0)+"px 'DM Mono',monospace";
+          ctx.textBaseline="top";
+          const headY=c.y*c.size;
+          ctx.fillStyle=c.tint?"rgba(190,75,65,.82)":c.bright?"rgba(190,231,190,.9)":"rgba(87,170,116,.68)";
+          ctx.shadowColor=c.tint?"rgba(180,52,52,.5)":"rgba(79,210,122,.35)";
+          ctx.shadowBlur=c.bright?9:3;
+          ctx.fillText(char,c.x,headY);
+          ctx.shadowBlur=0;
+          if(Math.random()>.94){
+            ctx.fillStyle="rgba(112,205,139,.16)";
+            ctx.fillText(glyphs[Math.floor(Math.random()*glyphs.length)],c.x,headY-c.size*2);
+          }
+          c.y+=c.speed*(reduced?0.25:1);
+          if(headY>height+30){c.y=-Math.random()*24;c.speed=.18+Math.random()*.72;}
         }
-        // Receding ceiling ribs and floor seams make the archive feel larger than the screen.
-        for(let i=0;i<8;i++){
-          const t=(i+1)/9;
-          const x=horizonX+(0-horizonX)*t;
-          line([[x,horizonY],[x*.78,h*.02]],"rgba(137,157,151,.075)",1);
-          const xr=horizonX+(w-horizonX)*t;
-          line([[xr,horizonY],[w-(w-xr)*.78,h*.02]],"rgba(137,157,151,.075)",1);
+        if(frame%2===0){
+          for(const p of phraseMarks){
+            const pulse=.45+.55*Math.sin(time*.00045+p.phase);
+            ctx.font="9px 'DM Mono',monospace";
+            ctx.fillStyle=p.red?"rgba(188,91,80,"+(p.alpha*pulse)+")":"rgba(137,194,147,"+(p.alpha*pulse)+")";
+            ctx.fillText(p.text,p.x,p.y);
+          }
         }
-        line([[horizonX,horizonY],[0,h*.98]],"rgba(135,156,148,.09)",1);
-        line([[horizonX,horizonY],[w,h*.98]],"rgba(135,156,148,.09)",1);
-        cabinets.forEach((c,i)=>drawCabinet(c.side,c.depth,time,i));
-        // A distant sealed archive bay, deliberately subtle and partly obscured by darkness.
-        const bw=Math.min(w*.12,150),bh=Math.min(h*.28,190);
-        const bx=horizonX-bw/2,by=horizonY-bh*.35;
-        path([[bx,by],[bx+bw,by],[bx+bw,by+bh],[bx,by+bh]],"rgba(12,23,27,.34)","rgba(153,172,160,.16)",1);
-        for(let i=1;i<5;i++)line([[bx+8,by+bh*i/5],[bx+bw-8,by+bh*i/5]],"rgba(151,171,160,.12)",1);
-        const pulse=.25+.12*Math.sin(time*.0007);
-        ctx.fillStyle="rgba(184,105,86,"+pulse+")";ctx.fillRect(bx+bw*.82,by+bh*.12,3,3);
-        // Soft foreground shadows frame the login panel without competing with it.
-        const vignette=ctx.createRadialGradient(w*.5,h*.48,Math.min(w,h)*.12,w*.5,h*.48,Math.max(w,h)*.78);
-        vignette.addColorStop(0,"rgba(0,4,8,0)");vignette.addColorStop(1,"rgba(0,3,7,.78)");
-        ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
+        const vignette=ctx.createRadialGradient(width*.5,height*.48,Math.min(width,height)*.18,width*.5,height*.48,Math.max(width,height)*.78);
+        vignette.addColorStop(0,"rgba(0,0,0,0)");
+        vignette.addColorStop(1,"rgba(0,0,0,.58)");
+        ctx.fillStyle=vignette;ctx.fillRect(0,0,width,height);
       }
       addEventListener("resize",resize,{passive:true});
-      addEventListener("pointermove",e=>{pointerX=e.clientX;pointerY=e.clientY;pointerActive=true;},{passive:true});
-      addEventListener("pointerleave",()=>{pointerActive=false;},{passive:true});
       addEventListener("pagehide",()=>cancelAnimationFrame(raf),{once:true});
       resize();raf=requestAnimationFrame(draw);
     })();
-  </script>t>
+  </script>
 
 
 

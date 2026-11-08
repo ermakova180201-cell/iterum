@@ -1387,7 +1387,7 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
 }
 
 
-/* Visible layered fog for the unauthenticated ITERUM portal */
+/* Futuristic system-access background — login screen only */
 #ambient-network {
   position: fixed;
   inset: 0;
@@ -1395,31 +1395,86 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
   display: block;
   pointer-events: none;
   opacity: 1;
-  mix-blend-mode: normal;
+  mix-blend-mode: screen;
 }
 body:has(#workspace:not([hidden])) #ambient-network { display: none; }
 body:not(:has(#workspace:not([hidden]))) {
-  background: #03090f !important;
+  position: relative;
+  isolation: isolate;
+  background: #050b12 !important;
 }
 body:not(:has(#workspace:not([hidden])))::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% -8%, rgba(92,151,157,.2), transparent 53%),
-    radial-gradient(ellipse at 12% 42%, rgba(23,76,83,.13), transparent 46%),
-    linear-gradient(180deg, #10252b 0%, #091820 34%, #050f17 68%, #02070d 100%);
+    radial-gradient(ellipse at 12% 18%, rgba(24,105,117,.2), transparent 36%),
+    radial-gradient(ellipse at 88% 78%, rgba(104,43,53,.11), transparent 32%),
+    linear-gradient(135deg, #0a1821 0%, #07111a 48%, #080d15 100%);
 }
 body:not(:has(#workspace:not([hidden])))::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background:
-    radial-gradient(ellipse at center, transparent 4%, rgba(0,3,8,.24) 55%, rgba(0,2,6,.68) 100%),
-    linear-gradient(180deg, rgba(0,0,0,.02), rgba(0,0,0,.3));
+    repeating-linear-gradient(0deg, rgba(117,190,190,.018) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 20%, rgba(0,3,8,.48) 100%);
+}
+body:not(:has(#workspace:not([hidden]))) > .topbar,
+body:not(:has(#workspace:not([hidden]))) > main,
+body:not(:has(#workspace:not([hidden]))) > footer {
+  position: relative;
+  z-index: 2;
 }
 body:not(:has(#workspace:not([hidden]))) .auth-panel {
-  background: linear-gradient(145deg, rgba(19,27,27,.9), rgba(8,14,15,.95)) !important;
-  border-color: rgba(143,157,145,.2);
-  box-shadow: 0 28px 90px rgba(0,0,0,.58), 0 0 75px rgba(91,112,101,.07), inset 0 1px rgba(255,255,255,.035);
+  background: linear-gradient(145deg, rgba(10,24,32,.94), rgba(6,13,20,.97)) !important;
+  border-color: rgba(91,174,178,.34);
+  box-shadow:
+    0 28px 90px rgba(0,0,0,.62),
+    0 0 65px rgba(38,137,143,.11),
+    inset 0 1px rgba(168,226,222,.055);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-panel::before {
+  background: #55aeb0 !important;
+  box-shadow: 0 0 14px rgba(76,196,194,.35);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-copy h2 {
+  color: #d8e7e5;
+}
+body:not(:has(#workspace:not([hidden]))) .auth-copy > p:last-child {
+  color: #8fa9aa;
+}
+body:not(:has(#workspace:not([hidden]))) .auth-panel label {
+  color: #b6cecd;
+}
+body:not(:has(#workspace:not([hidden]))) .auth-panel input {
+  color: #e0eeee;
+  border-color: rgba(100,164,167,.3);
+  background: rgba(2,9,15,.72);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-panel input:focus {
+  border-color: rgba(94,202,198,.7);
+  box-shadow: 0 0 0 2px rgba(75,174,174,.1);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-submit {
+  color: #061317;
+  background: linear-gradient(110deg,#79c7c2,#4b9d9e);
+  border-color: rgba(132,219,211,.65);
+  box-shadow: 0 5px 24px rgba(39,151,151,.16);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-switch {
+  color: #91b9b8;
+}
+body:not(:has(#workspace:not([hidden]))) footer {
+  color: rgba(145,185,184,.48);
 }
 @media (max-width: 620px) {
-  #ambient-network { opacity: 1; }
+  #ambient-network { opacity: .82; }
 }
 @media (prefers-reduced-motion: reduce) {
-  #ambient-network { opacity: 1; }
+  #ambient-network { opacity: .9; }
 }

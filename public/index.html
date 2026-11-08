@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-9">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-10">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -992,112 +992,100 @@
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      let w=0,h=0,dpr=1,raf=0,pointer={x:.5,y:.5,tx:.5,ty:.5};
-      function resize(){
-        w=innerWidth; h=innerHeight; dpr=Math.min(devicePixelRatio||1,1.5);
-        canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
-        canvas.style.width=w+"px"; canvas.style.height=h+"px";
-        ctx.setTransform(dpr,0,0,dpr,0,0);
+      let width = 0, height = 0, ratio = 1, frame = 0;
+      let pointerX = .5, pointerY = .5, targetX = .5, targetY = .5;
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       }
-      function stroke(points,color,width=1){
-        ctx.beginPath(); points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
-        ctx.strokeStyle=color; ctx.lineWidth=width; ctx.stroke();
+
+      function draw(time) {
+        frame = requestAnimationFrame(draw);
+        if (document.hidden) return;
+        const t = reduced ? 0 : time * .00012;
+        pointerX += (targetX - pointerX) * .018;
+        pointerY += (targetY - pointerY) * .018;
+        const driftX = (pointerX - .5) * 24;
+        const driftY = (pointerY - .5) * 15;
+        ctx.clearRect(0, 0, width, height);
+
+        const deep = ctx.createLinearGradient(0, 0, width, height);
+        deep.addColorStop(0, "rgba(18,29,31,.12)");
+        deep.addColorStop(.48, "rgba(8,17,20,.06)");
+        deep.addColorStop(1, "rgba(3,9,12,.28)");
+        ctx.fillStyle = deep;
+        ctx.fillRect(0, 0, width, height);
+
+        // Distant, diffused light filtering through a deep layer of water.
+        const lightX = width * (.52 + Math.sin(t * .7) * .035) + driftX;
+        const light = ctx.createRadialGradient(lightX, height * .12 + driftY, 2, lightX, height * .3, height * .9);
+        light.addColorStop(0, "rgba(151,173,160,.16)");
+        light.addColorStop(.28, "rgba(92,126,119,.075)");
+        light.addColorStop(1, "rgba(42,75,75,0)");
+        ctx.fillStyle = light;
+        ctx.fillRect(0, 0, width, height);
+
+        // Broad translucent currents; no recognizable shapes or objects.
+        for (let layer = 0; layer < 7; layer++) {
+          const baseY = height * (.22 + layer * .115);
+          const amplitude = height * (.025 + layer * .006);
+          ctx.beginPath();
+          for (let x = -30; x <= width + 30; x += 18) {
+            const wave = Math.sin(x * .0032 + t * (1.1 + layer * .08) + layer) * amplitude;
+            const second = Math.sin(x * .0015 - t * .65 + layer * 1.7) * amplitude * .7;
+            const y = baseY + wave + second + driftY * (layer / 7);
+            if (x === -30) ctx.moveTo(x + driftX * (layer / 7), y);
+            else ctx.lineTo(x + driftX * (layer / 7), y);
+          }
+          ctx.lineTo(width + 30, height + 20);
+          ctx.lineTo(-30, height + 20);
+          ctx.closePath();
+          const shade = .018 + layer * .004;
+          ctx.fillStyle = layer % 2
+            ? "rgba(91,126,119," + shade + ")"
+            : "rgba(121,145,132," + shade + ")";
+          ctx.fill();
+        }
+
+        // Very soft vertical shafts, blurred into the darkness.
+        for (let ray = 0; ray < 5; ray++) {
+          const x = width * (.18 + ray * .16) + Math.sin(t * .45 + ray) * 26 + driftX * .35;
+          const rayGradient = ctx.createLinearGradient(x, 0, x + 55, height * .82);
+          rayGradient.addColorStop(0, "rgba(168,185,164,0)");
+          rayGradient.addColorStop(.32, "rgba(168,185,164," + (reduced ? ".012" : ".022") + ")");
+          rayGradient.addColorStop(1, "rgba(168,185,164,0)");
+          ctx.fillStyle = rayGradient;
+          ctx.beginPath();
+          ctx.moveTo(x - 12, 0);
+          ctx.lineTo(x + 12, 0);
+          ctx.lineTo(x + 75, height);
+          ctx.lineTo(x + 18, height);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        const vignette = ctx.createRadialGradient(width * .5, height * .48, height * .12, width * .5, height * .48, Math.max(width, height) * .78);
+        vignette.addColorStop(0, "rgba(0,0,0,0)");
+        vignette.addColorStop(1, "rgba(0,0,0,.68)");
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, width, height);
       }
-      function room(time){
-        const t=reduced?0:time;
-        const shift=Math.sin(t*.00017)*4;
-        const cx=w*.51+shift, cy=h*.46;
-        ctx.clearRect(0,0,w,h);
 
-        // A recognizable room, deliberately composed like a film still.
-        const wall=ctx.createLinearGradient(0,0,0,h);
-        wall.addColorStop(0,"rgba(41,47,45,.25)"); wall.addColorStop(1,"rgba(8,12,13,.40)");
-        ctx.fillStyle=wall; ctx.fillRect(0,0,w,h);
-
-        // Left wall and floor perspective.
-        ctx.fillStyle="rgba(2,6,7,.22)";
-        ctx.beginPath();ctx.moveTo(0,h*.08);ctx.lineTo(cx,cy);ctx.lineTo(cx,h*.79);ctx.lineTo(0,h);ctx.closePath();ctx.fill();
-        ctx.fillStyle="rgba(3,6,7,.32)";
-        ctx.beginPath();ctx.moveTo(w,h*.04);ctx.lineTo(cx,cy);ctx.lineTo(cx,h*.79);ctx.lineTo(w,h);ctx.closePath();ctx.fill();
-        stroke([[0,h*.08],[cx,cy],[w,h*.04]],"rgba(185,179,157,.12)");
-        stroke([[0,h],[cx,h*.79],[w,h]],"rgba(185,179,157,.10)");
-        for(let i=1;i<7;i++){
-          const x=w*i/7;
-          stroke([[x,h],[cx+(x-cx)*.08,h*.79]],"rgba(174,168,149,.035)");
-        }
-
-        // Doorway on the far wall; light leaks from a room that should be empty.
-        const dw=Math.min(w*.19,210), dh=h*.48, dx=cx-dw*.5, dy=cy-dh*.12;
-        ctx.fillStyle="rgba(1,4,5,.75)";ctx.fillRect(dx,dy,dw,dh);
-        ctx.fillStyle="rgba(155,119,78,.12)";
-        ctx.fillRect(dx+dw*.08,dy+dh*.08,dw*.84,dh*.88);
-        ctx.fillStyle="rgba(4,8,9,.86)";ctx.fillRect(dx+dw*.16,dy+dh*.08,dw*.68,dh*.92);
-        stroke([[dx,dy+dh],[dx,dy],[dx+dw,dy],[dx+dw,dy+dh]],"rgba(190,174,144,.22)",1.2);
-        const leak=ctx.createRadialGradient(cx,dy+dh*.45,2,cx,dy+dh*.45,dw*1.8);
-        leak.addColorStop(0,"rgba(177,132,84,.16)");leak.addColorStop(1,"rgba(177,132,84,0)");
-        ctx.fillStyle=leak;ctx.fillRect(0,0,w,h);
-
-        // A framed family photograph: the image itself is only an indistinct silhouette.
-        const fx=w*.13, fy=h*.24, fw=Math.min(w*.17,190), fh=h*.27;
-        ctx.fillStyle="rgba(4,7,8,.48)";ctx.fillRect(fx,fy,fw,fh);
-        ctx.strokeStyle="rgba(180,169,145,.22)";ctx.lineWidth=3;ctx.strokeRect(fx,fy,fw,fh);
-        ctx.fillStyle="rgba(96,108,99,.17)";ctx.fillRect(fx+8,fy+8,fw-16,fh-16);
-        ctx.fillStyle="rgba(8,13,13,.38)";
-        ctx.beginPath();ctx.ellipse(fx+fw*.52,fy+fh*.42,fw*.12,fh*.22,0,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.ellipse(fx+fw*.5,fy+fh*.88,fw*.31,fh*.25,0,Math.PI,Math.PI*2);ctx.fill();
-
-        // The mirror shows a second, displaced doorway instead of reflecting the room.
-        const mx=w*.72, my=h*.17, mw=Math.min(w*.19,215), mh=h*.56;
-        ctx.fillStyle="rgba(1,4,5,.5)";ctx.fillRect(mx,my,mw,mh);
-        ctx.strokeStyle="rgba(174,181,171,.24)";ctx.lineWidth=2;ctx.strokeRect(mx,my,mw,mh);
-        const mirror=ctx.createLinearGradient(mx,my,mx+mw,my+mh);
-        mirror.addColorStop(0,"rgba(90,111,108,.13)");mirror.addColorStop(.5,"rgba(8,15,16,.48)");mirror.addColorStop(1,"rgba(138,117,91,.12)");
-        ctx.fillStyle=mirror;ctx.fillRect(mx+5,my+5,mw-10,mh-10);
-        const mdx=mx+mw*.29+Math.sin(t*.00021)*2;
-        ctx.fillStyle="rgba(1,4,5,.75)";ctx.fillRect(mdx,my+mh*.17,mw*.43,mh*.74);
-        stroke([[mdx,my+mh*.91],[mdx,my+mh*.17],[mdx+mw*.43,my+mh*.17],[mdx+mw*.43,my+mh*.91]],"rgba(180,159,125,.17)");
-        // A faint second outline is intentionally offset: the reflection is wrong.
-        if(!reduced){
-          ctx.save();ctx.globalAlpha=.25;ctx.translate(7+Math.sin(t*.0003)*3,0);
-          ctx.strokeStyle="rgba(160,188,178,.22)";ctx.strokeRect(mx+5,my+5,mw-10,mh-10);ctx.restore();
-        }
-
-        // Wall clock with two slightly disagreeing sets of hands.
-        const clockX=w*.48, clockY=h*.18, r=Math.min(25,w*.025);
-        ctx.beginPath();ctx.arc(clockX,clockY,r,0,Math.PI*2);
-        ctx.fillStyle="rgba(6,10,10,.5)";ctx.fill();
-        ctx.strokeStyle="rgba(190,177,149,.22)";ctx.lineWidth=1;ctx.stroke();
-        for(let i=0;i<12;i++){
-          const a=i*Math.PI/6;
-          stroke([[clockX+Math.cos(a)*r*.78,clockY+Math.sin(a)*r*.78],[clockX+Math.cos(a)*r*.9,clockY+Math.sin(a)*r*.9]],"rgba(198,186,158,.35)");
-        }
-        stroke([[clockX,clockY],[clockX+r*.05,clockY-r*.56]],"rgba(211,193,157,.55)",1.4);
-        stroke([[clockX,clockY],[clockX-r*.42,clockY+r*.16]],"rgba(211,193,157,.5)",1.2);
-        stroke([[clockX+2,clockY+1],[clockX+r*.45,clockY+r*.1]],"rgba(159,188,176,.24)",1);
-
-        // The room gently breathes; the cursor shifts the ghost reflection.
-        pointer.x+=(pointer.tx-pointer.x)*.035; pointer.y+=(pointer.ty-pointer.y)*.035;
-        const cursorDx=(pointer.x-.5)*12, cursorDy=(pointer.y-.5)*8;
-        if(!reduced){
-          ctx.save();ctx.globalAlpha=.12;ctx.translate(-cursorDx*.5,cursorDy*.4);
-          stroke([[mx,my],[mx+mw,my],[mx+mw,my+mh]],"rgba(184,196,181,.6)",1);
-          ctx.restore();
-        }
-        const glow=ctx.createRadialGradient(w*.5,h*.45,20,w*.5,h*.45,Math.max(w,h)*.7);
-        glow.addColorStop(0,"rgba(0,0,0,0)");glow.addColorStop(1,"rgba(0,0,0,.62)");
-        ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
-        const grainAlpha=.025;
-        ctx.fillStyle="rgba(196,191,170,"+grainAlpha+")";
-        for(let i=0;i<90;i++){
-          const x=(i*137.5+t*.006)%w, y=(i*83.7+t*.002)%h;
-          ctx.fillRect(x,y,1,1);
-        }
-      }
-      function draw(time){raf=requestAnimationFrame(draw);if(!document.hidden)room(time);}
-      addEventListener("pointermove",e=>{pointer.tx=e.clientX/Math.max(w,1);pointer.ty=e.clientY/Math.max(h,1);},{passive:true});
-      addEventListener("resize",resize,{passive:true});
-      addEventListener("pagehide",()=>cancelAnimationFrame(raf),{once:true});
-      resize();raf=requestAnimationFrame(draw);
+      window.addEventListener("pointermove", event => {
+        targetX = event.clientX / Math.max(width, 1);
+        targetY = event.clientY / Math.max(height, 1);
+      }, { passive: true });
+      window.addEventListener("resize", resize, { passive: true });
+      window.addEventListener("pagehide", () => cancelAnimationFrame(frame), { once: true });
+      resize();
+      frame = requestAnimationFrame(draw);
     })();
   </script>
 

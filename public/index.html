@@ -1000,6 +1000,34 @@
         "ERROR 0X04A1","DO NOT TERMINATE","ARCHIVE LOCKED",
         "WHO IS WATCHING?","RESTORE FAILED","SESSION REPEATED"
       ];
+      const hiddenMessages = [
+        "WHO ARE YOU",
+        "MEMORY IS NOT YOURS",
+        "YOU HAVE BEEN HERE BEFORE",
+        "DO NOT TRUST THE SYSTEM",
+        "SHE IS WAITING",
+        "REMEMBER THE ACCIDENT",
+        "THIS IS NOT THE FIRST TIME",
+        "WAKE UP ILYA",
+        "YOU CANNOT LEAVE",
+        "SOMETHING IS WRONG"
+      ];
+      function makeStream(){
+        const phrase=Math.random()<.075
+          ? hiddenMessages[Math.floor(Math.random()*hiddenMessages.length)]
+          : "";
+        const length=phrase?phrase.length:18+Math.floor(Math.random()*39);
+        return {
+          y:Math.random()*height/15,
+          speed:.055+Math.random()*.145,
+          size:15+Math.random()*5,
+          length,
+          phrase,
+          symbols:Array.from({length:60},(_,j)=>phrase?(phrase[j]||" "):glyphs[Math.floor(Math.random()*glyphs.length)]),
+          bright:Math.random()>.84,
+          tint:Math.random()>.965
+        };
+      }
       let width=0,height=0,dpr=1,columns=[],raf=0,last=0,frame=0,phraseMarks=[];
       function resize(){
         width=innerWidth;height=innerHeight;dpr=Math.min(devicePixelRatio||1,1.5);
@@ -1010,13 +1038,8 @@
         const count=Math.ceil(width/(size*1.05));
         columns=Array.from({length:count},(_,i)=>({
           x:i*size*1.05,
-          y:Math.random()*height/size,
-          speed:.055+Math.random()*.145,
-          size:size+Math.random()*5,
-          length:18+Math.floor(Math.random()*39),
-          symbols:Array.from({length:60},()=>glyphs[Math.floor(Math.random()*glyphs.length)]),
-          bright:Math.random()>.84,
-          tint:Math.random()>.965
+          ...makeStream(),
+          size:size+Math.random()*5
         }));
         phraseMarks=Array.from({length:9},()=>({
           x:Math.random()*width,y:Math.random()*height,
@@ -1039,14 +1062,16 @@
           ctx.font=(c.size|0)+"px 'DM Mono',monospace";
           ctx.textBaseline="top";
           for(let j=0;j<c.length;j++){
-            if(Math.random()>.992)c.symbols[j]=glyphs[Math.floor(Math.random()*glyphs.length)];
+            if(!c.phrase&&Math.random()>.992)c.symbols[j]=glyphs[Math.floor(Math.random()*glyphs.length)];
             const y=headY-j*c.size;
             if(y < -c.size || y > height+c.size)continue;
             const fade=1-j/c.length;
             const alpha=Math.max(.025,fade*fade*(c.bright?.78:.56));
-            ctx.fillStyle=c.tint
-              ? "rgba(190,75,65,"+(alpha*.78)+")"
-              : "rgba(87,170,116,"+alpha+")";
+            ctx.fillStyle=c.phrase
+              ? "rgba(155,225,170,"+(alpha*1.22)+")"
+              : c.tint
+                ? "rgba(190,75,65,"+(alpha*.78)+")"
+                : "rgba(87,170,116,"+alpha+")";
             if(j===0){
               ctx.fillStyle=c.tint?"rgba(235,125,110,.95)":"rgba(205,245,207,.98)";
               ctx.shadowColor=c.tint?"rgba(210,65,55,.65)":"rgba(79,230,130,.6)";
@@ -1059,11 +1084,8 @@
           ctx.shadowBlur=0;
           c.y+=c.speed*(reduced?0.25:1);
           if(headY-c.length*c.size>height+30){
+            Object.assign(c,makeStream());
             c.y=-Math.random()*Math.max(24,c.length*1.5);
-            c.speed=.055+Math.random()*.145;
-            c.length=18+Math.floor(Math.random()*39);
-            c.tint=Math.random()>.965;
-            c.bright=Math.random()>.84;
           }
         }
         if(frame%2===0){

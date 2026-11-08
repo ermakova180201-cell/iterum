@@ -70,11 +70,11 @@ async function handleApi(request, env) {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
     const cases = await env.DB.prepare(
-      "SELECT id, title, case_code, description FROM cases WHERE status = 'active' ORDER BY created_at"
-    ).all();
-    const materials = await env.DB.prepare(
-      "SELECT materials.id, materials.case_id, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id JOIN material_unlocks ON material_unlocks.material_id = materials.id WHERE cases.status = 'active' AND materials.is_published = 1 AND material_unlocks.user_id = ? ORDER BY cases.created_at, materials.release_order, materials.created_at"
+      "SELECT cases.id, cases.title, cases.case_code, cases.description FROM cases JOIN case_access ON case_access.case_id = cases.id WHERE cases.status = 'active' AND case_access.user_id = ? AND case_access.access_status = 'active' ORDER BY cases.created_at"
     ).bind(user.id).all();
+    const materials = await env.DB.prepare(
+      "SELECT materials.id, materials.case_id, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id JOIN case_access ON case_access.case_id = cases.id JOIN material_unlocks ON material_unlocks.material_id = materials.id WHERE cases.status = 'active' AND case_access.user_id = ? AND case_access.access_status = 'active' AND materials.is_published = 1 AND material_unlocks.user_id = ? ORDER BY cases.created_at, materials.release_order, materials.created_at"
+    ).bind(user.id, user.id).all();
     return json({ cases: cases.results || [], materials: materials.results || [] });
   }
 
@@ -95,11 +95,13 @@ async function handleApi(request, env) {
       let body;
       try { body = await request.json(); } catch { return json({ error: "Выберите игрока." }, 400); }
       const userId = String(body.userId || "");
-      const material = await env.DB.prepare("SELECT id, is_published FROM materials WHERE id = ?").bind(unlockRoute[1]).first();
+      const material = await env.DB.prepare("SELECT id, case_id, is_published FROM materials WHERE id = ?").bind(unlockRoute[1]).first();
       if (!material) return json({ error: "Материал не найден." }, 404);
       if (!material.is_published) return json({ error: "Сначала опубликуйте материал." }, 409);
       const targetUser = await env.DB.prepare("SELECT id FROM users WHERE id = ?").bind(userId).first();
       if (!targetUser) return json({ error: "Игрок не найден." }, 404);
+      await env.DB.prepare("INSERT OR IGNORE INTO case_access (user_id, case_id) VALUES (?, ?)")
+        .bind(userId, material.case_id).run();
       await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id) VALUES (?, ?)")
         .bind(userId, material.id).run();
       return json({ ok: true });

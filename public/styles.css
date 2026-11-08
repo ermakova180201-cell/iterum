@@ -1622,3 +1622,21 @@ body.system-deep-scan .system-output { box-shadow:0 0 24px rgba(139,63,58,.1); }
 @media(prefers-reduced-motion:reduce) {
   .ambient-node,.ambient-node span,.ambient-node::before,.ambient-node em { transition:none; }
 }
+
+
+/* Memory shards — quiet, tactile glass fragments for the entry screen */
+#ambient-network { opacity: .96; mix-blend-mode: screen; }
+.ambient-node-layer { display:none !important; }
+body:not(:has(#workspace:not([hidden])))::before {
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(16,54,62,.18), transparent 54%),
+    radial-gradient(ellipse at 12% 18%, rgba(24,105,117,.16), transparent 36%),
+    radial-gradient(ellipse at 88% 78%, rgba(104,43,53,.08), transparent 32%),
+    linear-gradient(135deg, #09151d 0%, #07111a 52%, #080d15 100%);
+}
+@media (max-width:620px) {
+  #ambient-network { opacity:.72; }
+}
+@media (prefers-reduced-motion:reduce) {
+  #ambient-network { opacity:.8; }
+}

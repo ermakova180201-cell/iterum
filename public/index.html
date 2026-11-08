@@ -158,8 +158,15 @@
             <textarea id="material-summary" name="summary" maxlength="1000" rows="2" placeholder="Краткая пометка для архива"></textarea>
             <label for="material-content">СОДЕРЖАНИЕ</label>
             <textarea id="material-content" name="content" maxlength="50000" rows="6" placeholder="Текст материала"></textarea>
-            <label for="material-order">ПОРЯДОК ОТКРЫТИЯ</label>
+            <label for="material-order">ПОРЯДОК ОТОБРАЖЕНИЯ</label>
             <input id="material-order" name="releaseOrder" type="number" min="0" max="100000" value="0" required>
+            <label for="delivery-mode">СПОСОБ ПОСТУПЛЕНИЯ</label>
+            <select id="delivery-mode" name="deliveryMode">
+              <option value="automatic">Автоматически после публикации</option>
+              <option value="triggered">После прочтения другого материала</option>
+            </select>
+            <label for="material-trigger">КАКОЙ МАТЕРИАЛ НУЖНО ПРОЧИТАТЬ</label>
+            <select id="material-trigger" name="triggerMaterialId" disabled><option value="">Сначала выберите дело</option></select>
             <button class="admin-submit" type="submit">СОХРАНИТЬ ЧЕРНОВИК</button>
             <p class="admin-message" id="material-message" role="status"></p>
           </form>
@@ -232,6 +239,8 @@
     const caseMessage = document.getElementById("case-message");
     const materialMessage = document.getElementById("material-message");
     const materialCase = document.getElementById("material-case");
+    const deliveryMode = document.getElementById("delivery-mode");
+    const materialTrigger = document.getElementById("material-trigger");
 
     const adminMaterialList = document.getElementById("admin-material-list");
     const adminCaseList = document.getElementById("admin-case-list");
@@ -382,6 +391,21 @@
             content.className = "player-material-content";
             content.textContent = item.content || "Содержание не добавлено.";
             card.append(type, title, summary, content);
+            const readButton = document.createElement("button");
+            readButton.type = "button";
+            readButton.className = "admin-mini-button";
+            readButton.textContent = item.is_read ? "ПРОЧИТАНО" : "ОТМЕТИТЬ КАК ПРОЧИТАННОЕ";
+            readButton.disabled = Boolean(item.is_read);
+            readButton.addEventListener("click", async () => {
+              readButton.disabled = true;
+              try {
+                await fetch("/api/player/materials/" + encodeURIComponent(item.id) + "/read", { method: "POST", credentials: "same-origin" });
+                await loadPlayerArchive();
+              } catch {
+                readButton.disabled = false;
+              }
+            });
+            card.append(readButton);
             playerMaterialList.append(card);
           }
         }
@@ -427,6 +451,19 @@
         }
 
 
+        materialTrigger.replaceChildren();
+        const triggerPlaceholder = document.createElement("option");
+        triggerPlaceholder.value = "";
+        triggerPlaceholder.textContent = data.materials.length ? "Выберите материал-предусловие" : "Сначала создайте материал";
+        materialTrigger.append(triggerPlaceholder);
+        for (const material of data.materials) {
+          const option = document.createElement("option");
+          option.value = material.id;
+          option.textContent = material.title + " · " + material.case_title;
+          materialTrigger.append(option);
+        }
+        materialTrigger.disabled = deliveryMode.value !== "triggered" || !data.materials.length;
+
         adminCaseList.replaceChildren();
         if (!data.cases.length) {
           const emptyCases = document.createElement("p");
@@ -467,7 +504,7 @@
             const heading = document.createElement("strong");
             heading.textContent = item.title;
             const details = document.createElement("span");
-            details.textContent = item.case_title + " · " + item.material_type + " · порядок " + item.release_order;
+            details.textContent = item.case_title + " · " + item.material_type + " · порядок " + item.release_order + (item.delivery_mode === "triggered" ? " · после прочтения другого материала" : " · автоматически");
             const status = document.createElement("small");
             status.textContent = item.is_published ? "ОПУБЛИКОВАНО" : "ЧЕРНОВИК";
             info.append(heading, details, status);
@@ -529,6 +566,9 @@
         document.getElementById("material-summary").value = item.summary;
         document.getElementById("material-content").value = item.content;
         document.getElementById("material-order").value = item.release_order;
+        deliveryMode.value = item.delivery_mode || "automatic";
+        materialTrigger.value = item.trigger_material_id || "";
+        materialTrigger.disabled = deliveryMode.value !== "triggered";
         document.getElementById("material-form-title").textContent = "Редактирование материала";
         materialForm.querySelector("button[type=submit]").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
         materialForm.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -553,8 +593,17 @@
       }
     }
 
+    deliveryMode.addEventListener("change", () => {
+      materialTrigger.disabled = deliveryMode.value !== "triggered";
+    });
+
+    materialCase.addEventListener("change", () => {
+      materialTrigger.value = "";
+    });
+
     function resetMaterialEditor() {
       materialForm.reset();
+      materialTrigger.disabled = true;
       document.getElementById("material-id").value = "";
       document.getElementById("material-form-title").textContent = "Новый материал";
       materialForm.querySelector("button[type=submit]").textContent = "СОХРАНИТЬ ЧЕРНОВИК";
@@ -578,7 +627,9 @@
             title: form.get("title"),
             summary: form.get("summary"),
             content: form.get("content"),
-            releaseOrder: Number(form.get("releaseOrder"))
+            releaseOrder: Number(form.get("releaseOrder")),
+            deliveryMode: form.get("deliveryMode"),
+            triggerMaterialId: form.get("triggerMaterialId")
           })
         });
         resetMaterialEditor();

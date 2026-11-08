@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-6">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-7">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -991,19 +991,23 @@
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
+
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const pointer = { x: -1000, y: -1000, active: false };
-      let width = 0, height = 0, dpr = 1, frame = 0;
-      const fragments = [
-        { x:.12, y:.25, w:150, h:104, r:-.12, kind:0, phase:.2 },
-        { x:.82, y:.19, w:118, h:154, r:.10, kind:1, phase:1.7 },
-        { x:.19, y:.76, w:176, h:112, r:.08, kind:2, phase:2.8 },
-        { x:.84, y:.75, w:145, h:100, r:-.09, kind:0, phase:4.1 },
-        { x:.48, y:.12, w:94, h:128, r:.04, kind:1, phase:5.2 },
-        { x:.53, y:.88, w:122, h:82, r:-.06, kind:2, phase:3.4 },
-        { x:.06, y:.52, w:88, h:126, r:.14, kind:1, phase:2.1 },
-        { x:.94, y:.48, w:94, h:124, r:-.13, kind:0, phase:5.7 }
-      ];
+      let width = 0, height = 0, dpr = 1, frame = 0, drops = [];
+
+      function makeDrop(randomY = true) {
+        const long = Math.random() < .18;
+        return {
+          x: Math.random() * width,
+          y: randomY ? Math.random() * height : -30,
+          length: long ? 34 + Math.random() * 68 : 8 + Math.random() * 24,
+          speed: long ? .18 + Math.random() * .28 : .35 + Math.random() * .65,
+          drift: -.08 - Math.random() * .18,
+          alpha: .035 + Math.random() * .09,
+          width: Math.random() < .15 ? 1.1 : .55,
+          phase: Math.random() * Math.PI * 2
+        };
+      }
 
       function resize() {
         width = window.innerWidth;
@@ -1014,97 +1018,50 @@
         canvas.style.width = width + "px";
         canvas.style.height = height + "px";
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
-
-      function drawFragment(f, time) {
-        const drift = reducedMotion ? 0 : Math.sin(time * .00022 + f.phase) * 9;
-        const px = f.x * width + drift;
-        const py = f.y * height + Math.cos(time * .00018 + f.phase) * 7;
-        const dx = pointer.x - px, dy = pointer.y - py;
-        const distance = Math.hypot(dx, dy);
-        const focus = pointer.active && !reducedMotion
-          ? Math.max(0, 1 - distance / 230) : 0;
-        const alpha = .12 + focus * .52;
-
-        ctx.save();
-        ctx.translate(px, py);
-        ctx.rotate(f.r + (reducedMotion ? 0 : Math.sin(time * .00012 + f.phase) * .012));
-        ctx.globalAlpha = alpha;
-        ctx.shadowColor = "rgba(0,0,0,.45)";
-        ctx.shadowBlur = 24;
-        ctx.fillStyle = "rgba(30,31,30,.72)";
-        ctx.fillRect(-f.w/2, -f.h/2, f.w, f.h);
-        ctx.shadowBlur = 0;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(-f.w/2+5, -f.h/2+5, f.w-10, f.h-10);
-        ctx.clip();
-        const grad = ctx.createLinearGradient(-f.w/2, -f.h/2, f.w/2, f.h/2);
-        grad.addColorStop(0, f.kind===1 ? "#77736b" : "#555b58");
-        grad.addColorStop(.48, f.kind===2 ? "#7b655b" : "#353a39");
-        grad.addColorStop(1, "#171a1a");
-        ctx.fillStyle = grad;
-        ctx.fillRect(-f.w/2, -f.h/2, f.w, f.h);
-
-        ctx.globalAlpha = .35 + focus * .3;
-        if (f.kind === 0) {
-          ctx.fillStyle = "#171b1b";
-          ctx.fillRect(-f.w*.42, -f.h*.05, f.w*.84, f.h*.62);
-          ctx.fillStyle = "#a49a87";
-          ctx.fillRect(-f.w*.34, -f.h*.32, f.w*.68, f.h*.025);
-          ctx.fillRect(-f.w*.28, -f.h*.25, f.w*.025, f.h*.42);
-          ctx.fillRect(f.w*.18, -f.h*.25, f.w*.025, f.h*.42);
-          ctx.fillStyle = "#8d8170";
-          ctx.fillRect(-f.w*.4, f.h*.31, f.w*.8, f.h*.018);
-        } else if (f.kind === 1) {
-          ctx.fillStyle = "#171a19";
-          ctx.beginPath();
-          ctx.ellipse(0, -f.h*.05, f.w*.13, f.h*.22, 0, 0, Math.PI*2);
-          ctx.fill();
-          ctx.fillRect(-f.w*.17, f.h*.12, f.w*.34, f.h*.42);
-          ctx.fillStyle = "#b0a28e";
-          ctx.fillRect(-f.w*.36, f.h*.34, f.w*.72, f.h*.018);
-        } else {
-          ctx.strokeStyle = "#c1b39b";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(-f.w*.42, -f.h*.18);
-          ctx.lineTo(f.w*.38, -f.h*.18);
-          ctx.moveTo(-f.w*.42, -f.h*.02);
-          ctx.lineTo(f.w*.12, -f.h*.02);
-          ctx.moveTo(-f.w*.42, f.h*.14);
-          ctx.lineTo(f.w*.3, f.h*.14);
-          ctx.stroke();
-          ctx.fillStyle = "#191d1c";
-          ctx.fillRect(f.w*.2, f.h*.22, f.w*.18, f.h*.18);
-        }
-        ctx.restore();
-
-        ctx.strokeStyle = "rgba(211,197,171," + (.12 + focus*.45) + ")";
-        ctx.lineWidth = .7;
-        ctx.strokeRect(-f.w/2, -f.h/2, f.w, f.h);
-        ctx.fillStyle = "rgba(222,210,190," + (.25 + focus*.45) + ")";
-        ctx.font = "7px monospace";
-        ctx.fillText("MEMORY / 0" + (fragments.indexOf(f)+1), -f.w/2+8, f.h/2-8);
-        ctx.restore();
+        drops = Array.from({ length: Math.min(105, Math.round(width / 12)) }, () => makeDrop());
       }
 
       function draw(time) {
         frame = requestAnimationFrame(draw);
         if (document.hidden) return;
         ctx.clearRect(0, 0, width, height);
-        fragments.forEach(f => drawFragment(f, reducedMotion ? 0 : time));
+
+        // Rain on a distant pane of glass: deliberately quiet and out of focus.
+        for (const drop of drops) {
+          const shimmer = reducedMotion ? 1 : .82 + Math.sin(time * .00045 + drop.phase) * .18;
+          const gradient = ctx.createLinearGradient(drop.x, drop.y, drop.x + drop.drift * drop.length, drop.y + drop.length);
+          gradient.addColorStop(0, "rgba(190,197,190,0)");
+          gradient.addColorStop(.35, "rgba(190,197,190," + drop.alpha * shimmer + ")");
+          gradient.addColorStop(1, "rgba(190,197,190,0)");
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = drop.width;
+          ctx.beginPath();
+          ctx.moveTo(drop.x, drop.y);
+          ctx.lineTo(drop.x + drop.drift * drop.length, drop.y + drop.length);
+          ctx.stroke();
+
+          if (!reducedMotion) {
+            drop.y += drop.speed;
+            drop.x += drop.drift * .12;
+            if (drop.y - drop.length > height) Object.assign(drop, makeDrop(false));
+          }
+        }
+
+        // A few soft beads of water catch the distant light.
+        if (!reducedMotion) {
+          ctx.fillStyle = "rgba(204,199,183,.10)";
+          for (let i = 0; i < 9; i++) {
+            const x = (i * 173 + time * .003) % (width + 20);
+            const y = (i * 97 + Math.sin(time * .00018 + i) * 18) % height;
+            ctx.beginPath();
+            ctx.ellipse(x, y, 1, 2.2, -.15, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
       }
 
-      window.addEventListener("pointermove", event => {
-        pointer.x = event.clientX;
-        pointer.y = event.clientY;
-        pointer.active = true;
-      }, { passive:true });
-      window.addEventListener("pointerleave", () => { pointer.active = false; }, { passive:true });
-      window.addEventListener("resize", resize, { passive:true });
-      window.addEventListener("pagehide", () => cancelAnimationFrame(frame), { once:true });
+      window.addEventListener("resize", resize, { passive: true });
+      window.addEventListener("pagehide", () => cancelAnimationFrame(frame), { once: true });
       resize();
       frame = requestAnimationFrame(draw);
     })();

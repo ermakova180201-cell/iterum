@@ -171,7 +171,8 @@
             <label for="material-case">ДЕЛО</label>
             <select id="material-case" name="caseId" required><option value="">Сначала создайте дело</option></select>
             <label for="material-type">ТИП МАТЕРИАЛА</label>
-            <select id="material-type" name="type">
+            <select id="material-type" name="type" required>
+              <option value="" disabled selected>Выберите тип материала</option>
               <option value="email">Письмо</option>
               <option value="publication">Публикация</option>
               <option value="document">Документ</option>

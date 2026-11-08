@@ -174,7 +174,7 @@
           authForm.reset();
           setMode(false);
           await refreshAuth();
-          showMessage(registering ? "Учётная запись создана." : "Вход выполнен.");
+          showMessage(wasRegistering ? "Учётная запись создана." : "Вход выполнен.");
         }
       } catch {
         showMessage("Не удалось связаться с сервером. Попробуйте ещё раз.", true);

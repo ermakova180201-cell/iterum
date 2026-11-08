@@ -66,6 +66,54 @@ async function handleApi(request, env) {
   }
 
 
+  const materialFilesRoute = url.pathname.match(/^\/api\/player\/materials\/([a-f0-9]+)\/files$/);
+  if (request.method === "GET" && materialFilesRoute) {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    const materialId = materialFilesRoute[1];
+    const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
+    const material = await env.DB.prepare(
+      "SELECT m.id, m.case_id, m.is_published, m.delivery_mode, c.status AS case_status FROM materials m JOIN cases c ON c.id = m.case_id WHERE m.id = ?"
+    ).bind(materialId).first();
+    if (!material) return json({ error: "Материал не найден." }, 404);
+    if (!isAdmin && (material.is_published !== 1 || material.case_status !== "active")) return json({ error: "Материал недоступен." }, 403);
+    if (!isAdmin && material.delivery_mode === "triggered") {
+      const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ?").bind(user.id, materialId).first();
+      if (!unlocked) return json({ error: "Материал ещё не открыт." }, 403);
+    }
+    const files = await env.DB.prepare("SELECT id, file_name, content_type, file_size, created_at FROM material_files WHERE material_id = ? ORDER BY created_at").bind(materialId).all();
+    return json({ files: files.results || [], is_preview: isAdmin && (material.is_published !== 1 || material.case_status !== "active") });
+  }
+
+  const privateFileRoute = url.pathname.match(/^\/api\/material-files\/([a-f0-9]+)$/);
+  if (request.method === "GET" && privateFileRoute) {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    const file = await env.DB.prepare(
+      "SELECT f.id, f.object_key, f.file_name, f.content_type, m.id AS material_id, m.is_published, m.delivery_mode, c.status AS case_status FROM material_files f JOIN materials m ON m.id = f.material_id JOIN cases c ON c.id = m.case_id WHERE f.id = ?"
+    ).bind(privateFileRoute[1]).first();
+    if (!file) return json({ error: "Файл не найден." }, 404);
+    const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
+    if (!isAdmin && (file.is_published !== 1 || file.case_status !== "active")) return json({ error: "Файл недоступен." }, 403);
+    if (!isAdmin && file.delivery_mode === "triggered") {
+      const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ?").bind(user.id, file.material_id).first();
+      if (!unlocked) return json({ error: "Файл ещё не открыт." }, 403);
+    }
+    if (!env.FILES) return json({ error: "Хранилище файлов ещё не подключено." }, 503);
+    const object = await env.FILES.get(file.object_key);
+    if (!object) return json({ error: "Файл отсутствует в хранилище." }, 404);
+    const safeName = file.file_name.replace(/[\r\n"]/g, "_");
+    return new Response(object.body, {
+      headers: {
+        "content-type": file.content_type,
+        "content-disposition": "inline; filename*=UTF-8''" + encodeURIComponent(safeName),
+        "cache-control": "private, no-store",
+        "x-content-type-options": "nosniff",
+        "content-security-policy": "default-src 'none'; sandbox"
+      }
+    });
+  }
+
   const playerReadRoute = url.pathname.match(/^\/api\/player\/materials\/([a-f0-9]+)\/read$/);
   if (request.method === "POST" && playerReadRoute) {
     const user = await currentUser(request, env);
@@ -158,6 +206,54 @@ async function handleApi(request, env) {
       await env.DB.prepare("UPDATE cases SET status = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?")
         .bind(body.status, caseStatusRoute[1]).run();
       return json({ ok: true, status: body.status });
+    }
+
+    const uploadFilesRoute = url.pathname.match(/^\/api\/admin\/materials\/([a-f0-9]+)\/files$/);
+    if (request.method === "POST" && uploadFilesRoute) {
+      if (!env.FILES) return json({ error: "Хранилище файлов ещё не подключено." }, 503);
+      const materialId = uploadFilesRoute[1];
+      const material = await env.DB.prepare("SELECT id FROM materials WHERE id = ?").bind(materialId).first();
+      if (!material) return json({ error: "Материал не найден." }, 404);
+      let form;
+      try { form = await request.formData(); } catch { return json({ error: "Не удалось прочитать выбранные файлы." }, 400); }
+      const uploads = form.getAll("files").filter(file => file && typeof file.arrayBuffer === "function" && file.size > 0);
+      if (!uploads.length) return json({ error: "Выберите хотя бы один файл." }, 400);
+      if (uploads.length > 8) return json({ error: "За один раз можно добавить не более 8 файлов." }, 400);
+      const allowed = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp", "image/gif", "audio/mpeg", "audio/wav", "audio/ogg"]);
+      for (const file of uploads) {
+        if (!allowed.has(file.type)) return json({ error: "Поддерживаются PDF, JPG, PNG, WEBP, GIF, MP3, WAV и OGG." }, 400);
+        if (file.size > 15 * 1024 * 1024) return json({ error: "Размер одного файла не должен превышать 15 МБ." }, 400);
+      }
+      const saved = [];
+      for (const file of uploads) {
+        const id = randomToken(16);
+        const originalName = String(file.name || "attachment").replace(/[\r\n]/g, "_").slice(0, 180);
+        const objectKey = "materials/" + materialId + "/" + id;
+        await env.FILES.put(objectKey, file.stream(), {
+          httpMetadata: { contentType: file.type },
+          customMetadata: { originalName }
+        });
+        try {
+          await env.DB.prepare(
+            "INSERT INTO material_files (id, material_id, object_key, file_name, content_type, file_size) VALUES (?, ?, ?, ?, ?, ?)"
+          ).bind(id, materialId, objectKey, originalName, file.type, file.size).run();
+        } catch (error) {
+          await env.FILES.delete(objectKey);
+          throw error;
+        }
+        saved.push({ id, file_name: originalName, content_type: file.type, file_size: file.size });
+      }
+      return json({ ok: true, files: saved });
+    }
+
+    const deleteFileRoute = url.pathname.match(/^\/api\/admin\/material-files\/([a-f0-9]+)$/);
+    if (request.method === "DELETE" && deleteFileRoute) {
+      if (!env.FILES) return json({ error: "Хранилище файлов ещё не подключено." }, 503);
+      const file = await env.DB.prepare("SELECT id, object_key FROM material_files WHERE id = ?").bind(deleteFileRoute[1]).first();
+      if (!file) return json({ error: "Файл не найден." }, 404);
+      await env.FILES.delete(file.object_key);
+      await env.DB.prepare("DELETE FROM material_files WHERE id = ?").bind(file.id).run();
+      return json({ ok: true });
     }
 
     const materialRoute = url.pathname.match(/^\/api\/admin\/materials\/([a-f0-9]+)(?:\/(publish))?$/);

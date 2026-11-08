@@ -178,6 +178,9 @@ async function handleApi(request, env) {
         if (!existing) return json({ error: "Материал не найден." }, 404);
         await env.DB.prepare("UPDATE materials SET is_published = ? WHERE id = ?")
           .bind(body.published ? 1 : 0, materialId).run();
+        if (body.published) {
+          await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id) SELECT user_id, ? FROM player_material_reads WHERE material_id = (SELECT trigger_material_id FROM materials WHERE id = ?) AND (SELECT delivery_mode FROM materials WHERE id = ?) = 'triggered'").bind(materialId, materialId, materialId).run();
+        }
         return json({ ok: true, published: body.published });
       }
     }

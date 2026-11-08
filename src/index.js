@@ -70,11 +70,11 @@ async function handleApi(request, env) {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
     const cases = await env.DB.prepare(
-      "SELECT cases.id, cases.title, cases.case_code, cases.description FROM cases JOIN case_access ON case_access.case_id = cases.id WHERE cases.status = 'active' AND case_access.user_id = ? AND case_access.access_status = 'active' ORDER BY cases.created_at"
-    ).bind(user.id).all();
+      "SELECT id, title, case_code, description FROM cases WHERE status = 'active' ORDER BY created_at"
+    ).all();
     const materials = await env.DB.prepare(
-      "SELECT materials.id, materials.case_id, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id JOIN case_access ON case_access.case_id = cases.id JOIN material_unlocks ON material_unlocks.material_id = materials.id WHERE cases.status = 'active' AND case_access.user_id = ? AND case_access.access_status = 'active' AND materials.is_published = 1 AND material_unlocks.user_id = ? ORDER BY cases.created_at, materials.release_order, materials.created_at"
-    ).bind(user.id, user.id).all();
+      "SELECT materials.id, materials.case_id, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id WHERE cases.status = 'active' AND materials.is_published = 1 ORDER BY cases.created_at, materials.release_order, materials.created_at"
+    ).all();
     return json({ cases: cases.results || [], materials: materials.results || [] });
   }
 
@@ -83,28 +83,6 @@ async function handleApi(request, env) {
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
     if (user.email.toLowerCase() !== ADMIN_EMAIL) {
       return json({ error: "Доступ к панели администратора запрещён." }, 403);
-    }
-
-    if (request.method === "GET" && url.pathname === "/api/admin/users") {
-      const users = await env.DB.prepare("SELECT id, email, created_at FROM users ORDER BY created_at").all();
-      return json({ users: users.results || [] });
-    }
-
-    const unlockRoute = url.pathname.match(/^\/api\/admin\/materials\/([a-f0-9]+)\/unlock$/);
-    if (request.method === "POST" && unlockRoute) {
-      let body;
-      try { body = await request.json(); } catch { return json({ error: "Выберите игрока." }, 400); }
-      const userId = String(body.userId || "");
-      const material = await env.DB.prepare("SELECT id, case_id, is_published FROM materials WHERE id = ?").bind(unlockRoute[1]).first();
-      if (!material) return json({ error: "Материал не найден." }, 404);
-      if (!material.is_published) return json({ error: "Сначала опубликуйте материал." }, 409);
-      const targetUser = await env.DB.prepare("SELECT id FROM users WHERE id = ?").bind(userId).first();
-      if (!targetUser) return json({ error: "Игрок не найден." }, 404);
-      await env.DB.prepare("INSERT OR IGNORE INTO case_access (user_id, case_id) VALUES (?, ?)")
-        .bind(userId, material.case_id).run();
-      await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id) VALUES (?, ?)")
-        .bind(userId, material.id).run();
-      return json({ ok: true });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/overview") {
@@ -117,20 +95,6 @@ async function handleApi(request, env) {
       return json({ cases: cases.results || [], materials: materials.results || [] });
     }
 
-
-    const caseAccessRoute = url.pathname.match(/^\/api\/admin\/cases\/([a-f0-9]+)\/access$/);
-    if (request.method === "POST" && caseAccessRoute) {
-      let body;
-      try { body = await request.json(); } catch { return json({ error: "Выберите игрока." }, 400); }
-      const userId = String(body.userId || "");
-      const targetCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseAccessRoute[1]).first();
-      if (!targetCase) return json({ error: "Дело не найдено." }, 404);
-      const targetUser = await env.DB.prepare("SELECT id FROM users WHERE id = ?").bind(userId).first();
-      if (!targetUser) return json({ error: "Игрок не найден." }, 404);
-      await env.DB.prepare("INSERT OR IGNORE INTO case_access (user_id, case_id) VALUES (?, ?)")
-        .bind(userId, targetCase.id).run();
-      return json({ ok: true });
-    }
 
     const caseStatusRoute = url.pathname.match(/^\/api\/admin\/cases\/([a-f0-9]+)\/status$/);
     if (request.method === "POST" && caseStatusRoute) {

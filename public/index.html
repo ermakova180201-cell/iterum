@@ -992,119 +992,101 @@
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const digits = "0123456789".repeat(5);
-      const glyphs = digits + "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZアイウエオカキクケコサシスセソタチツテトナニヌネノ#$%&*+-=<>/";
-      const fragments = [
-        "СТРОГО КОНФИДЕНЦИАЛЬНО",
-        "ДОСТУП ОГРАНИЧЕН",
-        "ТОЛЬКО ДЛЯ СЛУЖЕБНОГО ПОЛЬЗОВАНИЯ",
-        "НЕ ДЛЯ ПУБЛИЧНОГО ДОСТУПА",
-        "КОПИРОВАНИЕ ЗАПРЕЩЕНО",
-        "ВНИМАНИЕ: ЗАКРЫТАЯ ИНФОРМАЦИЯ"
-      ];
-      const hiddenMessages = [
-        "СТРОГО КОНФИДЕНЦИАЛЬНО",
-        "ДОСТУП ОГРАНИЧЕН",
-        "ТОЛЬКО ДЛЯ СЛУЖЕБНОГО ПОЛЬЗОВАНИЯ",
-        "НЕ ДЛЯ ПУБЛИЧНОГО ДОСТУПА",
-        "КОПИРОВАНИЕ ЗАПРЕЩЕНО",
-        "ВНИМАНИЕ: ЗАКРЫТАЯ ИНФОРМАЦИЯ"
-      ];
-      function makeStream(){
-        const phrase=Math.random()<.075
-          ? hiddenMessages[Math.floor(Math.random()*hiddenMessages.length)]
-          : "";
-        const length=phrase?phrase.length:18+Math.floor(Math.random()*39);
-        return {
-          y:Math.random()*height/15,
-          speed:.055+Math.random()*.145,
-          size:15+Math.random()*5,
-          length,
-          phrase,
-          symbols:Array.from({length:60},(_,j)=>phrase?(phrase[phrase.length-1-j]||" "):glyphs[Math.floor(Math.random()*glyphs.length)]),
-          bright:Math.random()>.84,
-          tint:Math.random()>.965
-        };
-      }
-      let width=0,height=0,dpr=1,columns=[],raf=0,last=0,frame=0,phraseMarks=[];
+      const mono = "'DM Mono',monospace";
+      let width=0,height=0,dpr=1,raf=0,last=0,scan=0,nodes=[],signals=[];
+      const labels=["CASE INDEX","MEMORY TRACE","ARCHIVE NODE","SIGNAL STATUS","RECORD ACCESS","SYSTEM LOG"];
+      const warnings=["ACCESS RESTRICTED","RECORD SEALED","DATA INTEGRITY CHECK"];
       function resize(){
         width=innerWidth;height=innerHeight;dpr=Math.min(devicePixelRatio||1,1.5);
         canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
         canvas.style.width=width+"px";canvas.style.height=height+"px";
         ctx.setTransform(dpr,0,0,dpr,0,0);
-        const size=width<600?13:15;
-        const count=Math.ceil(width/(size*1.05));
-        columns=Array.from({length:count},(_,i)=>({
-          x:i*size*1.05,
-          ...makeStream(),
-          size:size+Math.random()*5
+        nodes=Array.from({length:18},(_,i)=>({
+          x:width*(.07+Math.random()*.86),y:height*(.12+Math.random()*.78),
+          r:1+Math.random()*1.5,phase:Math.random()*Math.PI*2,
+          label:labels[i%labels.length]
         }));
-        phraseMarks=Array.from({length:9},()=>({
-          x:Math.random()*width,y:Math.random()*height,
-          text:fragments[Math.floor(Math.random()*fragments.length)],
-          alpha:.035+Math.random()*.07,
-          phase:Math.random()*Math.PI*2,
-          red:Math.random()>.78
+        signals=Array.from({length:7},(_,i)=>({
+          x:width*(.04+Math.random()*.88),y:height*(.12+Math.random()*.76),
+          text:warnings[i%warnings.length],phase:Math.random()*Math.PI*2
         }));
-        ctx.fillStyle="#030907";ctx.fillRect(0,0,width,height);
+      }
+      function line(x1,y1,x2,y2,color="rgba(107,163,129,.11)",w=1){
+        ctx.strokeStyle=color;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
       }
       function draw(time){
         raf=requestAnimationFrame(draw);
         if(document.hidden)return;
         if(!reduced&&time-last<42)return;
-        last=time;frame++;
-        ctx.fillStyle="rgba(2,8,6,.17)";
-        ctx.fillRect(0,0,width,height);
-        for(const c of columns){
-          const headY=c.y*c.size;
-          ctx.font=(c.size|0)+"px 'DM Mono',monospace";
-          ctx.textBaseline="top";
-          for(let j=0;j<c.length;j++){
-            if(!c.phrase&&Math.random()>.992)c.symbols[j]=glyphs[Math.floor(Math.random()*glyphs.length)];
-            const y=headY-j*c.size;
-            if(y < -c.size || y > height+c.size)continue;
-            const fade=1-j/c.length;
-            const alpha=Math.max(.025,fade*fade*(c.bright?.78:.56));
-            ctx.fillStyle=c.phrase
-              ? "rgba(235,82,72,"+(alpha*1.3)+")"
-              : c.tint
-                ? "rgba(190,75,65,"+(alpha*.78)+")"
-                : "rgba(87,170,116,"+alpha+")";
-            if(j===0){
-              ctx.fillStyle=c.phrase
-                ? "rgba(255,105,95,.98)"
-                : c.tint
-                  ? "rgba(235,125,110,.95)"
-                  : "rgba(205,245,207,.98)";
-              ctx.shadowColor=c.phrase
-                ? "rgba(230,55,50,.8)"
-                : c.tint
-                  ? "rgba(210,65,55,.65)"
-                  : "rgba(79,230,130,.6)";
-              ctx.shadowBlur=9;
-            }else{
-              ctx.shadowBlur=0;
-            }
-            ctx.fillText(c.symbols[j],c.x,y);
-          }
-          ctx.shadowBlur=0;
-          c.y+=c.speed*(reduced?0.25:1);
-          if(headY-c.length*c.size>height+30){
-            Object.assign(c,makeStream());
-            c.y=-Math.random()*Math.max(24,c.length*1.5);
+        last=time;scan=(scan+(reduced?.12:.42))%(height+180);
+        ctx.clearRect(0,0,width,height);
+        ctx.font="8px "+mono;
+        // Fine technical grid, fading toward the centre.
+        const step=width<600?48:64;
+        for(let x=0;x<width;x+=step) line(x,0,x,height,"rgba(91,151,115,.045)");
+        for(let y=0;y<height;y+=step) line(0,y,width,y,"rgba(91,151,115,.04)");
+        // Quiet framing marks and calibration rulers.
+        const inset=width<600?18:34;
+        line(inset,92,inset,height-42,"rgba(103,165,126,.12)");
+        line(width-inset,92,width-inset,height-42,"rgba(103,165,126,.12)");
+        for(let y=112;y<height-42;y+=24){
+          line(inset-3,y,inset+3,y,"rgba(119,175,137,.18)");
+          line(width-inset-3,y,width-inset+3,y,"rgba(119,175,137,.18)");
+        }
+        // Sparse data panels at the edges, never behind the centre of the form.
+        const panelW=Math.min(210,width*.24);
+        const leftX=inset+12,rightX=width-inset-panelW-12;
+        const topY=Math.max(118,height*.2);
+        function panel(x,y,w,title,side){
+          if(w<95)return;
+          ctx.strokeStyle="rgba(103,163,126,.16)";ctx.lineWidth=1;
+          ctx.strokeRect(x,y,w,92);
+          ctx.fillStyle="rgba(122,177,139,.46)";ctx.fillText(title,x+9,y+14);
+          line(x+8,y+21,x+w-8,y+21,"rgba(103,163,126,.16)");
+          for(let k=0;k<4;k++){
+            const yy=y+34+k*13,barW=w*(.24+((k*17+side*11)%53)/100);
+            ctx.fillStyle="rgba(105,160,122,"+(.13+k*.025)+")";
+            ctx.fillRect(x+9,yy,barW,2);
+            ctx.fillStyle="rgba(147,179,151,.32)";
+            ctx.fillText(["IDX 04","TRACE 2A","NODE 17","SYNC 08"][k],x+w-48,yy+2);
           }
         }
-        if(frame%2===0){
-          for(const p of phraseMarks){
-            const pulse=.45+.55*Math.sin(time*.00045+p.phase);
-            ctx.font="9px 'DM Mono',monospace";
-            ctx.fillStyle="rgba(188,65,58,"+(p.alpha*pulse)+")";
-            ctx.fillText(p.text,p.x,p.y);
+        if(width>760){
+          panel(leftX,topY,panelW,"ARCHIVE / STATUS",1);
+          panel(rightX,topY+118,panelW,"SIGNAL / TRACE",2);
+          panel(leftX,height*.69,panelW,"RECORD / 025",3);
+        }
+        // Connected points and faint traces.
+        for(let i=0;i<nodes.length;i++){
+          const n=nodes[i],pulse=.55+.45*Math.sin(time*.00035+n.phase);
+          const next=nodes[(i+4)%nodes.length];
+          if(i%3===0) line(n.x,n.y,next.x,next.y,"rgba(91,164,126,"+(.045*pulse)+")");
+          ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+          ctx.fillStyle="rgba(143,202,155,"+(.22*pulse)+")";ctx.fill();
+          if(i%5===0&&width>760){
+            ctx.fillStyle="rgba(145,181,150,"+(.25*pulse)+")";
+            ctx.fillText(n.label,n.x+7,n.y-5);
           }
         }
-        const vignette=ctx.createRadialGradient(width*.5,height*.48,Math.min(width,height)*.18,width*.5,height*.48,Math.max(width,height)*.78);
+        // Red restricted-data markers, intentionally rare and understated.
+        for(const p of signals){
+          const pulse=.55+.45*Math.sin(time*.00028+p.phase);
+          ctx.fillStyle="rgba(191,91,79,"+(.16*pulse)+")";
+          ctx.fillText(p.text,p.x,p.y);
+          line(p.x,p.y+5,p.x+Math.min(84,width*.12),p.y+5,"rgba(184,83,72,"+(.11*pulse)+")");
+        }
+        // A slow scanning line gives the scene a sense of an active workstation.
+        const scanY=(scan-90)%(height+180);
+        const grad=ctx.createLinearGradient(0,scanY-34,0,scanY+34);
+        grad.addColorStop(0,"rgba(91,181,119,0)");
+        grad.addColorStop(.5,"rgba(91,181,119,.055)");
+        grad.addColorStop(1,"rgba(91,181,119,0)");
+        ctx.fillStyle=grad;ctx.fillRect(0,scanY-34,width,68);
+        line(0,scanY,width,scanY,"rgba(113,190,132,.10)");
+        // Soft vignette keeps the login panel visually dominant.
+        const vignette=ctx.createRadialGradient(width*.5,height*.48,Math.min(width,height)*.2,width*.5,height*.48,Math.max(width,height)*.78);
         vignette.addColorStop(0,"rgba(0,0,0,0)");
-        vignette.addColorStop(1,"rgba(0,0,0,.58)");
+        vignette.addColorStop(1,"rgba(0,0,0,.48)");
         ctx.fillStyle=vignette;ctx.fillRect(0,0,width,height);
       }
       addEventListener("resize",resize,{passive:true});

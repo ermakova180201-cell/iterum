@@ -845,3 +845,95 @@ footer { border-top-color: rgba(216,208,191,.16); }
 .case-start-button:hover,.all-cases-button:hover { background:rgba(190,170,125,.1); }
 .desktop-toolbar { flex-wrap:wrap; }
 .all-cases-button { margin-left:auto; padding:8px 12px; }
+
+
+/* Immersive full-screen investigation workstation */
+body.is-workstation {
+  overflow: hidden;
+  background: #171a18;
+}
+body.is-workstation > .topbar,
+body.is-workstation > main > .intro,
+body.is-workstation #workspace > .section-heading,
+body.is-workstation #workspace > .member-summary,
+body.is-workstation #available-cases,
+body.is-workstation > footer {
+  display: none !important;
+}
+body.is-workstation > main {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+body.is-workstation #workspace {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: 0;
+  margin: 0;
+}
+body.is-workstation #player-archive {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+body.is-workstation .desktop-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+body.is-workstation .desktop-toolbar {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 5px 18px;
+}
+body.is-workstation .desktop-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+body.is-workstation .desktop-taskbar {
+  flex: 0 0 auto;
+}
+@media (max-width: 620px) {
+  body.is-workstation .desktop-toolbar {
+    gap: 8px;
+    padding: 7px 10px;
+  }
+  body.is-workstation .desktop-window-title {
+    font-size: 8px;
+  }
+  body.is-workstation .desktop-toolbar-right {
+    width: 100%;
+    justify-content: flex-end;
+    font-size: 7px;
+  }
+  body.is-workstation .desktop-area {
+    min-height: 0;
+    padding: 18px 12px;
+  }
+  body.is-workstation .desktop-icons {
+    grid-template-columns: repeat(2, 88px);
+    gap: 10px;
+    width: 190px;
+  }
+  body.is-workstation .desktop-icon {
+    width: 88px;
+    min-height: 98px;
+  }
+  body.is-workstation .desktop-case-shortcut {
+    right: 14px;
+    bottom: 22px;
+    min-width: 0;
+    max-width: 48%;
+    padding: 10px;
+  }
+  body.is-workstation .desktop-case-shortcut strong {
+    font-size: 12px;
+  }
+}

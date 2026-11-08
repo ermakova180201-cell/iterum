@@ -1385,3 +1385,24 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
     0 0 70px rgba(112,65,57,.09),
     inset 0 1px rgba(255,255,255,.035);
 }
+
+
+/* Interactive cursor-reactive network on the public access screen */
+#ambient-network {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+  opacity: .78;
+  mix-blend-mode: screen;
+}
+body:has(#workspace:not([hidden])) #ambient-network {
+  display: none;
+}
+@media (max-width: 620px) {
+  #ambient-network { opacity: .5; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #ambient-network { opacity: .45; }
+}

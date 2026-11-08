@@ -288,6 +288,7 @@
     const playerSearchResults = document.getElementById("player-search-results");
     const playerMailList = document.getElementById("player-mail-list");
     const playerMailCount = document.getElementById("player-mail-count");
+    const openedMailIds = new Set();
 
     const adminMaterialList = document.getElementById("admin-material-list");
     const adminCaseList = document.getElementById("admin-case-list");
@@ -412,7 +413,6 @@
         playerCaseList.replaceChildren();
         playerMaterialList.replaceChildren();
         playerMailList.replaceChildren();
-        playerSearchResults.replaceChildren();
         if (!data.cases.length) return;
         playerArchiveCount.textContent = data.materials.length + " МАТЕРИАЛОВ";
         for (const item of data.cases) {
@@ -455,18 +455,26 @@
             summary.textContent = item.summary || "";
             const body = document.createElement("div");
             body.className = "player-material-content";
-            body.hidden = true;
+            body.hidden = !openedMailIds.has(item.id);
             body.textContent = item.content || "Содержание письма не добавлено.";
             const open = document.createElement("button");
             open.type = "button";
             open.className = "admin-mini-button";
             open.textContent = item.is_read ? "ОТКРЫТЬ ПИСЬМО" : "ПРОЧИТАТЬ ПИСЬМО";
             open.addEventListener("click", async () => {
-              body.hidden = !body.hidden;
+              if (body.hidden) {
+                body.hidden = false;
+                openedMailIds.add(item.id);
+              } else {
+                body.hidden = true;
+                openedMailIds.delete(item.id);
+              }
               if (!item.is_read) {
                 open.disabled = true;
-                try { await markMaterialRead(item.id); await loadPlayerArchive(); }
-                catch { open.disabled = false; body.hidden = true; }
+                try {
+                  await markMaterialRead(item.id);
+                  await loadPlayerArchive();
+                } catch { open.disabled = false; body.hidden = true; openedMailIds.delete(item.id); }
               }
             });
             card.append(head, subject, address, summary, open, body);

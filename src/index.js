@@ -89,10 +89,10 @@ async function handleApi(request, env) {
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
     const query = (url.searchParams.get("q") || "").trim();
     if (query.length < 2) return json({ results: [] });
-    const pattern = "%" + query.replace(/[\\%_]/g, "\\  if (request.method === "GET" && url.pathname === "/api/player/archive") {") + "%";
+    const needle = query.toLocaleLowerCase();
     const results = await env.DB.prepare(
-      "SELECT m.id, m.case_id, c.title AS case_title, m.title, m.summary, m.content, EXISTS(SELECT 1 FROM player_material_reads r WHERE r.user_id = ? AND r.material_id = m.id) AS is_read FROM materials m JOIN cases c ON c.id = m.case_id WHERE c.status = 'active' AND m.is_published = 1 AND m.is_searchable = 1 AND (m.delivery_mode = 'automatic' OR EXISTS(SELECT 1 FROM material_unlocks u WHERE u.user_id = ? AND u.material_id = m.id)) AND (m.title LIKE ? ESCAPE '\\\\' OR m.summary LIKE ? ESCAPE '\\\\' OR m.content LIKE ? ESCAPE '\\\\') ORDER BY m.release_order, m.created_at LIMIT 30"
-    ).bind(user.id, user.id, pattern, pattern, pattern).all();
+      "SELECT m.id, m.case_id, c.title AS case_title, m.title, m.summary, m.content, EXISTS(SELECT 1 FROM player_material_reads r WHERE r.user_id = ? AND r.material_id = m.id) AS is_read FROM materials m JOIN cases c ON c.id = m.case_id WHERE c.status = 'active' AND m.is_published = 1 AND m.is_searchable = 1 AND (m.delivery_mode = 'automatic' OR EXISTS(SELECT 1 FROM material_unlocks u WHERE u.user_id = ? AND u.material_id = m.id)) AND (instr(lower(m.title), ?) > 0 OR instr(lower(m.summary), ?) > 0 OR instr(lower(m.content), ?) > 0) ORDER BY m.release_order, m.created_at LIMIT 30"
+    ).bind(user.id, user.id, needle, needle, needle).all();
     return json({ results: results.results || [] });
   }
 

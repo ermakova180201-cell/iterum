@@ -51,7 +51,10 @@ async function handleApi(request, env) {
   const url = new URL(request.url);
   if (request.method === "GET" && url.pathname === "/api/me") {
     const user = await currentUser(request, env);
-    return json({ authenticated: !!user, user: user ? { email: user.email } : null });
+    if (!user) return json({ authenticated: false, user: null });
+    // A lightweight read confirms that the Worker can reach the migrated D1 schema.
+    await env.DB.prepare("SELECT COUNT(*) AS total FROM cases").first();
+    return json({ authenticated: true, user: { email: user.email }, databaseConnected: true });
   }
 
   if (request.method === "POST" && (url.pathname === "/api/register" || url.pathname === "/api/login")) {

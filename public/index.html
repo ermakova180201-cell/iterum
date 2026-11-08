@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=desktop-help-shortcut-01">
+  <link rel="stylesheet" href="/styles.css?v=system-diagnostics-01">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -87,6 +87,10 @@
                 <span class="desktop-icon-art log-art" aria-hidden="true"><span class="log-paper"></span></span>
                 <span class="icon-caption">Системный архив</span>
               </button>
+              <button class="desktop-icon" type="button" data-open-window="diagnostics-window" aria-label="Самодиагностика" title="Самодиагностика">
+                <span class="desktop-icon-art diagnostics-art" aria-hidden="true"><span>⌁</span></span>
+                <span class="icon-caption">Самодиагностика</span>
+              </button>
             </div>
             <button class="desktop-icon desktop-help-shortcut" type="button" data-open-window="help-window" aria-label="Помощь" title="Помощь">
               <span class="desktop-icon-art folder-art help-art" aria-hidden="true"><span class="help-question">?</span></span>
@@ -160,7 +164,36 @@
             <p><strong>Поиск данных</strong> — поиск сведений и зацепок.</p>
             <p><strong>Материалы дела</strong> — изучение доступных документов и улик.</p>
             <p><strong>Системный архив</strong> — журнал событий текущего сеанса.</p>
+            <p><strong>Самодиагностика</strong> — проверка состояния компонентов системы.</p>
             <p>Чтобы открыть приложение, нажмите на его значок. Окна можно перемещать за верхнюю панель, а закрыть — кнопкой ×.</p>
+          </div>
+        </section>
+
+        <section id="diagnostics-window" class="player-tool-section desktop-window diagnostics-window" aria-labelledby="diagnostics-heading" hidden>
+          <div class="player-tool-heading window-drag-handle">
+            <div><span class="section-kicker">СИСТЕМНОЕ ПРИЛОЖЕНИЕ / 05</span><h2 id="diagnostics-heading">Самодиагностика системы</h2></div>
+            <button class="window-close" type="button" data-close-window="diagnostics-window" aria-label="Закрыть окно">×</button>
+          </div>
+          <p class="diagnostics-intro">Проверка целостности компонентов и согласованности данных текущего сеанса.</p>
+          <div class="diagnostics-console">
+            <div class="diagnostics-console-top"><span>ITERUM / DIAGNOSTIC TOOL</span><span id="diagnostics-run-state">ОЖИДАНИЕ</span></div>
+            <div class="diagnostics-scanline" aria-hidden="true"><span id="diagnostics-scan-progress"></span></div>
+            <p id="diagnostics-message" class="diagnostics-message" aria-live="polite">Проверка ещё не запускалась. Для начала нажмите кнопку ниже.</p>
+          </div>
+          <div id="diagnostics-results" class="diagnostics-results" hidden>
+            <div class="diagnostics-metric"><span>Целостность данных</span><strong>98,7%</strong><i><b style="width:98.7%"></b></i></div>
+            <div class="diagnostics-metric"><span>Стабильность памяти</span><strong>94,2%</strong><i><b style="width:94.2%"></b></i></div>
+            <div class="diagnostics-metric"><span>Синхронизация</span><strong>100%</strong><i><b style="width:100%"></b></i></div>
+            <div class="diagnostics-metric"><span>Контроль процессов</span><strong>87,5%</strong><i><b style="width:87.5%"></b></i></div>
+            <div class="diagnostics-warning">
+              <span class="diagnostics-warning-label">ОБНАРУЖЕНО ОТКЛОНЕНИЕ · SYS-0041</span>
+              <strong>Несоответствие данных</strong>
+              <p>Контрольная сумма одного из сегментов не совпадает с предыдущей записью. Источник изменения не определён.</p>
+            </div>
+          </div>
+          <div class="diagnostics-actions">
+            <button type="button" class="admin-mini-button" id="diagnostics-run">НАЧАТЬ ПРОВЕРКУ</button>
+            <span id="diagnostics-footnote">Проверка не изменяет материалы дела.</span>
           </div>
         </section>
 
@@ -1155,6 +1188,52 @@
         });
         observer.observe(mailBadge, { childList: true, characterData: true, subtree: true });
       }
+    })();
+  </script>
+
+  <script>
+    (() => {
+      const runButton = document.getElementById("diagnostics-run");
+      const stateNode = document.getElementById("diagnostics-run-state");
+      const messageNode = document.getElementById("diagnostics-message");
+      const progressNode = document.getElementById("diagnostics-scan-progress");
+      const resultsNode = document.getElementById("diagnostics-results");
+      const footnoteNode = document.getElementById("diagnostics-footnote");
+      if (!runButton || !stateNode || !messageNode || !progressNode || !resultsNode) return;
+      let completedRuns = 0;
+      const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+      runButton.addEventListener("click", async () => {
+        if (runButton.disabled) return;
+        runButton.disabled = true;
+        runButton.textContent = "ВЫПОЛНЯЕТСЯ…";
+        resultsNode.hidden = true;
+        progressNode.style.width = "0%";
+        progressNode.parentElement.classList.add("is-scanning");
+        stateNode.textContent = "СКАНИРОВАНИЕ";
+        messageNode.textContent = "Инициализация диагностического модуля…";
+        footnoteNode.textContent = "Пожалуйста, дождитесь завершения проверки.";
+        const steps = [
+          ["Проверка доступности системных компонентов…", "28%"],
+          ["Сверка контрольных сумм и журналов…", "61%"],
+          ["Анализ целостности данных…", "100%"]
+        ];
+        for (const [message, progress] of steps) {
+          await wait(650);
+          messageNode.textContent = message;
+          progressNode.style.width = progress;
+        }
+        await wait(450);
+        completedRuns += 1;
+        progressNode.parentElement.classList.remove("is-scanning");
+        stateNode.textContent = "ЗАВЕРШЕНО С ОТКЛОНЕНИЕМ";
+        messageNode.textContent = completedRuns === 1
+          ? "Проверка завершена. Обнаружено одно отклонение, требующее внимания."
+          : "Повторная проверка завершена. Отклонение SYS-0041 сохраняется.";
+        resultsNode.hidden = false;
+        footnoteNode.textContent = "Результат сохранён в рамках текущего сеанса.";
+        runButton.disabled = false;
+        runButton.textContent = "ПОВТОРИТЬ ПРОВЕРКУ";
+      });
     })();
   </script>
 

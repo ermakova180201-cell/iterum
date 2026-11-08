@@ -326,6 +326,7 @@
     const playerMaterialList = document.getElementById("player-material-list");
     const playerArchiveCount = document.getElementById("player-archive-count");
     let registering = false;
+    let isAdminSession = false;
 
     function showMessage(message, error = false) {
       authMessage.textContent = message;
@@ -358,6 +359,7 @@
           authForm.hidden = true;
           authUser.hidden = false;
           authUserEmail.textContent = "Вы вошли как " + data.user.email;
+          isAdminSession = Boolean(data.isAdmin);
           adminPanel.hidden = !data.isAdmin;
           adminSetupNote.hidden = data.adminConfigured || data.isAdmin;
 
@@ -365,6 +367,7 @@
           if (data.isAdmin) await loadAdminOverview();
         } else {
           workspace.hidden = true;
+          isAdminSession = false;
           adminPanel.hidden = true;
           adminSetupNote.hidden = true;
           topbarStatus.textContent = "ОЖИДАНИЕ АВТОРИЗАЦИИ";
@@ -438,11 +441,31 @@
         const response = await fetch("/api/player/archive", { credentials: "same-origin" });
         if (!response.ok) throw new Error("Не удалось загрузить архив.");
         const data = await response.json();
-        playerArchive.hidden = !data.cases.length;
+        playerArchive.hidden = !data.cases.length && !isAdminSession;
         playerCaseList.replaceChildren();
         playerMaterialList.replaceChildren();
         playerMailList.replaceChildren();
-        if (!data.cases.length) return;
+        if (!data.cases.length) {
+          if (isAdminSession) {
+            playerArchiveCount.textContent = "ПРЕДПРОСМОТР";
+            document.getElementById("desktop-case-label").textContent = "ЧЕРНОВИК / НЕ ОПУБЛИКОВАНО";
+            document.getElementById("desktop-case-name").textContent = "Дело пока не опубликовано";
+            document.getElementById("desktop-mail-badge").textContent = "ПОКА ПУСТО";
+            const mailEmpty = document.createElement("p");
+            mailEmpty.className = "player-empty";
+            mailEmpty.textContent = "Почта пока пуста. Сообщения появятся здесь после публикации материалов дела.";
+            playerMailList.append(mailEmpty);
+            const materialEmpty = document.createElement("p");
+            materialEmpty.className = "player-empty";
+            materialEmpty.textContent = "Материалы появятся здесь после публикации дела и открытия первых документов.";
+            playerMaterialList.append(materialEmpty);
+            const searchEmpty = document.createElement("p");
+            searchEmpty.className = "player-empty";
+            searchEmpty.textContent = "Поиск данных станет доступен, когда в деле появятся опубликованные досье.";
+            playerSearchResults.replaceChildren(searchEmpty);
+          }
+          return;
+        }
         playerArchiveCount.textContent = data.materials.length + " МАТЕРИАЛОВ";
         const desktopCaseName = document.getElementById("desktop-case-name");
         if (desktopCaseName && data.cases[0]) desktopCaseName.textContent = data.cases[0].title;

@@ -109,13 +109,15 @@ async function handleApi(request, env) {
     let materials = await env.DB.prepare(
       "SELECT materials.id, materials.case_id, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at, materials.sender_name, materials.sender_address, materials.sent_at, materials.is_published, 0 AS is_preview, EXISTS(SELECT 1 FROM player_material_reads r WHERE r.user_id = ? AND r.material_id = materials.id) AS is_read FROM materials JOIN cases ON cases.id = materials.case_id WHERE cases.status = 'active' AND materials.is_published = 1 AND (materials.delivery_mode = 'automatic' OR EXISTS(SELECT 1 FROM material_unlocks u WHERE u.user_id = ? AND u.material_id = materials.id)) ORDER BY cases.created_at, materials.release_order, materials.created_at"
     ).bind(user.id, user.id).all();
-    if (isAdmin && !(cases.results || []).length) {
-      cases = await env.DB.prepare(
+    if (isAdmin) {
+      const draftCases = await env.DB.prepare(
         "SELECT id, title, case_code, description FROM cases WHERE status = 'draft' ORDER BY created_at DESC"
       ).all();
-      materials = await env.DB.prepare(
+      const draftMaterials = await env.DB.prepare(
         "SELECT materials.id, materials.case_id, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at, materials.sender_name, materials.sender_address, materials.sent_at, materials.is_published, 1 AS is_preview, 1 AS is_read FROM materials JOIN cases ON cases.id = materials.case_id WHERE cases.status = 'draft' ORDER BY cases.created_at DESC, materials.release_order, materials.created_at"
       ).all();
+      cases = { results: [...(cases.results || []), ...(draftCases.results || [])] };
+      materials = { results: [...(materials.results || []), ...(draftMaterials.results || [])] };
     }
     return json({ cases: cases.results || [], materials: materials.results || [] });
   }

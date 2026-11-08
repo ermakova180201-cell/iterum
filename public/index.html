@@ -992,32 +992,22 @@
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Deep-water volume: slowly advecting suspended matter, soft light shafts and drifting particles.
-      const map = document.createElement("canvas");
-      const mapCtx = map.getContext("2d");
-      if (!mapCtx) return;
-      const mw = 300, mh = 170;
-      map.width = mw;
-      map.height = mh;
-      const image = mapCtx.createImageData(mw, mh);
-      const pixels = image.data;
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       let width = 0, height = 0, ratio = 1, frame = 0, lastFrame = 0;
-      let pointerX = .5, pointerY = .5, targetX = .5, targetY = .5;
+      const signals = Array.from({ length: 34 }, (_, i) => ({
+        x: ((i * 37) % 97) / 100,
+        y: ((i * 61) % 89) / 100,
+        length: 24 + (i % 5) * 17,
+        phase: i * 1.73,
+        speed: .00012 + (i % 4) * .000045
+      }));
+      const panels = [
+        {x:.055,y:.19,w:.19,h:.17,label:"NETWORK / 01"},
+        {x:.755,y:.16,w:.18,h:.22,label:"MEMORY / LINK"},
+        {x:.07,y:.72,w:.22,h:.13,label:"ARCHIVE STATUS"},
+        {x:.79,y:.68,w:.15,h:.16,label:"SIGNAL / 04"}
+      ];
 
-      function hash(ix, iy, seed) {
-        const n = Math.sin(ix * 127.1 + iy * 311.7 + seed * 74.7) * 43758.5453;
-        return n - Math.floor(n);
-      }
-      function fade(v) { return v * v * (3 - 2 * v); }
-      function noise(x, y, seed) {
-        const ix = Math.floor(x), iy = Math.floor(y);
-        const fx = fade(x - ix), fy = fade(y - iy);
-        const a = hash(ix, iy, seed), b = hash(ix + 1, iy, seed);
-        const c = hash(ix, iy + 1, seed), d = hash(ix + 1, iy + 1, seed);
-        const top = a + (b - a) * fx, bottom = c + (d - c) * fx;
-        return top + (bottom - top) * fy;
-      }
       function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
@@ -1029,112 +1019,96 @@
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       }
 
-      const particles = Array.from({ length: 58 }, (_, i) => ({
-        x: hash(i, 3, 41), y: hash(i, 9, 73),
-        size: .35 + hash(i, 12, 19) * .9,
-        speed: .0007 + hash(i, 17, 29) * .0015,
-        drift: (hash(i, 22, 31) - .5) * .0007,
-        alpha: .08 + hash(i, 28, 37) * .19
-      }));
+      function line(x1,y1,x2,y2,alpha) {
+        ctx.strokeStyle = "rgba(91,190,190," + alpha + ")";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      }
 
       function draw(time) {
         frame = requestAnimationFrame(draw);
         if (document.hidden) return;
-        if (!reduced && time - lastFrame < 42) return;
+        if (!reduced && time - lastFrame < 38) return;
         lastFrame = time;
-        const t = reduced ? 0 : time * .000035;
-        pointerX += (targetX - pointerX) * .004;
-        pointerY += (targetY - pointerY) * .004;
-        const drift = (pointerX - .5) * .16;
+        const t = reduced ? 0 : time;
+        ctx.clearRect(0,0,width,height);
 
-        for (let y = 0; y < mh; y++) {
-          const ny = y / mh;
-          for (let x = 0; x < mw; x++) {
-            const nx = x / mw;
-            const warpA = (noise(nx * 2.1 + t * .22, ny * 2.8 - t * .13, 5) - .5) * .75;
-            const warpB = (noise(nx * 3.7 - t * .16, ny * 2.0 + t * .18, 13) - .5) * .42;
-            const sx = nx * 3.4 + warpA + drift + t * .12;
-            const sy = ny * 4.8 + warpB - t * .19;
-            const large = noise(sx, sy, 17);
-            const middle = noise(sx * 2.3 + t * .06, sy * 1.8, 23);
-            const fine = noise(sx * 5.1 - t * .08, sy * 4.0 + t * .05, 31);
-            const current = large * .54 + middle * .32 + fine * .14;
-            const upperLight = Math.pow(Math.max(0, 1 - ny), 1.55);
-            const depth = Math.pow(1 - ny, 1.25);
-            const wavering = .82 + .18 * Math.sin(nx * 8.5 + ny * 3.2 + t * 1.7 + large * 3);
-            const texture = .76 + current * .42;
-            const light = upperLight * wavering * texture;
-            const deepCurrent = Math.max(0, current - .43) * .12;
-            const r = 5 + light * 20 + deepCurrent * 8;
-            const g = 13 + light * 54 + deepCurrent * 27;
-            const b = 19 + light * 68 + deepCurrent * 38;
-            const index = (y * mw + x) * 4;
-            pixels[index] = Math.min(255, r);
-            pixels[index + 1] = Math.min(255, g);
-            pixels[index + 2] = Math.min(255, b);
-            pixels[index + 3] = 255;
-          }
+        // Restrained technical grid, fading toward the centre so the access form stays clear.
+        const spacing = width < 620 ? 46 : 64;
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= width; x += spacing) {
+          const a = .035 + .025 * (Math.sin(x * .012 + t * .00018) + 1);
+          line(x,0,x,height,a);
         }
-        mapCtx.putImageData(image, 0, 0);
-        ctx.clearRect(0, 0, width, height);
-        ctx.drawImage(map, 0, 0, width, height);
+        for (let y = 0; y <= height; y += spacing) line(0,y,width,y,.035);
 
-        // Broad, uneven shafts of distant surface light; their edges bend with the current.
+        // Fine circuit paths and connection points around the perimeter.
         ctx.save();
-        ctx.globalCompositeOperation = "screen";
-        for (let i = 0; i < 4; i++) {
-          const base = width * (.17 + i * .22);
-          const sway = reduced ? 0 : Math.sin(t * (1.1 + i * .17) + i * 2.1) * width * .035;
-          const x = base + sway;
-          const topWidth = width * (.045 + (i % 2) * .018);
-          const bottomWidth = topWidth * (2.2 + .25 * Math.sin(t + i));
-          const ray = ctx.createLinearGradient(x, 0, x + width * .025, height * .82);
-          ray.addColorStop(0, "rgba(137,190,187,.13)");
-          ray.addColorStop(.28, "rgba(91,151,153,.075)");
-          ray.addColorStop(1, "rgba(42,100,108,0)");
-          ctx.fillStyle = ray;
+        for (let i = 0; i < signals.length; i++) {
+          const p = signals[i];
+          const drift = reduced ? 0 : Math.sin(t * p.speed + p.phase) * 13;
+          const x = p.x * width + drift;
+          const y = p.y * height;
+          const edgeFade = Math.min(1, Math.abs(x - width * .5) / (width * .22) + .18);
+          const alpha = (.055 + (i % 4) * .018) * edgeFade;
+          ctx.strokeStyle = "rgba(83,181,184," + alpha + ")";
           ctx.beginPath();
-          ctx.moveTo(x - topWidth * .35, 0);
-          ctx.bezierCurveTo(x - topWidth, height * .28, x - bottomWidth, height * .62, x - bottomWidth * 1.2, height * .86);
-          ctx.lineTo(x + bottomWidth * 1.2, height * .86);
-          ctx.bezierCurveTo(x + bottomWidth, height * .58, x + topWidth, height * .25, x + topWidth * .45, 0);
-          ctx.closePath();
-          ctx.fill();
+          ctx.moveTo(x,y);
+          ctx.lineTo(x + p.length,y);
+          ctx.lineTo(x + p.length,y + 12 + (i % 3) * 7);
+          ctx.stroke();
+          ctx.fillStyle = "rgba(121,211,207," + (alpha * 2.1) + ")";
+          ctx.beginPath(); ctx.arc(x,y,1.3,0,Math.PI*2); ctx.fill();
         }
         ctx.restore();
 
-        // Fine suspended particles, barely visible unless they cross the faint light.
-        if (!reduced) {
+        // Quiet diagnostic panels; intentionally kept away from the centre.
+        if (width > 760) {
           ctx.save();
-          for (const p of particles) {
-            p.y += p.speed * 1.7;
-            p.x += p.drift + Math.sin(t * 2 + p.y * 9) * .00008;
-            if (p.y > 1.02) { p.y = -.02; p.x = hash(Math.floor(time + p.size * 100), 4, 61); }
-            if (p.x < 0) p.x += 1;
-            if (p.x > 1) p.x -= 1;
-            const illumination = Math.max(0, 1 - p.y) * .55 + .12;
-            ctx.fillStyle = "rgba(172,205,199," + (p.alpha * illumination) + ")";
-            ctx.beginPath();
-            ctx.arc(p.x * width, p.y * height, p.size, 0, Math.PI * 2);
-            ctx.fill();
+          ctx.font = "9px monospace";
+          for (let i = 0; i < panels.length; i++) {
+            const p = panels[i], x = p.x * width, y = p.y * height;
+            const w = p.w * width, h = p.h * height;
+            ctx.fillStyle = "rgba(4,15,21,.22)";
+            ctx.fillRect(x,y,w,h);
+            ctx.strokeStyle = "rgba(83,174,178,.17)";
+            ctx.strokeRect(x + .5,y + .5,w,h);
+            ctx.fillStyle = "rgba(126,190,190,.42)";
+            ctx.fillText(p.label,x + 10,y + 16);
+            for (let k = 0; k < 3; k++) {
+              const yy = y + 34 + k * 17;
+              ctx.fillStyle = "rgba(104,169,171,.16)";
+              ctx.fillRect(x + 10,yy,w * (.35 + ((i + k) % 4) * .12),2);
+              ctx.fillStyle = "rgba(105,203,198,.24)";
+              ctx.fillRect(x + w - 25,yy - 2,3,5);
+            }
           }
           ctx.restore();
         }
-        // A soft upper glow fades quickly into the abyss.
-        const glow = ctx.createLinearGradient(0, 0, 0, height * .72);
-        glow.addColorStop(0, "rgba(106,158,158,.12)");
-        glow.addColorStop(.34, "rgba(54,111,117,.045)");
-        glow.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = glow;
-        ctx.fillRect(0, 0, width, height);
+
+        // A slow scanner passes through the field, with a short-lived glow.
+        const scanY = reduced ? height * .48 : ((t * .018) % (height + 180)) - 90;
+        const scan = ctx.createLinearGradient(0,scanY - 24,0,scanY + 24);
+        scan.addColorStop(0,"rgba(64,188,190,0)");
+        scan.addColorStop(.5,"rgba(64,188,190,.075)");
+        scan.addColorStop(1,"rgba(64,188,190,0)");
+        ctx.fillStyle = scan;
+        ctx.fillRect(0,scanY - 24,width,48);
+        line(0,scanY,width,scanY,.12);
+
+        // Small status marks and a restrained warning pulse.
+        const pulse = reduced ? .04 : .035 + .025 * (1 + Math.sin(t * .0012));
+        ctx.fillStyle = "rgba(190,104,91," + pulse + ")";
+        ctx.fillRect(width * .91,height * .11,5,5);
+        const vignette = ctx.createRadialGradient(width*.5,height*.48,Math.min(width,height)*.12,width*.5,height*.48,Math.max(width,height)*.72);
+        vignette.addColorStop(0,"rgba(0,5,10,0)");
+        vignette.addColorStop(1,"rgba(0,3,8,.62)");
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0,0,width,height);
       }
 
-      window.addEventListener("pointermove", event => {
-        targetX = event.clientX / Math.max(width, 1);
-        targetY = event.clientY / Math.max(height, 1);
-      }, { passive: true });
-      window.addEventListener("resize", resize, { passive: true });
-      window.addEventListener("pagehide", () => cancelAnimationFrame(frame), { once: true });
+      window.addEventListener("resize",resize,{passive:true});
+      window.addEventListener("pagehide",() => cancelAnimationFrame(frame),{once:true});
       resize();
       frame = requestAnimationFrame(draw);
     })();

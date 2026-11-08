@@ -127,7 +127,9 @@
           </form>
 
           <form class="admin-form" id="material-form">
-            <h3>Новый материал</h3>
+            <h3 id="material-form-title">Новый материал</h3>
+            <input id="material-id" name="materialId" type="hidden" value="">
+
             <label for="material-case">ДЕЛО</label>
             <select id="material-case" name="caseId" required><option value="">Сначала создайте дело</option></select>
             <label for="material-type">ТИП МАТЕРИАЛА</label>
@@ -344,13 +346,28 @@
           for (const item of data.materials) {
             const card = document.createElement("article");
             card.className = "admin-material";
+            const info = document.createElement("div");
             const heading = document.createElement("strong");
             heading.textContent = item.title;
             const details = document.createElement("span");
             details.textContent = item.case_title + " · " + item.material_type + " · порядок " + item.release_order;
             const status = document.createElement("small");
             status.textContent = item.is_published ? "ОПУБЛИКОВАНО" : "ЧЕРНОВИК";
-            card.append(heading, details, status);
+            info.append(heading, details, status);
+            const actions = document.createElement("div");
+            actions.className = "admin-material-actions";
+            const edit = document.createElement("button");
+            edit.type = "button";
+            edit.className = "admin-mini-button";
+            edit.textContent = "РЕДАКТИРОВАТЬ";
+            edit.addEventListener("click", () => editMaterial(item.id));
+            const publish = document.createElement("button");
+            publish.type = "button";
+            publish.className = "admin-mini-button";
+            publish.textContent = item.is_published ? "СНЯТЬ С ПУБЛИКАЦИИ" : "ОПУБЛИКОВАТЬ";
+            publish.addEventListener("click", () => setMaterialPublished(item.id, !item.is_published));
+            actions.append(edit, publish);
+            card.append(info, actions);
             adminMaterialList.append(card);
           }
         }
@@ -384,15 +401,60 @@
       }
     });
 
-    materialForm.addEventListener("submit", async event => {
+    async function editMaterial(id) {
+      try {
+        const data = await adminRequest("/api/admin/materials/" + encodeURIComponent(id));
+        const item = data.material;
+        document.getElementById("material-id").value = item.id;
+        materialCase.value = item.case_id;
+        document.getElementById("material-type").value = item.material_type;
+        document.getElementById("material-title").value = item.title;
+        document.getElementById("material-summary").value = item.summary;
+        document.getElementById("material-content").value = item.content;
+        document.getElementById("material-order").value = item.release_order;
+        document.getElementById("material-form-title").textContent = "Редактирование материала";
+        materialForm.querySelector("button[type=submit]").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
+        materialForm.scrollIntoView({ behavior: "smooth", block: "center" });
+        showAdminMessage(materialMessage, "Материал загружен для редактирования.");
+      } catch (error) {
+        showAdminMessage(materialMessage, error.message, true);
+      }
+    }
+
+    async function setMaterialPublished(id, published) {
+      const action = published ? "опубликовать" : "снять с публикации";
+      if (!window.confirm("Вы действительно хотите " + action + " этот материал?")) return;
+      try {
+        await adminRequest("/api/admin/materials/" + encodeURIComponent(id) + "/publish", {
+          method: "POST",
+          body: JSON.stringify({ published })
+        });
+        showAdminMessage(materialMessage, published ? "Материал опубликован." : "Материал снят с публикации.");
+        await loadAdminOverview();
+      } catch (error) {
+        showAdminMessage(materialMessage, error.message, true);
+      }
+    }
+
+    function resetMaterialEditor() {
+      materialForm.reset();
+      document.getElementById("material-id").value = "";
+      document.getElementById("material-form-title").textContent = "Новый материал";
+      materialForm.querySelector("button[type=submit]").textContent = "СОХРАНИТЬ ЧЕРНОВИК";
+    }
+
+        materialForm.addEventListener("submit", async event => {
       event.preventDefault();
       const submit = materialForm.querySelector("button[type=submit]");
       submit.disabled = true;
-      showAdminMessage(materialMessage, "Сохраняем черновик…");
+      const materialId = document.getElementById("material-id").value;
+      showAdminMessage(materialMessage, materialId ? "Сохраняем изменения…" : "Сохраняем черновик…");
       const form = new FormData(materialForm);
       try {
-        await adminRequest("/api/admin/materials", {
-          method: "POST",
+        await adminRequest(materialId
+          ? "/api/admin/materials/" + encodeURIComponent(materialId)
+          : "/api/admin/materials", {
+          method: materialId ? "PUT" : "POST",
           body: JSON.stringify({
             caseId: form.get("caseId"),
             type: form.get("type"),
@@ -402,8 +464,8 @@
             releaseOrder: Number(form.get("releaseOrder"))
           })
         });
-        materialForm.reset();
-        showAdminMessage(materialMessage, "Черновик сохранён. Игрокам он пока не доступен.");
+        resetMaterialEditor();
+        showAdminMessage(materialMessage, materialId ? "Изменения сохранены." : "Черновик сохранён. Игрокам он пока не доступен.");
         await loadAdminOverview();
       } catch (error) {
         showAdminMessage(materialMessage, error.message, true);

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-13">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-14">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -1065,24 +1065,24 @@
             const wisps = noise(px * 7.2 + t * .2, py * 6.1 - t * .14, 31);
             const density = broad * .53 + middle * .27 + detail * .14 + wisps * .06;
             const heightFade = .72 + .28 * Math.sin(ny * Math.PI);
-            const threshold = .49 + (ny < .22 ? .055 : 0);
-            let alpha = Math.max(0, Math.min(1, (density - threshold) * 3.1)) * heightFade;
-            alpha *= .34;
+            const threshold = .465 + (ny < .22 ? .045 : 0);
+            let alpha = Math.max(0, Math.min(1, (density - threshold) * 4.0)) * heightFade;
+            alpha *= .46;
             const index = (y * fogWidth + x) * 4;
-            pixels[index] = 139;
-            pixels[index + 1] = 153;
-            pixels[index + 2] = 145;
+            pixels[index] = 151;
+            pixels[index + 1] = 165;
+            pixels[index + 2] = 157;
             pixels[index + 3] = Math.round(alpha * 255);
           }
         }
         fogCtx.putImageData(image, 0, 0);
         ctx.clearRect(0, 0, width, height);
         ctx.save();
-        ctx.filter = "blur(13px)";
-        ctx.globalAlpha = .94;
+        ctx.filter = "blur(8px)";
+        ctx.globalAlpha = .92;
         ctx.drawImage(fogCanvas, -width * .025, -height * .035, width * 1.05, height * 1.07);
-        ctx.filter = "blur(2px)";
-        ctx.globalAlpha = .3;
+        ctx.filter = "blur(1px)";
+        ctx.globalAlpha = .48;
         ctx.drawImage(fogCanvas, 0, 0, width, height);
         ctx.restore();
       }

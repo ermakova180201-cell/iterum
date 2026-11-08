@@ -65,6 +65,19 @@ async function handleApi(request, env) {
     });
   }
 
+
+  if (request.method === "GET" && url.pathname === "/api/player/archive") {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    const cases = await env.DB.prepare(
+      "SELECT id, title, case_code, description FROM cases WHERE status = 'active' ORDER BY created_at"
+    ).all();
+    const materials = await env.DB.prepare(
+      "SELECT materials.id, materials.case_id, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id WHERE cases.status = 'active' AND materials.is_published = 1 ORDER BY cases.created_at, materials.release_order, materials.created_at"
+    ).all();
+    return json({ cases: cases.results || [], materials: materials.results || [] });
+  }
+
   if (url.pathname.startsWith("/api/admin/")) {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
@@ -80,6 +93,19 @@ async function handleApi(request, env) {
         "SELECT materials.id, materials.case_id, cases.title AS case_title, materials.material_type, materials.title, materials.summary, materials.release_order, materials.is_published, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id ORDER BY materials.created_at DESC"
       ).all();
       return json({ cases: cases.results || [], materials: materials.results || [] });
+    }
+
+
+    const caseStatusRoute = url.pathname.match(/^\/api\/admin\/cases\/([a-f0-9]+)\/status$/);
+    if (request.method === "POST" && caseStatusRoute) {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Проверьте действие." }, 400); }
+      if (!["draft", "active"].includes(body.status)) return json({ error: "Недопустимый статус дела." }, 400);
+      const existing = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseStatusRoute[1]).first();
+      if (!existing) return json({ error: "Дело не найдено." }, 404);
+      await env.DB.prepare("UPDATE cases SET status = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?")
+        .bind(body.status, caseStatusRoute[1]).run();
+      return json({ ok: true, status: body.status });
     }
 
     const materialRoute = url.pathname.match(/^\/api\/admin\/materials\/([a-f0-9]+)(?:\/(publish))?$/);

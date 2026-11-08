@@ -228,6 +228,31 @@
         </section>
 
           </div>
+          <div class="system-lock-overlay" id="system-lock-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="system-lock-title">
+            <div class="system-lock-panel">
+              <div class="system-lock-top"><span>ITERUM SECURITY PROTOCOL</span><span class="system-lock-indicator">● CRITICAL</span></div>
+              <p class="section-kicker">АВТОМАТИЧЕСКАЯ ЗАЩИТА / LOCK-07</p>
+              <h2 id="system-lock-title">ДОСТУП ЗАБЛОКИРОВАН</h2>
+              <p class="system-lock-copy">Обнаружена аномальная активность в системном канале. Для восстановления сеанса необходимо замкнуть повреждённую цепь.</p>
+              <div class="system-lock-meta"><span>ПРОТОКОЛ: <b>RESTORE</b></span><span>КАНАЛ: <b>IN-01 → OUT-05</b></span></div>
+              <div class="system-lock-board" id="system-lock-board" aria-label="Головоломка восстановления канала">
+                <button type="button" class="system-lock-tile" data-lock-tile="0" data-lock-type="corner" data-lock-rotation="2" aria-label="Повернуть фрагмент 1"><i></i><i></i><i></i><i></i></button>
+                <button type="button" class="system-lock-tile" data-lock-tile="1" data-lock-type="straight" data-lock-rotation="2" aria-label="Повернуть фрагмент 2"><i></i><i></i><i></i><i></i></button>
+                <button type="button" class="system-lock-tile" data-lock-tile="2" data-lock-type="corner" data-lock-rotation="3" aria-label="Повернуть фрагмент 3"><i></i><i></i><i></i><i></i></button>
+                <button type="button" class="system-lock-tile" data-lock-tile="3" data-lock-type="corner" data-lock-rotation="1" aria-label="Повернуть фрагмент 4"><i></i><i></i><i></i><i></i></button>
+                <button type="button" class="system-lock-tile" data-lock-tile="4" data-lock-type="empty" data-lock-rotation="0" disabled></button>
+                <button type="button" class="system-lock-tile" data-lock-tile="5" data-lock-type="corner" data-lock-rotation="2" aria-label="Повернуть фрагмент 6"><i></i><i></i><i></i><i></i></button>
+                <span class="system-lock-terminal system-lock-in">IN</span><span class="system-lock-terminal system-lock-out">OUT</span>
+              </div>
+              <div class="system-lock-footer"><span id="system-lock-state" aria-live="polite">СВЯЗЬ НЕ УСТАНОВЛЕНА</span><span id="system-lock-moves">ПОПЫТОК: 0</span></div>
+              <div class="system-lock-restored" id="system-lock-restored" hidden>
+                <strong>СИСТЕМА ВОССТАНОВЛЕНА</strong>
+                <p>Защитный протокол снят. Доступ к рабочему столу восстановлен.</p>
+                <button type="button" id="system-lock-continue" class="admin-mini-button">ВОЗОБНОВИТЬ РАБОТУ</button>
+              </div>
+              <p class="system-lock-footnote">ПОВОРОТ ФРАГМЕНТА — НАЖАТИЕ / ПОВТОРНАЯ ПОПЫТКА ДОСТУПНА</p>
+            </div>
+          </div>
           <div class="desktop-taskbar">
             <span class="taskbar-start"><b>I.</b> ITERUM</span>
             <nav class="taskbar-apps" aria-label="Открыть приложение">
@@ -675,11 +700,14 @@
         const opener = event.target.closest("[data-open-window]");
         const closer = event.target.closest("[data-close-window]");
         if (opener) {
+          const lockOverlay = document.getElementById("system-lock-overlay");
+          if (lockOverlay && !lockOverlay.hidden) return;
           const win = document.getElementById(opener.dataset.openWindow);
           if (win) {
             desktopShell.querySelectorAll(".desktop-window").forEach(other => { if (other !== win) other.hidden = true; });
             win.hidden = false;
             desktopShell.querySelectorAll("[data-open-window]").forEach(button => button.classList.toggle("is-selected", button.dataset.openWindow === opener.dataset.openWindow));
+            if (window.iterumSystemLock) window.iterumSystemLock.noteAppOpen();
           }
         }
         if (closer) {
@@ -1466,6 +1494,70 @@
       levelButtons.forEach(b=>b.addEventListener("click",()=>{const i=Number(b.dataset.level);if(i<=unlocked)load(i);}));
       reset.addEventListener("click",()=>load(current));
       load(0);
+    })();
+  </script>
+
+  <script>
+    (() => {
+      const overlay=document.getElementById("system-lock-overlay");
+      const board=document.getElementById("system-lock-board");
+      const continueButton=document.getElementById("system-lock-continue");
+      if(!overlay||!board||!continueButton)return;
+      const tiles=[...board.querySelectorAll(".system-lock-tile")];
+      const state=document.getElementById("system-lock-state");
+      const movesLabel=document.getElementById("system-lock-moves");
+      const restored=document.getElementById("system-lock-restored");
+      const order=["N","E","S","W"], opposite={N:"S",E:"W",S:"N",W:"E"};
+      const target=[3,0,0,2,0,0], key="iterum-lock-app-opens";
+      let moves=0,active=false,solved=false;
+      function ports(tile){
+        const base=tile.dataset.lockType==="corner"?["N","E"]:tile.dataset.lockType==="straight"?["E","W"]:[];
+        return base.map(p=>order[(order.indexOf(p)+Number(tile.dataset.lockRotation))%4]);
+      }
+      function draw(){
+        tiles.forEach(tile=>[...tile.children].forEach((arm,i)=>arm.classList.toggle("is-active",ports(tile).includes(order[i]))));
+        const reached=new Set([3]),queue=[3];
+        while(queue.length){
+          const id=queue.shift(),row=Math.floor(id/3),col=id%3;
+          for(const [dir,next,valid] of [["N",id-3,row>0],["E",id+1,col<2],["S",id+3,row<2],["W",id-1,col>0]]){
+            if(!valid||reached.has(next)||!ports(tiles[id]).includes(dir)||!ports(tiles[next]).includes(opposite[dir]))continue;
+            reached.add(next);queue.push(next);
+          }
+        }
+        solved=[3,0,1,2,5].every(id=>reached.has(id))&&ports(tiles[5]).includes("E");
+        board.classList.toggle("is-restored",solved);
+        state.textContent=solved?"КАНАЛ ВОССТАНОВЛЕН":"СВЯЗЬ НЕ УСТАНОВЛЕНА";
+        movesLabel.textContent="ПОВОРОТОВ: "+moves;
+        restored.hidden=!solved;
+        if(solved)tiles.forEach(tile=>tile.disabled=true);
+      }
+      tiles.forEach(tile=>{
+        if(tile.dataset.lockType==="empty")return;
+        tile.addEventListener("click",()=>{
+          if(solved)return;
+          tile.dataset.lockRotation=String((Number(tile.dataset.lockRotation)+1)%4);
+          moves++;draw();
+        });
+      });
+      function lock(){
+        if(active)return;
+        active=true;moves=0;solved=false;
+        tiles.forEach((tile,i)=>{tile.dataset.lockRotation=String([2,2,3,1,0,2][i]);tile.disabled=tile.dataset.lockType==="empty";});
+        restored.hidden=true;overlay.hidden=false;draw();
+      }
+      continueButton.addEventListener("click",()=>{
+        if(!solved)return;
+        overlay.hidden=true;active=false;
+        document.querySelectorAll(".desktop-window").forEach(win=>{if(!win.hidden)win.hidden=true;});
+        document.querySelectorAll("[data-open-window]").forEach(button=>button.classList.remove("is-selected"));
+      });
+      const count=()=>Number(sessionStorage.getItem(key)||"0");
+      window.iterumSystemLock={noteAppOpen(){
+        if(active)return;
+        const next=count()+1;sessionStorage.setItem(key,String(next));
+        if(next>=5&&next%5===0)lock();
+      }};
+      window.iterumSystemLock.lockNow=lock;
     })();
   </script>
 

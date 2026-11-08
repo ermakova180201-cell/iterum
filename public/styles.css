@@ -3231,3 +3231,143 @@ body.is-workstation .desktop-help-shortcut > .icon-caption {
     font-size: 9px;
   }
 }
+
+
+/* System diagnostics application */
+body.is-workstation .diagnostics-art {
+  border-color: rgba(132,183,143,.58);
+  background: linear-gradient(145deg, #405d49, #202d25);
+  color: #c5e0c8;
+}
+body.is-workstation .diagnostics-art span {
+  font: 34px/1 var(--mono);
+  transform: rotate(-35deg);
+}
+.diagnostics-window {
+  border-color: rgba(111,151,116,.52);
+  background: linear-gradient(135deg, rgba(29,38,31,.99), rgba(17,25,21,.99));
+  color: #d0ddcf;
+}
+.diagnostics-window:before {
+  background: linear-gradient(90deg, #79a982, #456c50 45%, transparent);
+}
+.diagnostics-window .player-tool-heading h2 { color: #dce8d9; }
+.diagnostics-intro {
+  margin: 0 0 16px;
+  color: #8ea58f;
+  font: 9px/1.7 var(--mono);
+}
+.diagnostics-console {
+  padding: 14px 15px;
+  border: 1px solid rgba(119,164,126,.28);
+  background: rgba(8,17,12,.62);
+}
+.diagnostics-console-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #8ba88e;
+  font: 8px var(--mono);
+  letter-spacing: .08em;
+}
+#diagnostics-run-state { color: #c3d6bd; text-align: right; }
+.diagnostics-scanline {
+  height: 4px;
+  margin: 13px 0 11px;
+  overflow: hidden;
+  background: rgba(111,151,116,.17);
+}
+.diagnostics-scanline span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #91bd91;
+  transition: width .45s ease;
+  box-shadow: 0 0 10px rgba(130,190,139,.55);
+}
+.diagnostics-scanline.is-scanning span { background: #a6d6a7; }
+.diagnostics-message {
+  min-height: 34px;
+  margin: 0;
+  color: #b7c9b4;
+  font: 10px/1.7 var(--sans);
+}
+.diagnostics-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px 18px;
+  padding: 17px 2px 4px;
+}
+.diagnostics-metric {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 7px;
+  color: #9eb39b;
+  font: 9px var(--sans);
+}
+.diagnostics-metric strong {
+  color: #c8ddc4;
+  font: 10px var(--mono);
+}
+.diagnostics-metric i {
+  grid-column: 1 / -1;
+  height: 4px;
+  overflow: hidden;
+  background: rgba(111,151,116,.17);
+}
+.diagnostics-metric i b {
+  display: block;
+  height: 100%;
+  background: #7fa782;
+}
+.diagnostics-warning {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 7px;
+  margin-top: 4px;
+  padding: 13px 14px;
+  border: 1px solid rgba(181,151,91,.42);
+  background: rgba(75,60,32,.2);
+}
+.diagnostics-warning-label {
+  color: #c6aa72;
+  font: 8px var(--mono);
+  letter-spacing: .08em;
+}
+.diagnostics-warning strong {
+  color: #e1d0a6;
+  font: 500 13px var(--sans);
+}
+.diagnostics-warning p {
+  margin: 0;
+  color: #b9b29d;
+  font: 10px/1.65 var(--sans);
+}
+.diagnostics-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+.diagnostics-actions .admin-mini-button {
+  border-color: #668b68;
+  background: #29432e;
+  color: #d9e8d6;
+}
+.diagnostics-actions .admin-mini-button:hover {
+  background: #36583c;
+}
+.diagnostics-actions .admin-mini-button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+#diagnostics-footnote {
+  color: #718b72;
+  font: 8px/1.5 var(--mono);
+}
+@media (max-width: 620px) {
+  .diagnostics-window { padding: 15px 13px 17px; }
+  .diagnostics-results { grid-template-columns: 1fr; }
+  .diagnostics-console-top { font-size: 7px; }
+}

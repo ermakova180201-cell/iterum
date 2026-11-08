@@ -2747,3 +2747,160 @@ body:not(.is-workstation) .available-case-list > .player-empty {
   #mail-window .mail-reader { min-height: 220px; padding: 20px 16px; }
   #mail-window .mail-reader-subject { margin-top: 18px; }
 }
+
+
+/* ITERUM desktop app icons — clean, realistic shortcuts without captions */
+.desktop-icons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 78px;
+}
+.desktop-icon {
+  width: 72px;
+  min-height: 68px;
+  height: 68px;
+  padding: 5px;
+  gap: 0;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  text-shadow: none;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.desktop-icon:hover,
+.desktop-icon.is-selected {
+  border-color: rgba(210,190,157,.32);
+  background: rgba(214,196,164,.09);
+  transform: translateY(-1px);
+}
+.desktop-icon-art {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  overflow: hidden;
+  border: 1px solid rgba(235,224,202,.32);
+  border-radius: 11px;
+  box-shadow: 0 5px 12px rgba(0,0,0,.36), inset 0 1px rgba(255,255,255,.2);
+}
+.mail-art {
+  border-radius: 9px;
+  background: linear-gradient(145deg,#e8e8dc 0%,#b8c1b4 52%,#718277 100%);
+}
+.mail-art::before {
+  content: "";
+  position: absolute;
+  left: 8px; right: 8px; top: 13px; bottom: 9px;
+  border: 1px solid rgba(43,59,48,.6);
+  border-radius: 3px;
+  background: linear-gradient(145deg,#f4f2e7,#c7d0c4);
+  box-shadow: 0 2px 4px rgba(0,0,0,.2);
+}
+.mail-art .mail-symbol {
+  position: absolute;
+  z-index: 1;
+  left: 8px; right: 8px; top: 13px; bottom: 9px;
+  background: linear-gradient( to bottom right, transparent 48.5%,#718579 49%,#718579 51%,transparent 51.5%),
+              linear-gradient( to bottom left, transparent 48.5%,#718579 49%,#718579 51%,transparent 51.5%);
+}
+.search-art {
+  width: 54px;
+  height: 54px;
+  margin: 0;
+  border-radius: 11px;
+  background: linear-gradient(145deg,#74877d,#293c34 75%);
+}
+.search-lens {
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  width: 25px;
+  height: 25px;
+  border: 4px solid #e4e7d9;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.4), inset 0 1px rgba(255,255,255,.25);
+}
+.search-lens::after {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 5px;
+  right: -12px;
+  bottom: -7px;
+  border-radius: 3px;
+  background: linear-gradient(180deg,#e5e8dc,#9eafa2);
+  transform: rotate(47deg);
+  transform-origin: left center;
+  box-shadow: 0 1px 2px rgba(0,0,0,.4);
+}
+.folder-art {
+  width: 54px;
+  height: 54px;
+  border-radius: 9px;
+  background: linear-gradient(145deg,#b89561,#6c5232 80%);
+}
+.folder-art::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 12px;
+  width: 22px;
+  height: 8px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg,#e1c28d,#a9824f);
+}
+.folder-art::after {
+  content: "";
+  position: absolute;
+  left: 6px; right: 6px; top: 18px; bottom: 9px;
+  border: 1px solid rgba(70,49,27,.55);
+  border-radius: 3px 5px 4px 4px;
+  background: linear-gradient(145deg,#d7b77f,#987044);
+  transform: skewY(-3deg);
+  box-shadow: 0 3px 5px rgba(0,0,0,.25);
+}
+.folder-paper {
+  position: absolute;
+  z-index: 1;
+  left: 15px;
+  top: 8px;
+  width: 25px;
+  height: 31px;
+  border: 1px solid rgba(77,73,59,.5);
+  border-radius: 2px;
+  background: linear-gradient(180deg,#f0eee1,#c9c9b7);
+  box-shadow: 0 2px 4px rgba(0,0,0,.28);
+}
+.folder-paper::before {
+  content: "";
+  position: absolute;
+  left: 5px; right: 5px; top: 9px;
+  height: 1px;
+  background: #8b9488;
+  box-shadow: 0 5px #8b9488, 0 10px #8b9488;
+}
+.desktop-icon > span:not(.desktop-icon-art),
+.desktop-icon > small { display: none !important; }
+.desktop-icon:focus-visible {
+  outline: 1px solid rgba(225,211,183,.85);
+  outline-offset: 3px;
+}
+@media (max-width: 620px) {
+  .desktop-icons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    width: 100%;
+    gap: 7px;
+  }
+  .desktop-icon {
+    width: 64px;
+    min-height: 62px;
+    height: 62px;
+    padding: 4px;
+  }
+  .desktop-icon-art { width: 50px; height: 50px; flex-basis: 50px; }
+  .search-art, .folder-art { width: 50px; height: 50px; }
+}

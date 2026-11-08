@@ -444,6 +444,10 @@
         playerMailList.replaceChildren();
         if (!data.cases.length) return;
         playerArchiveCount.textContent = data.materials.length + " МАТЕРИАЛОВ";
+        const desktopCaseName = document.getElementById("desktop-case-name");
+        if (desktopCaseName && data.cases[0]) desktopCaseName.textContent = data.cases[0].title;
+        const desktopCaseLabel = document.getElementById("desktop-case-label");
+        if (desktopCaseLabel && data.cases[0]) desktopCaseLabel.textContent = data.cases[0].case_code;
         for (const item of data.cases) {
           const caseLine = document.createElement("div");
           caseLine.className = "player-case";
@@ -458,6 +462,8 @@
         const emails = data.materials.filter(item => item.material_type === "email");
         const unreadEmails = emails.filter(item => !item.is_read).length;
         playerMailCount.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
+        const desktopMailBadge = document.getElementById("desktop-mail-badge");
+        if (desktopMailBadge) desktopMailBadge.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : "ВХОДЯЩИЕ";
         if (!emails.length) {
           const empty = document.createElement("p");
           empty.className = "player-empty";
@@ -555,7 +561,7 @@
 
     const desktopShell = document.querySelector(".desktop-shell");
     if (desktopShell) {
-      desktopShell.addEventListener("click", event => {
+      playerArchive.addEventListener("click", event => {
         const opener = event.target.closest("[data-open-window]");
         const closer = event.target.closest("[data-close-window]");
         if (opener) {

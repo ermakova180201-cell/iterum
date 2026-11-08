@@ -809,6 +809,51 @@
       }
     });
 
+    async function loadAdminMaterialFiles(id) {
+      const list = document.getElementById("material-files-list");
+      list.replaceChildren();
+      try {
+        const response = await fetch("/api/player/materials/" + encodeURIComponent(id) + "/files", { credentials: "same-origin" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Не удалось получить список вложений.");
+        if (!data.files.length) {
+          list.append(Object.assign(document.createElement("span"), { textContent: "У этого материала пока нет вложений." }));
+          return;
+        }
+        for (const file of data.files) {
+          const row = document.createElement("div");
+          row.className = "admin-file-row";
+          const name = document.createElement("a");
+          name.href = "/api/material-files/" + encodeURIComponent(file.id);
+          name.target = "_blank";
+          name.rel = "noopener";
+          name.textContent = file.file_name + " · " + Math.max(1, Math.round(file.file_size / 1024)) + " КБ";
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "admin-mini-button";
+          remove.textContent = "УДАЛИТЬ";
+          remove.addEventListener("click", async () => {
+            if (!window.confirm("Удалить вложение «" + file.file_name + "»?")) return;
+            remove.disabled = true;
+            try {
+              const result = await fetch("/api/admin/material-files/" + encodeURIComponent(file.id), { method: "DELETE", credentials: "same-origin" });
+              const payload = await result.json().catch(() => ({}));
+              if (!result.ok) throw new Error(payload.error || "Не удалось удалить файл.");
+              await loadAdminMaterialFiles(id);
+              showAdminMessage(materialMessage, "Вложение удалено.");
+            } catch (error) {
+              remove.disabled = false;
+              showAdminMessage(materialMessage, error.message, true);
+            }
+          });
+          row.append(name, remove);
+          list.append(row);
+        }
+      } catch (error) {
+        list.append(Object.assign(document.createElement("span"), { textContent: error.message }));
+      }
+    }
+
     async function editMaterial(id) {
       try {
         const data = await adminRequest("/api/admin/materials/" + encodeURIComponent(id));
@@ -825,6 +870,7 @@
         document.getElementById("material-sender-name").value = item.sender_name || "";
         document.getElementById("material-sender-address").value = item.sender_address || "";
         document.getElementById("material-sent-at").value = item.sent_at || "";
+        await loadAdminMaterialFiles(item.id);
         syncMaterialTypeFields();
         document.getElementById("material-form-title").textContent = "Редактирование материала";
         materialForm.querySelector("button[type=submit]").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
@@ -871,6 +917,8 @@
       materialTrigger.disabled = true;
       syncMaterialTypeFields();
       document.getElementById("material-id").value = "";
+      document.getElementById("material-files").value = "";
+      document.getElementById("material-files-list").replaceChildren(Object.assign(document.createElement("span"), { textContent: "Вложения появятся после сохранения материала." }));
       document.getElementById("material-form-title").textContent = "Новый материал";
       materialForm.querySelector("button[type=submit]").textContent = "СОХРАНИТЬ ЧЕРНОВИК";
     }

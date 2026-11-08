@@ -3371,3 +3371,85 @@ body.is-workstation .diagnostics-art span {
   .diagnostics-results { grid-template-columns: 1fr; }
   .diagnostics-console-top { font-size: 7px; }
 }
+
+
+/* Connection restoration mini-game */
+body.is-workstation .connection-art {
+  border-color: rgba(119,183,145,.62);
+  background: linear-gradient(145deg,#365b49,#1d3028);
+  color: #c5e8d0;
+}
+body.is-workstation .connection-art span { font: 29px/1 var(--mono); }
+.connection-game-window {
+  border-color: rgba(91,151,116,.55);
+  background: linear-gradient(135deg,rgba(27,38,31,.99),rgba(15,24,20,.99));
+  color: #d0ddcf;
+}
+.connection-game-window:before { background: linear-gradient(90deg,#77ad88,#426c52 45%,transparent); }
+.connection-game-window .player-tool-heading h2 { color:#dce8d9; }
+.connection-game-intro { margin:0 0 15px; color:#91a993; font:10px/1.7 var(--sans); }
+.connection-game-status {
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  margin-bottom:12px; color:#77977e; font:7px var(--mono); letter-spacing:.06em;
+}
+.connection-game-status b { color:#c1d8c1; font-weight:500; }
+#connection-game-state { color:#c6b27c; text-align:center; }
+.connection-board {
+  position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px; width:min(100%,330px); margin:0 auto; padding:13px 17px;
+  border:1px solid rgba(119,164,126,.23);
+  background:
+    linear-gradient(rgba(111,151,116,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(111,151,116,.055) 1px,transparent 1px),
+    rgba(7,15,10,.58);
+  background-size:22px 22px;
+}
+.connection-tile {
+  position:relative; aspect-ratio:1; min-width:0; padding:0;
+  border:1px solid rgba(119,164,126,.27); border-radius:2px;
+  background:rgba(37,59,43,.48); cursor:pointer;
+  transition:border-color .15s,background .15s;
+}
+.connection-tile:hover:not(:disabled) { border-color:#a0c9a0; background:rgba(75,112,78,.38); }
+.connection-tile:focus-visible { outline:2px solid #b5d8b0; outline-offset:2px; }
+.connection-tile i {
+  position:absolute; display:block; background:transparent;
+  left:calc(50% - 2px); top:0; width:4px; height:50%;
+}
+.connection-tile i:nth-child(2) { left:50%; top:calc(50% - 2px); width:50%; height:4px; }
+.connection-tile i:nth-child(3) { left:calc(50% - 2px); top:50%; width:4px; height:50%; }
+.connection-tile i:nth-child(4) { left:0; top:calc(50% - 2px); width:50%; height:4px; }
+.connection-tile i.is-active {
+  background:#86bd91; box-shadow:0 0 7px rgba(125,197,140,.6);
+}
+.connection-tile.is-empty { border-color:rgba(119,164,126,.08); background:rgba(0,0,0,.1); cursor:default; }
+.connection-tile:disabled { cursor:default; }
+.connection-board.is-connected .connection-tile i.is-active {
+  background:#b0e5ad; box-shadow:0 0 10px rgba(154,231,153,.8);
+}
+.connection-terminal {
+  position:absolute; z-index:2; top:calc(50% - 8px); color:#b6d5b4;
+  font:8px var(--mono); letter-spacing:.08em;
+}
+.connection-terminal-in { left:0; transform:translateX(-100%); padding-right:4px; }
+.connection-terminal-out { right:0; transform:translateX(100%); padding-left:4px; }
+.connection-game-bottom {
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  margin-top:13px; color:#78977c; font:8px var(--mono);
+}
+.connection-game-bottom .admin-mini-button {
+  border-color:#668b68; background:#29432e; color:#d9e8d6;
+}
+.connection-success {
+  margin-top:14px; padding:13px 14px;
+  border:1px solid rgba(119,181,126,.5); background:rgba(38,76,44,.24);
+}
+.connection-success strong { color:#c6e2c2; font:10px var(--mono); letter-spacing:.07em; }
+.connection-success p { margin:7px 0; color:#b5cbb3; font:10px/1.6 var(--sans); }
+.connection-success span { color:#84a787; font:8px var(--mono); }
+@media(max-width:620px) {
+  .connection-game-window { padding:15px 13px 17px; }
+  .connection-game-status { flex-wrap:wrap; font-size:6px; }
+  .connection-board { width:min(100%,285px); padding:10px 15px; gap:5px; }
+  .connection-game-bottom { align-items:flex-start; flex-direction:column; }
+}

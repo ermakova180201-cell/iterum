@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-14">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-15">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -992,39 +992,30 @@
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Render the fog at a smaller resolution, then enlarge it smoothly.
-      // This keeps the animation light while the noise creates irregular, changing edges.
-      const fogCanvas = document.createElement("canvas");
-      const fogCtx = fogCanvas.getContext("2d");
-      if (!fogCtx) return;
-      const fogWidth = 320;
-      const fogHeight = 180;
-      fogCanvas.width = fogWidth;
-      fogCanvas.height = fogHeight;
-      const image = fogCtx.createImageData(fogWidth, fogHeight);
+      // Deep-water volume: slowly advecting suspended matter, soft light shafts and drifting particles.
+      const map = document.createElement("canvas");
+      const mapCtx = map.getContext("2d");
+      if (!mapCtx) return;
+      const mw = 300, mh = 170;
+      map.width = mw;
+      map.height = mh;
+      const image = mapCtx.createImageData(mw, mh);
       const pixels = image.data;
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      let width = 0, height = 0, ratio = 1, frame = 0;
-      let lastFrame = 0;
+      let width = 0, height = 0, ratio = 1, frame = 0, lastFrame = 0;
       let pointerX = .5, pointerY = .5, targetX = .5, targetY = .5;
 
-      // Smooth, deterministic lattice noise. Several scales are combined into natural-looking fog.
       function hash(ix, iy, seed) {
-        const value = Math.sin(ix * 127.1 + iy * 311.7 + seed * 74.7) * 43758.5453;
-        return value - Math.floor(value);
+        const n = Math.sin(ix * 127.1 + iy * 311.7 + seed * 74.7) * 43758.5453;
+        return n - Math.floor(n);
       }
-      function smooth(value) {
-        return value * value * (3 - 2 * value);
-      }
+      function fade(v) { return v * v * (3 - 2 * v); }
       function noise(x, y, seed) {
-        const x0 = Math.floor(x), y0 = Math.floor(y);
-        const fx = smooth(x - x0), fy = smooth(y - y0);
-        const a = hash(x0, y0, seed);
-        const b = hash(x0 + 1, y0, seed);
-        const c = hash(x0, y0 + 1, seed);
-        const d = hash(x0 + 1, y0 + 1, seed);
-        const top = a + (b - a) * fx;
-        const bottom = c + (d - c) * fx;
+        const ix = Math.floor(x), iy = Math.floor(y);
+        const fx = fade(x - ix), fy = fade(y - iy);
+        const a = hash(ix, iy, seed), b = hash(ix + 1, iy, seed);
+        const c = hash(ix, iy + 1, seed), d = hash(ix + 1, iy + 1, seed);
+        const top = a + (b - a) * fx, bottom = c + (d - c) * fx;
         return top + (bottom - top) * fy;
       }
       function resize() {
@@ -1038,53 +1029,104 @@
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       }
 
+      const particles = Array.from({ length: 58 }, (_, i) => ({
+        x: hash(i, 3, 41), y: hash(i, 9, 73),
+        size: .35 + hash(i, 12, 19) * .9,
+        speed: .0007 + hash(i, 17, 29) * .0015,
+        drift: (hash(i, 22, 31) - .5) * .0007,
+        alpha: .08 + hash(i, 28, 37) * .19
+      }));
+
       function draw(time) {
         frame = requestAnimationFrame(draw);
         if (document.hidden) return;
         if (!reduced && time - lastFrame < 42) return;
         lastFrame = time;
-        const t = reduced ? 0 : time * .000018;
-        pointerX += (targetX - pointerX) * .006;
-        pointerY += (targetY - pointerY) * .006;
-        const driftX = (pointerX - .5) * 2.5;
-        const driftY = (pointerY - .5) * 1.5;
+        const t = reduced ? 0 : time * .000035;
+        pointerX += (targetX - pointerX) * .004;
+        pointerY += (targetY - pointerY) * .004;
+        const drift = (pointerX - .5) * .16;
 
-        for (let y = 0; y < fogHeight; y++) {
-          for (let x = 0; x < fogWidth; x++) {
-            const nx = x / fogWidth;
-            const ny = y / fogHeight;
-            // Slow domain warping makes the fog billow and fold instead of sliding as a flat texture.
-            const warpX = (noise(nx * 3.1 + t * .7, ny * 2.8 - t * .35, 2) - .5) * 1.25;
-            const warpY = (noise(nx * 2.6 - t * .28, ny * 3.4 + t * .42, 7) - .5) * 1.1;
-            const px = nx * 4.2 + warpX + t * .48 + driftX;
-            const py = ny * 2.6 + warpY - t * .16 + driftY;
-
-            const broad = noise(px, py, 11);
-            const middle = noise(px * 2.15 + t * .12, py * 1.9 - t * .09, 17);
-            const detail = noise(px * 4.3 - t * .18, py * 3.8 + t * .11, 23);
-            const wisps = noise(px * 7.2 + t * .2, py * 6.1 - t * .14, 31);
-            const density = broad * .53 + middle * .27 + detail * .14 + wisps * .06;
-            const heightFade = .72 + .28 * Math.sin(ny * Math.PI);
-            const threshold = .465 + (ny < .22 ? .045 : 0);
-            let alpha = Math.max(0, Math.min(1, (density - threshold) * 4.0)) * heightFade;
-            alpha *= .46;
-            const index = (y * fogWidth + x) * 4;
-            pixels[index] = 151;
-            pixels[index + 1] = 165;
-            pixels[index + 2] = 157;
-            pixels[index + 3] = Math.round(alpha * 255);
+        for (let y = 0; y < mh; y++) {
+          const ny = y / mh;
+          for (let x = 0; x < mw; x++) {
+            const nx = x / mw;
+            const warpA = (noise(nx * 2.1 + t * .22, ny * 2.8 - t * .13, 5) - .5) * .75;
+            const warpB = (noise(nx * 3.7 - t * .16, ny * 2.0 + t * .18, 13) - .5) * .42;
+            const sx = nx * 3.4 + warpA + drift + t * .12;
+            const sy = ny * 4.8 + warpB - t * .19;
+            const large = noise(sx, sy, 17);
+            const middle = noise(sx * 2.3 + t * .06, sy * 1.8, 23);
+            const fine = noise(sx * 5.1 - t * .08, sy * 4.0 + t * .05, 31);
+            const current = large * .54 + middle * .32 + fine * .14;
+            const upperLight = Math.pow(Math.max(0, 1 - ny), 1.55);
+            const depth = Math.pow(1 - ny, 1.25);
+            const wavering = .82 + .18 * Math.sin(nx * 8.5 + ny * 3.2 + t * 1.7 + large * 3);
+            const texture = .76 + current * .42;
+            const light = upperLight * wavering * texture;
+            const deepCurrent = Math.max(0, current - .43) * .12;
+            const r = 5 + light * 20 + deepCurrent * 8;
+            const g = 13 + light * 54 + deepCurrent * 27;
+            const b = 19 + light * 68 + deepCurrent * 38;
+            const index = (y * mw + x) * 4;
+            pixels[index] = Math.min(255, r);
+            pixels[index + 1] = Math.min(255, g);
+            pixels[index + 2] = Math.min(255, b);
+            pixels[index + 3] = 255;
           }
         }
-        fogCtx.putImageData(image, 0, 0);
+        mapCtx.putImageData(image, 0, 0);
         ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(map, 0, 0, width, height);
+
+        // Broad, uneven shafts of distant surface light; their edges bend with the current.
         ctx.save();
-        ctx.filter = "blur(8px)";
-        ctx.globalAlpha = .92;
-        ctx.drawImage(fogCanvas, -width * .025, -height * .035, width * 1.05, height * 1.07);
-        ctx.filter = "blur(1px)";
-        ctx.globalAlpha = .48;
-        ctx.drawImage(fogCanvas, 0, 0, width, height);
+        ctx.globalCompositeOperation = "screen";
+        for (let i = 0; i < 4; i++) {
+          const base = width * (.17 + i * .22);
+          const sway = reduced ? 0 : Math.sin(t * (1.1 + i * .17) + i * 2.1) * width * .035;
+          const x = base + sway;
+          const topWidth = width * (.045 + (i % 2) * .018);
+          const bottomWidth = topWidth * (2.2 + .25 * Math.sin(t + i));
+          const ray = ctx.createLinearGradient(x, 0, x + width * .025, height * .82);
+          ray.addColorStop(0, "rgba(137,190,187,.13)");
+          ray.addColorStop(.28, "rgba(91,151,153,.075)");
+          ray.addColorStop(1, "rgba(42,100,108,0)");
+          ctx.fillStyle = ray;
+          ctx.beginPath();
+          ctx.moveTo(x - topWidth * .35, 0);
+          ctx.bezierCurveTo(x - topWidth, height * .28, x - bottomWidth, height * .62, x - bottomWidth * 1.2, height * .86);
+          ctx.lineTo(x + bottomWidth * 1.2, height * .86);
+          ctx.bezierCurveTo(x + bottomWidth, height * .58, x + topWidth, height * .25, x + topWidth * .45, 0);
+          ctx.closePath();
+          ctx.fill();
+        }
         ctx.restore();
+
+        // Fine suspended particles, barely visible unless they cross the faint light.
+        if (!reduced) {
+          ctx.save();
+          for (const p of particles) {
+            p.y += p.speed * 1.7;
+            p.x += p.drift + Math.sin(t * 2 + p.y * 9) * .00008;
+            if (p.y > 1.02) { p.y = -.02; p.x = hash(Math.floor(time + p.size * 100), 4, 61); }
+            if (p.x < 0) p.x += 1;
+            if (p.x > 1) p.x -= 1;
+            const illumination = Math.max(0, 1 - p.y) * .55 + .12;
+            ctx.fillStyle = "rgba(172,205,199," + (p.alpha * illumination) + ")";
+            ctx.beginPath();
+            ctx.arc(p.x * width, p.y * height, p.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+        // A soft upper glow fades quickly into the abyss.
+        const glow = ctx.createLinearGradient(0, 0, 0, height * .72);
+        glow.addColorStop(0, "rgba(106,158,158,.12)");
+        glow.addColorStop(.34, "rgba(54,111,117,.045)");
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, width, height);
       }
 
       window.addEventListener("pointermove", event => {

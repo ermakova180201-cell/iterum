@@ -951,6 +951,8 @@
           })
         });
         const savedId = materialId || savedMaterial.id;
+        // Keep the saved material ID if attachment upload fails, so retrying won't create a duplicate.
+        document.getElementById("material-id").value = savedId;
         const selectedFiles = document.getElementById("material-files").files;
         if (selectedFiles.length && savedId) {
           showAdminMessage(materialMessage, "Материал сохранён. Загружаем вложения…");

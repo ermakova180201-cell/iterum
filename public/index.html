@@ -173,7 +173,7 @@
         <div class="admin-inventory">
           <h3>Созданные материалы</h3>
           <div class="unlock-recipient">
-            <label for="unlock-user-select">ИГРОК, КОТОРОМУ ОТКРЫТЬ МАТЕРИАЛ</label>
+            <label for="unlock-user-select">ИГРОК ДЛЯ ВЫДАЧИ ДОСТУПА</label>
             <select id="unlock-user-select"><option value="">Загрузка списка игроков…</option></select>
           </div>
           <div id="admin-material-list" class="admin-material-list"><p class="admin-empty">Пока материалов нет.</p></div>
@@ -465,14 +465,23 @@
             const heading = document.createElement("strong");
             heading.textContent = item.title + " · " + item.case_code;
             const status = document.createElement("small");
-            status.textContent = item.status === "active" ? "АКТИВНОЕ ДЕЛО — ВИДНО ИГРОКАМ" : "ЧЕРНОВИК — СКРЫТО ОТ ИГРОКОВ";
+            status.textContent = item.status === "active" ? "АКТИВНОЕ ДЕЛО — ДОСТУП ПО НАЗНАЧЕНИЮ" : "ЧЕРНОВИК — НЕ ОТОБРАЖАЕТСЯ ИГРОКАМ";
             info.append(heading, status);
             const toggle = document.createElement("button");
             toggle.type = "button";
             toggle.className = "admin-mini-button";
             toggle.textContent = item.status === "active" ? "ДЕАКТИВИРОВАТЬ" : "АКТИВИРОВАТЬ";
             toggle.addEventListener("click", () => setCaseStatus(item.id, item.status === "active" ? "draft" : "active"));
-            card.append(info, toggle);
+            const grant = document.createElement("button");
+            grant.type = "button";
+            grant.className = "admin-mini-button";
+            grant.textContent = "ДАТЬ ДОСТУП ИГРОКУ";
+            grant.disabled = adminUsers.length === 0;
+            grant.addEventListener("click", () => grantCaseAccess(item.id, item.title));
+            const actions = document.createElement("div");
+            actions.className = "admin-material-actions";
+            actions.append(toggle, grant);
+            card.append(info, actions);
             adminCaseList.append(card);
           }
         }
@@ -566,6 +575,25 @@
         showAdminMessage(materialMessage, "Материал загружен для редактирования.");
       } catch (error) {
         showAdminMessage(materialMessage, error.message, true);
+      }
+    }
+
+    async function grantCaseAccess(id, title) {
+      const userId = unlockUserSelect.value;
+      if (!userId) {
+        showAdminMessage(caseMessage, "Сначала выберите игрока.", true);
+        return;
+      }
+      const user = adminUsers.find(item => item.id === userId);
+      if (!window.confirm("Выдать доступ к делу «" + title + "» игроку " + (user ? user.email : "") + "?")) return;
+      try {
+        await adminRequest("/api/admin/cases/" + encodeURIComponent(id) + "/access", {
+          method: "POST",
+          body: JSON.stringify({ userId })
+        });
+        showAdminMessage(caseMessage, "Доступ к делу выдан выбранному игроку. Само дело появится у него после активации.");
+      } catch (error) {
+        showAdminMessage(caseMessage, error.message, true);
       }
     }
 

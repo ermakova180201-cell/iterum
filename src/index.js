@@ -54,7 +54,80 @@ async function handleApi(request, env) {
     if (!user) return json({ authenticated: false, user: null });
     // A lightweight read confirms that the Worker can reach the migrated D1 schema.
     await env.DB.prepare("SELECT COUNT(*) AS total FROM cases").first();
-    return json({ authenticated: true, user: { email: user.email }, databaseConnected: true });
+    const isAdmin = Boolean(env.ADMIN_EMAIL) &&
+      user.email.toLowerCase() === String(env.ADMIN_EMAIL).trim().toLowerCase();
+    return json({
+      authenticated: true,
+      user: { email: user.email },
+      databaseConnected: true,
+      isAdmin,
+      adminConfigured: Boolean(env.ADMIN_EMAIL)
+    });
+  }
+
+  if (url.pathname.startsWith("/api/admin/")) {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    const adminEmail = String(env.ADMIN_EMAIL || "").trim().toLowerCase();
+    if (!adminEmail || user.email.toLowerCase() !== adminEmail) {
+      return json({ error: "Доступ к панели администратора запрещён." }, 403);
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/overview") {
+      const cases = await env.DB.prepare(
+        "SELECT id, title, case_code, description, status, created_at FROM cases ORDER BY created_at DESC"
+      ).all();
+      const materials = await env.DB.prepare(
+        "SELECT materials.id, materials.case_id, cases.title AS case_title, materials.material_type, materials.title, materials.summary, materials.release_order, materials.is_published, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id ORDER BY materials.created_at DESC"
+      ).all();
+      return json({ cases: cases.results || [], materials: materials.results || [] });
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/cases") {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Проверьте введённые данные." }, 400); }
+      const title = String(body.title || "").trim();
+      const caseCode = String(body.caseCode || "").trim().toUpperCase();
+      const description = String(body.description || "").trim();
+      if (!title || title.length > 160 || !/^[A-Z0-9_-]{2,32}$/.test(caseCode) || description.length > 1000) {
+        return json({ error: "Проверьте название, код дела и описание." }, 400);
+      }
+      const id = randomToken(16);
+      try {
+        await env.DB.prepare(
+          "INSERT INTO cases (id, title, case_code, description, status) VALUES (?, ?, ?, ?, 'draft')"
+        ).bind(id, title, caseCode, description).run();
+      } catch {
+        return json({ error: "Не удалось создать дело. Возможно, такой код уже используется." }, 409);
+      }
+      return json({ ok: true, id });
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/materials") {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Проверьте введённые данные." }, 400); }
+      const caseId = String(body.caseId || "");
+      const type = String(body.type || "");
+      const title = String(body.title || "").trim();
+      const summary = String(body.summary || "").trim();
+      const content = String(body.content || "").trim();
+      const releaseOrder = Number(body.releaseOrder ?? 0);
+      const allowedTypes = ["email", "publication", "document", "photo", "audio", "map", "other"];
+      if (!caseId || !allowedTypes.includes(type) || !title || title.length > 200 ||
+          summary.length > 1000 || content.length > 50000 ||
+          !Number.isInteger(releaseOrder) || releaseOrder < 0 || releaseOrder > 100000) {
+        return json({ error: "Проверьте тип, название, текст и порядок открытия материала." }, 400);
+      }
+      const targetCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseId).first();
+      if (!targetCase) return json({ error: "Выбранное дело не найдено." }, 404);
+      const id = randomToken(16);
+      await env.DB.prepare(
+        "INSERT INTO materials (id, case_id, material_type, title, summary, content, release_order, is_published) VALUES (?, ?, ?, ?, ?, ?, ?, 0)"
+      ).bind(id, caseId, type, title, summary, content, releaseOrder).run();
+      return json({ ok: true, id });
+    }
+
+    return json({ error: "Не найдено." }, 404);
   }
 
   if (request.method === "POST" && (url.pathname === "/api/register" || url.pathname === "/api/login")) {

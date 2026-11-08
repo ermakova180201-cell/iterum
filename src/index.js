@@ -90,7 +90,7 @@ async function handleApi(request, env) {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
     const file = await env.DB.prepare(
-      "SELECT f.id, f.object_key, f.file_name, f.content_type, m.id AS material_id, m.is_published, m.delivery_mode, c.status AS case_status FROM material_files f JOIN materials m ON m.id = f.material_id JOIN cases c ON c.id = m.case_id WHERE f.id = ?"
+      "SELECT f.id, f.file_data, f.file_name, f.content_type, m.id AS material_id, m.is_published, m.delivery_mode, c.status AS case_status FROM material_files f JOIN materials m ON m.id = f.material_id JOIN cases c ON c.id = m.case_id WHERE f.id = ?"
     ).bind(privateFileRoute[1]).first();
     if (!file) return json({ error: "Файл не найден." }, 404);
     const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
@@ -99,11 +99,9 @@ async function handleApi(request, env) {
       const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ?").bind(user.id, file.material_id).first();
       if (!unlocked) return json({ error: "Файл ещё не открыт." }, 403);
     }
-    if (!env.FILES) return json({ error: "Хранилище файлов ещё не подключено." }, 503);
-    const object = await env.FILES.get(file.object_key);
-    if (!object) return json({ error: "Файл отсутствует в хранилище." }, 404);
+    if (!file.file_data) return json({ error: "Файл отсутствует в хранилище." }, 404);
     const safeName = file.file_name.replace(/[\r\n"]/g, "_");
-    return new Response(object.body, {
+    return new Response(file.file_data, {
       headers: {
         "content-type": file.content_type,
         "content-disposition": "inline; filename*=UTF-8''" + encodeURIComponent(safeName),
@@ -210,7 +208,6 @@ async function handleApi(request, env) {
 
     const uploadFilesRoute = url.pathname.match(/^\/api\/admin\/materials\/([a-f0-9]+)\/files$/);
     if (request.method === "POST" && uploadFilesRoute) {
-      if (!env.FILES) return json({ error: "Хранилище файлов ещё не подключено." }, 503);
       const materialId = uploadFilesRoute[1];
       const material = await env.DB.prepare("SELECT id FROM materials WHERE id = ?").bind(materialId).first();
       if (!material) return json({ error: "Материал не найден." }, 404);
@@ -222,25 +219,16 @@ async function handleApi(request, env) {
       const allowed = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp", "image/gif", "audio/mpeg", "audio/wav", "audio/ogg"]);
       for (const file of uploads) {
         if (!allowed.has(file.type)) return json({ error: "Поддерживаются PDF, JPG, PNG, WEBP, GIF, MP3, WAV и OGG." }, 400);
-        if (file.size > 15 * 1024 * 1024) return json({ error: "Размер одного файла не должен превышать 15 МБ." }, 400);
+        if (file.size > 1 * 1024 * 1024) return json({ error: "Размер одного файла не должен превышать 1 МБ. Большие файлы можно будет подключить позже через отдельное хранилище." }, 400);
       }
       const saved = [];
       for (const file of uploads) {
         const id = randomToken(16);
         const originalName = String(file.name || "attachment").replace(/[\r\n]/g, "_").slice(0, 180);
-        const objectKey = "materials/" + materialId + "/" + id;
-        await env.FILES.put(objectKey, file.stream(), {
-          httpMetadata: { contentType: file.type },
-          customMetadata: { originalName }
-        });
-        try {
-          await env.DB.prepare(
-            "INSERT INTO material_files (id, material_id, object_key, file_name, content_type, file_size) VALUES (?, ?, ?, ?, ?, ?)"
-          ).bind(id, materialId, objectKey, originalName, file.type, file.size).run();
-        } catch (error) {
-          await env.FILES.delete(objectKey);
-          throw error;
-        }
+        const fileData = await file.arrayBuffer();
+        await env.DB.prepare(
+          "INSERT INTO material_files (id, material_id, file_name, content_type, file_size, file_data) VALUES (?, ?, ?, ?, ?, ?)"
+        ).bind(id, materialId, originalName, file.type, file.size, fileData).run();
         saved.push({ id, file_name: originalName, content_type: file.type, file_size: file.size });
       }
       return json({ ok: true, files: saved });
@@ -248,10 +236,8 @@ async function handleApi(request, env) {
 
     const deleteFileRoute = url.pathname.match(/^\/api\/admin\/material-files\/([a-f0-9]+)$/);
     if (request.method === "DELETE" && deleteFileRoute) {
-      if (!env.FILES) return json({ error: "Хранилище файлов ещё не подключено." }, 503);
-      const file = await env.DB.prepare("SELECT id, object_key FROM material_files WHERE id = ?").bind(deleteFileRoute[1]).first();
+      const file = await env.DB.prepare("SELECT id FROM material_files WHERE id = ?").bind(deleteFileRoute[1]).first();
       if (!file) return json({ error: "Файл не найден." }, 404);
-      await env.FILES.delete(file.object_key);
       await env.DB.prepare("DELETE FROM material_files WHERE id = ?").bind(file.id).run();
       return json({ ok: true });
     }

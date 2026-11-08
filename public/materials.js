@@ -64,6 +64,60 @@
     });
   }
 
+  async function loadReaderFiles(item, target) {
+    const section = el("section", "materials-attachments");
+    section.append(el("h4", "materials-attachments-title", "ПРИКРЕПЛЁННЫЕ ФАЙЛЫ"));
+    section.append(el("p", "materials-files-loading", "Проверяем вложения…"));
+    target.append(section);
+    try {
+      const response = await fetch("/api/player/materials/" + encodeURIComponent(item.id) + "/files", { credentials: "same-origin" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Не удалось загрузить список вложений.");
+      section.replaceChildren(el("h4", "materials-attachments-title", "ПРИКРЕПЛЁННЫЕ ФАЙЛЫ"));
+      if (!data.files.length) {
+        section.append(el("p", "materials-files-loading", "К этому материалу файлы не прикреплены."));
+        return;
+      }
+      for (const file of data.files) {
+        const url = "/api/material-files/" + encodeURIComponent(file.id);
+        const card = el("div", "materials-file-card");
+        const info = el("div", "materials-file-info");
+        info.append(el("strong", "", file.file_name));
+        info.append(el("span", "", Math.max(1, Math.round(file.file_size / 1024)) + " КБ"));
+        card.append(info);
+        if (file.content_type.startsWith("image/")) {
+          const image = document.createElement("img");
+          image.className = "materials-file-image";
+          image.src = url;
+          image.alt = file.file_name;
+          image.loading = "lazy";
+          card.append(image);
+        } else if (file.content_type === "application/pdf") {
+          const frame = document.createElement("iframe");
+          frame.className = "materials-file-pdf";
+          frame.src = url;
+          frame.title = file.file_name;
+          frame.loading = "lazy";
+          card.append(frame);
+        } else if (file.content_type.startsWith("audio/")) {
+          const audio = document.createElement("audio");
+          audio.controls = true;
+          audio.preload = "none";
+          audio.src = url;
+          card.append(audio);
+        }
+        const link = el("a", "materials-file-open", "ОТКРЫТЬ ФАЙЛ");
+        link.href = url;
+        link.target = "_blank";
+        link.rel = "noopener";
+        card.append(link);
+        section.append(card);
+      }
+    } catch (error) {
+      section.replaceChildren(el("h4", "materials-attachments-title", "ПРИКРЕПЛЁННЫЕ ФАЙЛЫ"), el("p", "materials-files-loading is-error", error.message));
+    }
+  }
+
   function renderReader(item) {
     const reader = el("article", "materials-reader");
     const top = el("div", "materials-reader-top");
@@ -75,6 +129,7 @@
     const divider = el("div", "materials-reader-divider");
     const content = el("div", "materials-reader-content", item.content || "Текстовое содержание к этому материалу не добавлено.");
     reader.append(top, title, meta, summary, divider, content);
+    loadReaderFiles(item, reader);
 
     if (item.is_preview) {
       reader.append(el("p", "materials-preview-note", "Это административный предпросмотр. Материал не опубликован и недоступен игрокам."));

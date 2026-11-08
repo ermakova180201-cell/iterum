@@ -1387,50 +1387,33 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
 }
 
 
-/* Empty-house corridor, warm distant light and subtle displaced reflections */
+/* Distorted reality: a dim room, impossible mirror and cinematic shadows */
 #ambient-network {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  display: block;
-  pointer-events: none;
-  opacity: .88;
-  mix-blend-mode: screen;
+  position: fixed; inset: 0; z-index: 1; display: block;
+  pointer-events: none; opacity: .96; mix-blend-mode: screen;
 }
-body:has(#workspace:not([hidden])) #ambient-network { display: none; }
-body:not(:has(#workspace:not([hidden]))) { background: #0e1314 !important; }
+body:has(#workspace:not([hidden])) #ambient-network { display:none; }
+body:not(:has(#workspace:not([hidden]))) { background:#0c1112 !important; }
 body:not(:has(#workspace:not([hidden])))::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
   background:
-    radial-gradient(ellipse at 53% 42%, rgba(143,111,79,.14), transparent 35%),
-    radial-gradient(ellipse at 13% 62%, rgba(82,91,83,.13), transparent 35%),
-    linear-gradient(90deg, rgba(2,6,7,.42), transparent 48%, rgba(2,6,7,.42)),
-    linear-gradient(180deg, #151b1c 0%, #111718 58%, #171918 100%);
+    radial-gradient(ellipse at 50% 42%, rgba(116,128,111,.12), transparent 40%),
+    radial-gradient(ellipse at 82% 48%, rgba(90,113,110,.12), transparent 34%),
+    radial-gradient(ellipse at 12% 75%, rgba(112,82,59,.12), transparent 30%),
+    linear-gradient(180deg,#171d1d 0%,#101617 58%,#141817 100%);
 }
 body:not(:has(#workspace:not([hidden])))::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at center, transparent 24%, rgba(0,0,0,.58) 100%),
-    linear-gradient(90deg, rgba(0,0,0,.22), transparent 28% 72%, rgba(0,0,0,.24));
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 18%,rgba(0,0,0,.62) 100%),
+    linear-gradient(90deg,rgba(0,0,0,.2),transparent 30% 70%,rgba(0,0,0,.25));
 }
 body:not(:has(#workspace:not([hidden]))) > .topbar,
 body:not(:has(#workspace:not([hidden]))) > main,
-body:not(:has(#workspace:not([hidden]))) > footer {
-  position: relative;
-  z-index: 2;
-}
+body:not(:has(#workspace:not([hidden]))) > footer { position:relative; z-index:2; }
 body:not(:has(#workspace:not([hidden]))) .auth-panel {
-  background: linear-gradient(145deg, rgba(25,31,31,.88), rgba(13,18,19,.94)) !important;
-  border-color: rgba(166,155,132,.23);
-  box-shadow: 0 28px 85px rgba(0,0,0,.5), 0 0 72px rgba(111,103,80,.08), inset 0 1px rgba(255,255,255,.035);
+  background:linear-gradient(145deg,rgba(24,30,29,.91),rgba(12,17,18,.95)) !important;
+  border-color:rgba(165,171,151,.25);
+  box-shadow:0 28px 90px rgba(0,0,0,.56),0 0 75px rgba(104,127,112,.09),inset 0 1px rgba(255,255,255,.04);
 }
-@media (max-width: 620px) { #ambient-network { opacity: .58; } }
-@media (prefers-reduced-motion: reduce) { #ambient-network { opacity: .48; } }
+@media(max-width:620px){#ambient-network{opacity:.72;}}
+@media(prefers-reduced-motion:reduce){#ambient-network{opacity:.62;}}

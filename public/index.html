@@ -991,90 +991,79 @@
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const layer = document.createElement("div");
-      layer.className = "ambient-node-layer";
-      layer.setAttribute("aria-label", "Интерактивная сеть");
-      document.body.appendChild(layer);
-      const nodes = [
-        {x:.66,y:.27,label:"УЗЕЛ 01",detail:"Канал связи стабилен."},
-        {x:.91,y:.28,label:"УЗЕЛ 02",detail:"Сигнал проходит без потерь."},
-        {x:.94,y:.68,label:"УЗЕЛ 03",detail:"Архивный сектор отвечает."},
-        {x:.69,y:.76,label:"УЗЕЛ 04",detail:"Связь с локальным контуром активна."},
-        {x:.79,y:.48,label:"УЗЕЛ 05",detail:"Обнаружен неизвестный маршрут."}
+      const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const shards = [
+        {x:.13,y:.25,s:1.05,r:-.28,shape:[[-.9,-.35],[-.2,-.9],[.8,-.55],[.55,.35],[-.35,.9],[-.8,.25]]},
+        {x:.31,y:.72,s:.72,r:.42,shape:[[-.8,-.5],[.35,-.85],[.9,-.1],[.25,.8],[-.65,.55]]},
+        {x:.78,y:.19,s:.82,r:.18,shape:[[-.75,-.25],[-.15,-.9],[.8,-.55],[.65,.55],[-.2,.8]]},
+        {x:.9,y:.58,s:1.12,r:-.36,shape:[[-.7,-.55],[.15,-.9],[.85,-.2],[.45,.75],[-.55,.55]]},
+        {x:.18,y:.83,s:.48,r:-.12,shape:[[-.85,-.15],[-.25,-.8],[.75,-.45],[.55,.55],[-.35,.8]]},
+        {x:.68,y:.82,s:.62,r:.3,shape:[[-.75,-.4],[.1,-.85],[.85,-.15],[.35,.8],[-.65,.5]]},
+        {x:.48,y:.14,s:.42,r:-.2,shape:[[-.8,-.25],[-.1,-.8],[.8,-.35],[.5,.65],[-.55,.55]]}
       ];
-      let width=0,height=0,ratio=1,frame=0,last=0,selected=-1;
-      const buttons=[];
-      function center(){ return {x:width*(width<620?.5:.81),y:height*(width<620?.23:.51)}; }
+      let w=0,h=0,dpr=1,frame=0,last=0,px=-1000,py=-1000;
+      const pointer={x:-1000,y:-1000,active:false};
       function resize(){
-        width=innerWidth;height=innerHeight;ratio=Math.min(devicePixelRatio||1,1.5);
-        canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);
-        canvas.style.width=width+"px";canvas.style.height=height+"px";
-        ctx.setTransform(ratio,0,0,ratio,0,0);
-        layer.replaceChildren();buttons.length=0;
-        nodes.forEach((node,i)=>{
-          const b=document.createElement("button");
-          b.type="button";b.className="ambient-node";
-          b.setAttribute("aria-label","Открыть "+node.label);
-          b.innerHTML='<span></span><em>'+node.label+'</em>';
-          b.addEventListener("click",()=>{selected=selected===i?-1:i;buttons.forEach((item,j)=>item.classList.toggle("is-selected",j===selected));});
-          layer.appendChild(b);buttons.push(b);
-        });
-        placeNodes();
+        w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,1.6);
+        canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+        canvas.style.width=w+"px";canvas.style.height=h+"px";
+        ctx.setTransform(dpr,0,0,dpr,0,0);
       }
-      function placeNodes(){
-        const c=center();
-        nodes.forEach((n,i)=>{
-          const x=width*(width<620?(.16+i*.17):n.x);
-          const y=height*(width<620?(.42+(i%2)*.12):n.y);
-          buttons[i].style.left=x+"px";buttons[i].style.top=y+"px";
-        });
+      function polygon(points){
+        ctx.beginPath();
+        points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+        ctx.closePath();
       }
       function draw(time){
         frame=requestAnimationFrame(draw);
         if(document.hidden)return;
-        if(!reduced&&time-last<32)return;last=time;
-        const t=reduced?0:time,c=center(),r=Math.min(178,height*.27,width*.19);
-        ctx.clearRect(0,0,width,height);
-        // Fine network paths with a soft fade toward the login form.
-        ctx.save();
-        nodes.forEach((n,i)=>{
-          const p=buttons[i];if(!p)return;
-          const x=parseFloat(p.style.left),y=parseFloat(p.style.top);
-          const a=i===selected?.32:.12;
-          ctx.strokeStyle="rgba(91,190,190,"+a+")";ctx.lineWidth=1;
-          ctx.beginPath();ctx.moveTo(x,y);
-          const bendX=(x+c.x)/2+(i%2?18:-18);
-          ctx.lineTo(bendX,(y+c.y)/2);ctx.lineTo(c.x,c.y);ctx.stroke();
-          ctx.fillStyle="rgba(105,211,205,"+(i===selected?.8:.38)+")";
-          ctx.beginPath();ctx.arc(x,y,2.2,0,Math.PI*2);ctx.fill();
-          const pulse=reduced?0:(Math.sin(t*.0015+i*1.7)+1)*.5;
-          ctx.beginPath();ctx.arc(x,y,4+pulse*5,0,Math.PI*2);
-          ctx.strokeStyle="rgba(91,201,194,"+(.08+pulse*.13)+")";ctx.stroke();
+        if(!reduced&&time-last<30)return;last=time;
+        ctx.clearRect(0,0,w,h);
+        const scale=Math.min(w/1100,h/760,1.15);
+        shards.forEach((shard,i)=>{
+          const drift=reduced?0:Math.sin(time*.00022+i*1.8)*9;
+          const floatY=reduced?0:Math.cos(time*.00019+i*1.3)*7;
+          const cx=w*shard.x+drift,cy=h*shard.y+floatY;
+          const size=(82+((i*37)%48))*scale*shard.s;
+          const dx=pointer.active?cx-pointer.x:0,dy=pointer.active?cy-pointer.y:0;
+          const dist=Math.hypot(dx,dy)||1;
+          const influence=pointer.active?Math.max(0,1-dist/260):0;
+          const nudge=influence*18;
+          const angle=shard.r+(reduced?0:Math.sin(time*.00016+i)*.045)+dx*.00008*influence;
+          ctx.save();
+          ctx.translate(cx+(dx/dist)*nudge,cy+(dy/dist)*nudge);
+          ctx.rotate(angle);
+          ctx.scale(size,size);
+          polygon(shard.shape);
+          const glow=ctx.createLinearGradient(-.8,-.8,.8,.8);
+          glow.addColorStop(0,"rgba(170,224,222,"+(.055+influence*.09)+")");
+          glow.addColorStop(.48,"rgba(80,142,151,.035)");
+          glow.addColorStop(1,"rgba(18,39,50,.015)");
+          ctx.fillStyle=glow;ctx.fill();
+          ctx.strokeStyle="rgba(164,211,211,"+(.2+influence*.32)+")";
+          ctx.lineWidth=.009;ctx.stroke();
+          ctx.beginPath();ctx.moveTo(shard.shape[0][0],shard.shape[0][1]);ctx.lineTo(shard.shape[2][0],shard.shape[2][1]);ctx.lineTo(shard.shape[4][0],shard.shape[4][1]);
+          ctx.strokeStyle="rgba(170,220,218,.11)";ctx.lineWidth=.006;ctx.stroke();
+          ctx.beginPath();ctx.moveTo(-.62,-.12);ctx.lineTo(.42,.28);
+          ctx.strokeStyle="rgba(180,224,219,"+(.12+influence*.22)+")";ctx.lineWidth=.008;ctx.stroke();
+          ctx.restore();
         });
-        // Radar rings and rotating sweep.
-        ctx.translate(c.x,c.y);
-        for(let k=1;k<=4;k++){
-          ctx.beginPath();ctx.arc(0,0,r*k/4,0,Math.PI*2);
-          ctx.strokeStyle="rgba(91,190,190,"+(k===4?.19:.12)+")";ctx.lineWidth=1;ctx.stroke();
+        // A restrained light leak follows the pointer, as if the surface were thin glass.
+        if(pointer.active&&!reduced){
+          const halo=ctx.createRadialGradient(pointer.x,pointer.y,0,pointer.x,pointer.y,210);
+          halo.addColorStop(0,"rgba(117,205,199,.075)");
+          halo.addColorStop(1,"rgba(117,205,199,0)");
+          ctx.fillStyle=halo;ctx.fillRect(pointer.x-210,pointer.y-210,420,420);
         }
-        ctx.strokeStyle="rgba(91,190,190,.12)";
-        ctx.beginPath();ctx.moveTo(-r,0);ctx.lineTo(r,0);ctx.moveTo(0,-r);ctx.lineTo(0,r);ctx.stroke();
-        const angle=reduced?-.7:t*.00032;
-        const grad=ctx.createConicGradient(angle,0,0);
-        grad.addColorStop(0,"rgba(85,205,198,.22)");grad.addColorStop(.16,"rgba(85,205,198,.025)");grad.addColorStop(.17,"rgba(85,205,198,0)");grad.addColorStop(1,"rgba(85,205,198,0)");
-        ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,0,Math.PI*2);ctx.closePath();ctx.fill();
-        ctx.save();ctx.rotate(angle);ctx.strokeStyle="rgba(117,224,215,.58)";ctx.lineWidth=1.2;
-        ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(r,0);ctx.stroke();ctx.restore();
-        ctx.fillStyle="rgba(125,220,211,.7)";ctx.beginPath();ctx.arc(0,0,2.5,0,Math.PI*2);ctx.fill();
-        ctx.restore();
-        // Keep the centre of the page quiet behind the access form.
-        const fade=ctx.createRadialGradient(width*.5,height*.48,Math.min(width,height)*.12,width*.5,height*.48,Math.max(width,height)*.7);
-        fade.addColorStop(0,"rgba(0,5,10,0)");fade.addColorStop(1,"rgba(0,3,8,.58)");
-        ctx.fillStyle=fade;ctx.fillRect(0,0,width,height);
+        const vignette=ctx.createRadialGradient(w*.5,h*.48,Math.min(w,h)*.12,w*.5,h*.48,Math.max(w,h)*.72);
+        vignette.addColorStop(0,"rgba(0,4,9,0)");
+        vignette.addColorStop(1,"rgba(0,3,8,.62)");
+        ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
       }
-      window.addEventListener("resize",resize,{passive:true});
-      window.addEventListener("pagehide",()=>cancelAnimationFrame(frame),{once:true});
+      addEventListener("resize",resize,{passive:true});
+      addEventListener("pointermove",e=>{pointer.x=e.clientX;pointer.y=e.clientY;pointer.active=true;},{passive:true});
+      addEventListener("pointerleave",()=>{pointer.active=false;},{passive:true});
+      addEventListener("pagehide",()=>cancelAnimationFrame(frame),{once:true});
       resize();frame=requestAnimationFrame(draw);
     })();
   </script>

@@ -91,6 +91,44 @@
           image.src = url;
           image.alt = file.file_name;
           image.loading = "lazy";
+          image.tabIndex = 0;
+          image.setAttribute("role", "button");
+          image.setAttribute("aria-label", "Открыть фотографию в увеличенном виде: " + file.file_name);
+          image.title = "Нажмите, чтобы увеличить";
+          const openImage = () => {
+            const overlay = el("div", "materials-image-lightbox");
+            overlay.setAttribute("role", "dialog");
+            overlay.setAttribute("aria-modal", "true");
+            overlay.setAttribute("aria-label", file.file_name);
+            const close = el("button", "materials-image-lightbox-close", "ЗАКРЫТЬ ✕");
+            close.type = "button";
+            const large = document.createElement("img");
+            large.src = url;
+            large.alt = file.file_name;
+            const caption = el("div", "materials-image-lightbox-caption", file.file_name);
+            overlay.append(close, large, caption);
+            const closeOverlay = () => {
+              overlay.remove();
+              document.removeEventListener("keydown", onKeyDown);
+            };
+            const onKeyDown = event => {
+              if (event.key === "Escape") closeOverlay();
+            };
+            close.addEventListener("click", closeOverlay);
+            overlay.addEventListener("click", event => {
+              if (event.target === overlay) closeOverlay();
+            });
+            document.addEventListener("keydown", onKeyDown);
+            document.body.append(overlay);
+            close.focus();
+          };
+          image.addEventListener("click", openImage);
+          image.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              openImage();
+            }
+          });
           card.append(image);
         } else if (file.content_type === "application/pdf") {
           const frame = document.createElement("iframe");

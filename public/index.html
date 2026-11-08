@@ -412,6 +412,7 @@
     }
 
     function showCaseList() {
+      document.body.classList.remove('is-workstation');
       currentCaseId = null;
       availableCases.hidden = false;
       playerArchive.hidden = true;
@@ -419,6 +420,7 @@
     }
 
     function openCase(caseId) {
+      document.body.classList.add('is-workstation');
       const selected = archiveCases.find(item => item.id === caseId);
       if (!selected) return;
       currentCaseId = caseId;

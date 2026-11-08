@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=case-gallery-01">
+  <link rel="stylesheet" href="/styles.css?v=case-gallery-02">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -25,6 +25,7 @@
       <span class="topbar-status" id="topbar-status">ОЖИДАНИЕ АВТОРИЗАЦИИ</span>
       <span class="topbar-divider"></span>
       <span class="topbar-version">v. 01</span>
+      <button class="topbar-logout" id="auth-logout" type="button" hidden>ВЫЙТИ ИЗ СИСТЕМЫ</button>
     </div>
   </header>
 
@@ -240,7 +241,6 @@
 
       <div class="auth-user" id="auth-user" hidden>
         <p id="auth-user-email"></p>
-        <button class="auth-submit" id="auth-logout" type="button">ВЫЙТИ</button>
       </div>
     </section>
 
@@ -335,6 +335,7 @@
             : "НЕТ СВЯЗИ С БАЗОЙ";
           authForm.hidden = true;
           authUser.hidden = false;
+          authLogout.hidden = false;
           authUserEmail.textContent = "Вы вошли как " + data.user.email;
           isAdminSession = Boolean(data.isAdmin);
           adminPanel.hidden = !data.isAdmin;
@@ -350,6 +351,7 @@
           topbarStatus.textContent = "ОЖИДАНИЕ АВТОРИЗАЦИИ";
           authForm.hidden = false;
           authUser.hidden = true;
+          authLogout.hidden = true;
         }
       } catch {
         showMessage("Не удалось проверить доступ. Обновите страницу.", true);

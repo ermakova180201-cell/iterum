@@ -55,34 +55,20 @@
         <span class="member-status" id="database-status">ПРОВЕРКА БАЗЫ…</span>
       </div>
 
-      <div class="case-card">
-        <div class="case-card-top">
-          <span class="micro-label">АКТИВНОЕ ДЕЛО</span>
-          <span class="case-state"><i></i> ОЖИДАЕТ НАЧАЛА</span>
+      <section class="available-cases" id="available-cases" aria-label="Доступные дела">
+        <div class="section-heading">
+          <div><p class="section-kicker">АРХИВ РАССЛЕДОВАНИЙ</p><h2>Доступные дела</h2></div>
+          <span class="archive-stamp">СПИСОК ДЕЛ</span>
         </div>
-        <div class="case-card-main">
-          <div>
-            <p class="case-date">28 МАЯ 2025</p>
-            <h3>Обстоятельства<br>происшествия</h3>
-            <p class="case-description">Расследование ещё не начато.<br>Новые материалы будут появляться здесь по мере открытия дела.</p>
-          </div>
-          <div class="case-index" aria-hidden="true">
-            <span>№</span>
-            <strong>01</strong>
-            <small>CASE FILE</small>
-          </div>
-        </div>
-        <div class="case-card-bottom">
-          <span>СТАТУС: НЕ НАЧАТО</span>
-          <span>МАТЕРИАЛЫ: ЗАКРЫТЫ</span>
-        </div>
-      </div>
+        <div id="available-case-list" class="available-case-list"><p class="player-empty">Загружаем список дел…</p></div>
+      </section>
 
 
       <section class="player-archive" id="player-archive" hidden>
         <div class="desktop-shell">
           <div class="desktop-toolbar">
             <div class="desktop-window-title"><span class="desktop-led"></span> ITERUM / РАБОЧАЯ СТАНЦИЯ</div>
+            <button class="all-cases-button" id="all-cases-button" type="button">← ВСЕ ДЕЛА</button>
             <div class="desktop-toolbar-right"><span id="desktop-case-label">ДЕЛО ОТКРЫТО</span><span id="player-archive-count"></span></div>
           </div>
           <div class="desktop-area">
@@ -144,8 +130,6 @@
             <span class="taskbar-clock" id="desktop-clock">ЛОКАЛЬНАЯ СИСТЕМА</span>
           </div>
         </div>
-        <div id="player-case-list" class="player-case-list" hidden></div>
-
       </section>
 
       <div class="modules-heading">
@@ -336,6 +320,12 @@
     const adminMaterialList = document.getElementById("admin-material-list");
     const adminCaseList = document.getElementById("admin-case-list");
     const playerArchive = document.getElementById("player-archive");
+    const availableCases = document.getElementById("available-cases");
+    const availableCaseList = document.getElementById("available-case-list");
+    const allCasesButton = document.getElementById("all-cases-button");
+    let archiveCases = [];
+    let archiveMaterials = [];
+    let currentCaseId = null;
     const playerCaseList = document.getElementById("player-case-list");
     const playerMaterialList = document.getElementById("player-material-list");
     const playerArchiveCount = document.getElementById("player-archive-count");
@@ -449,123 +439,132 @@
       if (!response.ok) throw new Error("Не удалось открыть материал.");
     }
 
+    function showCaseList() {
+      currentCaseId = null;
+      availableCases.hidden = false;
+      playerArchive.hidden = true;
+      playerArchive.querySelectorAll(".desktop-window").forEach(win => { win.hidden = true; });
+    }
+
+    function openCase(caseId) {
+      const selected = archiveCases.find(item => item.id === caseId);
+      if (!selected) return;
+      currentCaseId = caseId;
+      try { localStorage.setItem("iterum:last-case:" + memberEmail.textContent, caseId); } catch {}
+      availableCases.hidden = true;
+      playerArchive.hidden = false;
+      const caseMaterials = archiveMaterials.filter(item => item.case_id === caseId);
+      const isDraftPreview = isAdminSession && (selected.status === "draft" || caseMaterials.some(item => item.is_preview));
+      document.getElementById("desktop-case-name").textContent = selected.title;
+      document.getElementById("desktop-case-label").textContent = isDraftPreview ? "ЧЕРНОВИК / ПРЕДПРОСМОТР" : selected.case_code;
+      playerArchiveCount.textContent = caseMaterials.length + " МАТЕРИАЛОВ";
+      playerMaterialList.replaceChildren();
+      playerMailList.replaceChildren();
+      playerSearchResults.replaceChildren();
+      const emails = caseMaterials.filter(item => item.material_type === "email");
+      const unreadEmails = emails.filter(item => !item.is_read).length;
+      playerMailCount.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
+      document.getElementById("desktop-mail-badge").textContent = unreadEmails ? unreadEmails + " НОВЫХ" : "ВХОДЯЩИЕ";
+      if (!emails.length) {
+        selectedMailId = null;
+        const empty = document.createElement("p");
+        empty.className = "player-empty";
+        empty.textContent = "Входящих сообщений пока нет.";
+        playerMailList.append(empty);
+      } else {
+        if (!emails.some(item => item.id === selectedMailId)) selectedMailId = emails[0].id;
+        const list = document.createElement("div");
+        list.className = "mail-inbox-list";
+        const reader = document.createElement("article");
+        reader.className = "mail-reader";
+        for (const item of emails) {
+          const entry = document.createElement("button");
+          entry.type = "button";
+          entry.className = "mail-inbox-entry" + (item.id === selectedMailId ? " is-active" : "") + (!item.is_read ? " is-unread" : "");
+          const sender = document.createElement("span"); sender.className = "mail-entry-sender"; sender.textContent = item.sender_name || "Неизвестный отправитель";
+          const date = document.createElement("time"); date.textContent = item.sent_at || "";
+          const subject = document.createElement("strong"); subject.textContent = item.title;
+          const preview = document.createElement("small"); preview.textContent = item.summary || "Нет краткого описания";
+          entry.append(sender, date, subject, preview);
+          entry.addEventListener("click", async () => {
+            selectedMailId = item.id;
+            if (!item.is_read) { try { await markMaterialRead(item.id); } catch { return; } }
+            await loadPlayerArchive();
+            openCase(caseId);
+          });
+          list.append(entry);
+        }
+        const selectedMail = emails.find(item => item.id === selectedMailId) || emails[0];
+        const top = document.createElement("div"); top.className = "mail-reader-top";
+        const kicker = document.createElement("span"); kicker.className = "section-kicker"; kicker.textContent = "ВХОДЯЩЕЕ СООБЩЕНИЕ";
+        const date = document.createElement("time"); date.textContent = selectedMail.sent_at || ""; top.append(kicker, date);
+        const subject = document.createElement("h3"); subject.className = "mail-reader-subject"; subject.textContent = selectedMail.title;
+        const from = document.createElement("div"); from.className = "mail-reader-from"; from.textContent = (selectedMail.sender_name || "Неизвестный отправитель") + (selectedMail.sender_address ? "  ·  " + selectedMail.sender_address : "");
+        const divider = document.createElement("div"); divider.className = "mail-reader-divider";
+        const body = document.createElement("div"); body.className = "mail-reader-body"; body.textContent = selectedMail.content || "Содержание письма не добавлено.";
+        reader.append(top, subject, from, divider, body); playerMailList.append(list, reader);
+      }
+      const otherMaterials = caseMaterials.filter(item => item.material_type !== "email");
+      if (window.renderMaterialsArchive) window.renderMaterialsArchive(otherMaterials);
+      const searchEmpty = document.createElement("p");
+      searchEmpty.className = "player-empty";
+      searchEmpty.textContent = "Введите запрос, чтобы найти сведения в материалах этого дела.";
+      playerSearchResults.append(searchEmpty);
+    }
+
     async function loadPlayerArchive() {
       try {
         const response = await fetch("/api/player/archive", { credentials: "same-origin" });
         if (!response.ok) throw new Error("Не удалось загрузить архив.");
         const data = await response.json();
-        playerArchive.hidden = !data.cases.length && !isAdminSession;
-        playerCaseList.replaceChildren();
-        playerMaterialList.replaceChildren();
-        playerMailList.replaceChildren();
-        if (!data.cases.length) {
+        archiveCases = data.cases || [];
+        archiveMaterials = data.materials || [];
+        availableCaseList.replaceChildren();
+        if (!archiveCases.length) {
+          const empty = document.createElement("p");
+          empty.className = "player-empty";
+          empty.textContent = isAdminSession ? "Пока нет созданных дел. Создайте дело в панели управления — здесь появится его карточка для предварительного просмотра." : "Пока нет доступных расследований. Когда появится новое дело, оно будет отображаться здесь.";
+          availableCaseList.append(empty);
+          showCaseList();
           if (isAdminSession) {
+            const previewCase = { id: null, title: "Предварительный просмотр" };
+            playerArchive.hidden = false;
             playerArchiveCount.textContent = "ПРЕДПРОСМОТР";
             document.getElementById("desktop-case-label").textContent = "ЧЕРНОВИК / НЕ ОПУБЛИКОВАНО";
-            document.getElementById("desktop-case-name").textContent = "Дело пока не опубликовано";
-            document.getElementById("desktop-mail-badge").textContent = "ПОКА ПУСТО";
-            const mailEmpty = document.createElement("p");
-            mailEmpty.className = "player-empty";
-            mailEmpty.textContent = "Почта пока пуста. Сообщения появятся здесь после публикации материалов дела.";
-            playerMailList.append(mailEmpty);
-            const materialEmpty = document.createElement("p");
-            materialEmpty.className = "player-empty";
-            materialEmpty.textContent = "Материалы появятся здесь после публикации дела и открытия первых документов.";
-            playerMaterialList.append(materialEmpty);
-            const searchEmpty = document.createElement("p");
-            searchEmpty.className = "player-empty";
-            searchEmpty.textContent = "Поиск данных станет доступен, когда в деле появятся опубликованные досье.";
-            playerSearchResults.replaceChildren(searchEmpty);
+            document.getElementById("desktop-case-name").textContent = previewCase.title;
+            playerMailList.replaceChildren();
+            playerMaterialList.replaceChildren();
           }
           return;
         }
-        playerArchiveCount.textContent = data.materials.length + " МАТЕРИАЛОВ";
-        const desktopCaseName = document.getElementById("desktop-case-name");
-        if (desktopCaseName && data.cases[0]) desktopCaseName.textContent = data.cases[0].title;
-        const desktopCaseLabel = document.getElementById("desktop-case-label");
-        const isDraftPreview = isAdminSession && data.materials.some(item => item.is_preview);
-        if (desktopCaseLabel && data.cases[0]) desktopCaseLabel.textContent = isDraftPreview ? "ЧЕРНОВИК / ПРЕДПРОСМОТР" : data.cases[0].case_code;
-        for (const item of data.cases) {
-          const caseLine = document.createElement("div");
-          caseLine.className = "player-case";
-          const name = document.createElement("strong");
-          name.textContent = item.title;
-          const code = document.createElement("span");
-          code.textContent = item.case_code;
-          caseLine.append(name, code);
-          playerCaseList.append(caseLine);
+        for (const item of archiveCases) {
+          const card = document.createElement("article");
+          card.className = "available-case-card";
+          const top = document.createElement("div"); top.className = "available-case-top";
+          const code = document.createElement("span"); code.className = "micro-label"; code.textContent = item.case_code;
+          const state = document.createElement("span"); state.className = "case-state"; state.textContent = item.status === "draft" ? "ЧЕРНОВИК" : "ДОСТУПНО";
+          top.append(code, state);
+          const title = document.createElement("h3"); title.textContent = item.title;
+          const description = document.createElement("p"); description.textContent = item.description || "Материалы расследования и доступные сведения.";
+          const count = document.createElement("p"); count.className = "available-case-meta";
+          const countMaterials = archiveMaterials.filter(material => material.case_id === item.id).length;
+          count.textContent = "ДОСТУПНО МАТЕРИАЛОВ: " + countMaterials;
+          const start = document.createElement("button"); start.type = "button"; start.className = "case-start-button"; start.textContent = "НАЧАТЬ РАССЛЕДОВАНИЕ";
+          start.addEventListener("click", () => openCase(item.id));
+          card.append(top, title, description, count, start);
+          availableCaseList.append(card);
         }
-
-        const emails = data.materials.filter(item => item.material_type === "email");
-        const unreadEmails = emails.filter(item => !item.is_read).length;
-        playerMailCount.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
-        const desktopMailBadge = document.getElementById("desktop-mail-badge");
-        if (desktopMailBadge) desktopMailBadge.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : "ВХОДЯЩИЕ";
-        if (!emails.length) {
-          selectedMailId = null;
-          const empty = document.createElement("p");
-          empty.className = "player-empty";
-          empty.textContent = "Входящих сообщений пока нет.";
-          playerMailList.append(empty);
-        } else {
-          if (!emails.some(item => item.id === selectedMailId)) selectedMailId = emails[0].id;
-          const list = document.createElement("div");
-          list.className = "mail-inbox-list";
-          const reader = document.createElement("article");
-          reader.className = "mail-reader";
-          for (const item of emails) {
-            const entry = document.createElement("button");
-            entry.type = "button";
-            entry.className = "mail-inbox-entry" + (item.id === selectedMailId ? " is-active" : "") + (!item.is_read ? " is-unread" : "");
-            const sender = document.createElement("span");
-            sender.className = "mail-entry-sender";
-            sender.textContent = item.sender_name || "Неизвестный отправитель";
-            const date = document.createElement("time");
-            date.textContent = item.sent_at || "";
-            const subject = document.createElement("strong");
-            subject.textContent = item.title;
-            const preview = document.createElement("small");
-            preview.textContent = item.summary || "Нет краткого описания";
-            entry.append(sender, date, subject, preview);
-            entry.addEventListener("click", async () => {
-              selectedMailId = item.id;
-              if (!item.is_read) {
-                try { await markMaterialRead(item.id); } catch { return; }
-              }
-              await loadPlayerArchive();
-            });
-            list.append(entry);
-          }
-          const selected = emails.find(item => item.id === selectedMailId) || emails[0];
-          const top = document.createElement("div");
-          top.className = "mail-reader-top";
-          const kicker = document.createElement("span");
-          kicker.className = "section-kicker";
-          kicker.textContent = "ВХОДЯЩЕЕ СООБЩЕНИЕ";
-          const date = document.createElement("time");
-          date.textContent = selected.sent_at || "";
-          top.append(kicker, date);
-          const subject = document.createElement("h3");
-          subject.className = "mail-reader-subject";
-          subject.textContent = selected.title;
-          const from = document.createElement("div");
-          from.className = "mail-reader-from";
-          from.textContent = (selected.sender_name || "Неизвестный отправитель") + (selected.sender_address ? "  ·  " + selected.sender_address : "");
-          const divider = document.createElement("div");
-          divider.className = "mail-reader-divider";
-          const body = document.createElement("div");
-          body.className = "mail-reader-body";
-          body.textContent = selected.content || "Содержание письма не добавлено.";
-          reader.append(top, subject, from, divider, body);
-          playerMailList.append(list, reader);
-        }
-
-        const otherMaterials = data.materials.filter(item => item.material_type !== "email");
-        if (window.renderMaterialsArchive) window.renderMaterialsArchive(otherMaterials);
+        let lastCase = null;
+        try { lastCase = localStorage.getItem("iterum:last-case:" + memberEmail.textContent); } catch {}
+        showCaseList();
+        if (lastCase && archiveCases.some(item => item.id === lastCase)) openCase(lastCase);
       } catch {
-        playerArchive.hidden = true;
+        availableCaseList.textContent = "Не удалось загрузить список дел. Обновите страницу.";
+        showCaseList();
       }
     }
+
+    allCasesButton.addEventListener("click", showCaseList);
 
     const desktopShell = document.querySelector(".desktop-shell");
     if (desktopShell) {
@@ -605,18 +604,19 @@
       loading.textContent = "Выполняется поиск…";
       playerSearchResults.append(loading);
       try {
-        const response = await fetch("/api/player/search?q=" + encodeURIComponent(query), { credentials: "same-origin" });
+        const response = await fetch("/api/player/search?q=" + encodeURIComponent(query) + "&caseId=" + encodeURIComponent(currentCaseId || ""), { credentials: "same-origin" });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Поиск не выполнен.");
         playerSearchResults.replaceChildren();
-        if (!data.results.length) {
+        const scopedResults = data.results.filter(item => item.case_id === currentCaseId);
+        if (!scopedResults.length) {
           const empty = document.createElement("p");
           empty.className = "player-empty";
           empty.textContent = "По вашему запросу ничего не найдено.";
           playerSearchResults.append(empty);
           return;
         }
-        for (const item of data.results) {
+        for (const item of scopedResults) {
           const card = document.createElement("article");
           card.className = "player-search-result";
           const title = document.createElement("h3");

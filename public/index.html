@@ -105,5 +105,98 @@
     <span>ITERUM <b>—</b> CASE ARCHIVE</span>
     <span>ЧАСТНОЕ РАССЛЕДОВАНИЕ <b>·</b> 2025</span>
   </footer>
+  <script>
+    const authForm = document.getElementById("auth-form");
+    const authTitle = document.getElementById("auth-title");
+    const authDescription = document.getElementById("auth-description");
+    const authSwitch = document.getElementById("auth-switch");
+    const authSubmit = document.getElementById("auth-submit");
+    const authMessage = document.getElementById("auth-message");
+    const authUser = document.getElementById("auth-user");
+    const authUserEmail = document.getElementById("auth-user-email");
+    const authLogout = document.getElementById("auth-logout");
+    let registering = false;
+
+    function showMessage(message, error = false) {
+      authMessage.textContent = message;
+      authMessage.classList.toggle("is-error", error);
+    }
+
+    function setMode(isRegistering) {
+      registering = isRegistering;
+      authTitle.textContent = registering ? "Создать учётную запись" : "Войти в архив";
+      authDescription.textContent = registering
+        ? "Создайте личную учётную запись для доступа к архиву."
+        : "Войдите в свою учётную запись или создайте новую, чтобы начать работу с делом.";
+      authSubmit.textContent = registering ? "ЗАРЕГИСТРИРОВАТЬСЯ" : "ВОЙТИ";
+      authSwitch.textContent = registering ? "У меня уже есть учётная запись" : "Создать учётную запись";
+      document.getElementById("auth-password").autocomplete = registering ? "new-password" : "current-password";
+      showMessage("");
+    }
+
+    async function refreshAuth() {
+      try {
+        const response = await fetch("/api/me", { credentials: "same-origin" });
+        const data = await response.json();
+        if (data.authenticated) {
+          authForm.hidden = true;
+          authUser.hidden = false;
+          authUserEmail.textContent = "Вы вошли как " + data.user.email;
+        } else {
+          authForm.hidden = false;
+          authUser.hidden = true;
+        }
+      } catch {
+        showMessage("Не удалось проверить доступ. Обновите страницу.", true);
+      }
+    }
+
+    authSwitch.addEventListener("click", () => setMode(!registering));
+    authForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      authSubmit.disabled = true;
+      showMessage("Проверяем данные…");
+      const payload = {
+        email: document.getElementById("auth-email").value,
+        password: document.getElementById("auth-password").value
+      };
+      try {
+        const response = await fetch(registering ? "/api/register" : "/api/login", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          showMessage(data.error || "Не удалось выполнить запрос.", true);
+        } else {
+          authForm.reset();
+          setMode(false);
+          await refreshAuth();
+          showMessage(registering ? "Учётная запись создана." : "Вход выполнен.");
+        }
+      } catch {
+        showMessage("Не удалось связаться с сервером. Попробуйте ещё раз.", true);
+      } finally {
+        authSubmit.disabled = false;
+      }
+    });
+
+    authLogout.addEventListener("click", async () => {
+      authLogout.disabled = true;
+      try {
+        await fetch("/api/logout", { method: "POST", credentials: "same-origin" });
+        await refreshAuth();
+        showMessage("Вы вышли из учётной записи.");
+      } catch {
+        showMessage("Не удалось завершить сеанс.", true);
+      } finally {
+        authLogout.disabled = false;
+      }
+    });
+
+    refreshAuth();
+  </script>
 </body>
 </html>

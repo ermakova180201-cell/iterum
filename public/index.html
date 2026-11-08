@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-10">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-11">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -1006,74 +1006,64 @@
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       }
 
+      function fogCloud(x, y, rx, ry, alpha, drift, time, phase) {
+        const moveX = reduced ? 0 : Math.sin(time * drift + phase) * width * .035;
+        const moveY = reduced ? 0 : Math.cos(time * drift * .7 + phase) * height * .025;
+        const cx = x + moveX + (pointerX - .5) * 13;
+        const cy = y + moveY + (pointerY - .5) * 8;
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, rx);
+        gradient.addColorStop(0, "rgba(151,165,154," + alpha + ")");
+        gradient.addColorStop(.38, "rgba(112,132,124," + (alpha * .62) + ")");
+        gradient.addColorStop(.72, "rgba(77,96,91," + (alpha * .22) + ")");
+        gradient.addColorStop(1, "rgba(48,63,61,0)");
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(1, ry / rx);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(0, 0, rx, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
       function draw(time) {
         frame = requestAnimationFrame(draw);
         if (document.hidden) return;
-        const t = reduced ? 0 : time * .00012;
-        pointerX += (targetX - pointerX) * .018;
-        pointerY += (targetY - pointerY) * .018;
-        const driftX = (pointerX - .5) * 24;
-        const driftY = (pointerY - .5) * 15;
+        const t = reduced ? 0 : time * .000055;
+        pointerX += (targetX - pointerX) * .012;
+        pointerY += (targetY - pointerY) * .012;
         ctx.clearRect(0, 0, width, height);
 
-        const deep = ctx.createLinearGradient(0, 0, width, height);
-        deep.addColorStop(0, "rgba(18,29,31,.12)");
-        deep.addColorStop(.48, "rgba(8,17,20,.06)");
-        deep.addColorStop(1, "rgba(3,9,12,.28)");
-        ctx.fillStyle = deep;
+        const base = ctx.createLinearGradient(0, 0, width * .2, height);
+        base.addColorStop(0, "rgba(18,27,27,.12)");
+        base.addColorStop(.55, "rgba(8,15,16,.08)");
+        base.addColorStop(1, "rgba(2,7,9,.2)");
+        ctx.fillStyle = base;
         ctx.fillRect(0, 0, width, height);
 
-        // Distant, diffused light filtering through a deep layer of water.
-        const lightX = width * (.52 + Math.sin(t * .7) * .035) + driftX;
-        const light = ctx.createRadialGradient(lightX, height * .12 + driftY, 2, lightX, height * .3, height * .9);
-        light.addColorStop(0, "rgba(151,173,160,.16)");
-        light.addColorStop(.28, "rgba(92,126,119,.075)");
-        light.addColorStop(1, "rgba(42,75,75,0)");
-        ctx.fillStyle = light;
+        // Soft, irregular fog banks: broad gradients overlap without forming visible waves or objects.
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        ctx.filter = "blur(54px)";
+        fogCloud(width * .18, height * .48, width * .42, height * .24, .075, .34, t, .2);
+        fogCloud(width * .53, height * .34, width * .48, height * .28, .065, .26, t, 2.1);
+        fogCloud(width * .83, height * .62, width * .4, height * .25, .055, .3, t, 4.4);
+        fogCloud(width * .43, height * .83, width * .55, height * .2, .045, .2, t, 1.2);
+        ctx.filter = "blur(24px)";
+        fogCloud(width * .28, height * .27, width * .3, height * .17, .035, .22, t, 3.4);
+        fogCloud(width * .72, height * .43, width * .34, height * .19, .032, .18, t, 5.2);
+        ctx.restore();
+
+        const depth = ctx.createLinearGradient(0, 0, 0, height);
+        depth.addColorStop(0, "rgba(160,174,164,.025)");
+        depth.addColorStop(.42, "rgba(53,72,68,.015)");
+        depth.addColorStop(1, "rgba(0,0,0,.24)");
+        ctx.fillStyle = depth;
         ctx.fillRect(0, 0, width, height);
-
-        // Broad translucent currents; no recognizable shapes or objects.
-        for (let layer = 0; layer < 7; layer++) {
-          const baseY = height * (.22 + layer * .115);
-          const amplitude = height * (.025 + layer * .006);
-          ctx.beginPath();
-          for (let x = -30; x <= width + 30; x += 18) {
-            const wave = Math.sin(x * .0032 + t * (1.1 + layer * .08) + layer) * amplitude;
-            const second = Math.sin(x * .0015 - t * .65 + layer * 1.7) * amplitude * .7;
-            const y = baseY + wave + second + driftY * (layer / 7);
-            if (x === -30) ctx.moveTo(x + driftX * (layer / 7), y);
-            else ctx.lineTo(x + driftX * (layer / 7), y);
-          }
-          ctx.lineTo(width + 30, height + 20);
-          ctx.lineTo(-30, height + 20);
-          ctx.closePath();
-          const shade = .018 + layer * .004;
-          ctx.fillStyle = layer % 2
-            ? "rgba(91,126,119," + shade + ")"
-            : "rgba(121,145,132," + shade + ")";
-          ctx.fill();
-        }
-
-        // Very soft vertical shafts, blurred into the darkness.
-        for (let ray = 0; ray < 5; ray++) {
-          const x = width * (.18 + ray * .16) + Math.sin(t * .45 + ray) * 26 + driftX * .35;
-          const rayGradient = ctx.createLinearGradient(x, 0, x + 55, height * .82);
-          rayGradient.addColorStop(0, "rgba(168,185,164,0)");
-          rayGradient.addColorStop(.32, "rgba(168,185,164," + (reduced ? ".012" : ".022") + ")");
-          rayGradient.addColorStop(1, "rgba(168,185,164,0)");
-          ctx.fillStyle = rayGradient;
-          ctx.beginPath();
-          ctx.moveTo(x - 12, 0);
-          ctx.lineTo(x + 12, 0);
-          ctx.lineTo(x + 75, height);
-          ctx.lineTo(x + 18, height);
-          ctx.closePath();
-          ctx.fill();
-        }
 
         const vignette = ctx.createRadialGradient(width * .5, height * .48, height * .12, width * .5, height * .48, Math.max(width, height) * .78);
         vignette.addColorStop(0, "rgba(0,0,0,0)");
-        vignette.addColorStop(1, "rgba(0,0,0,.68)");
+        vignette.addColorStop(1, "rgba(0,0,0,.62)");
         ctx.fillStyle = vignette;
         ctx.fillRect(0, 0, width, height);
       }

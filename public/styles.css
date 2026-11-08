@@ -1416,8 +1416,8 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
   box-shadow: 0 28px 90px rgba(0,0,0,.58), 0 0 75px rgba(91,112,101,.07), inset 0 1px rgba(255,255,255,.035);
 }
 @media (max-width: 620px) {
-  #ambient-network { opacity: .9; }
+  #ambient-network { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  #ambient-network { opacity: .9; }
+  #ambient-network { opacity: 1; }
 }

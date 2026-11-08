@@ -242,6 +242,17 @@
         <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
       </form>
 
+      <div class="system-interactions" id="system-interactions" aria-label="Инструменты системы">
+        <div class="system-control-row">
+          <button type="button" class="system-tool-button" id="system-diagnostics">ПРОВЕРИТЬ СОЕДИНЕНИЕ</button>
+          <button type="button" class="system-tool-button" id="system-scan">СКАНИРОВАНИЕ</button>
+        </div>
+        <button type="button" class="system-status-trigger" id="system-status-trigger" aria-live="polite">
+          <span class="system-status-light"></span><span id="system-status-label">СИСТЕМА ГОТОВА</span><span class="system-status-hint">· открыть журнал</span>
+        </button>
+        <div class="system-output" id="system-output" role="status" aria-live="polite" hidden></div>
+      </div>
+
       <div class="auth-user" id="auth-user" hidden>
         <p id="auth-user-email"></p>
         <button class="auth-submit" id="auth-logout" type="button">ВЫЙТИ</button>
@@ -1114,5 +1125,126 @@
     })();
   </script>
 
+
+  <script>
+    (() => {
+      const panel = document.getElementById("system-interactions");
+      if (!panel) return;
+      const diagnostics = document.getElementById("system-diagnostics");
+      const scan = document.getElementById("system-scan");
+      const status = document.getElementById("system-status-trigger");
+      const statusLabel = document.getElementById("system-status-label");
+      const output = document.getElementById("system-output");
+      const messages = [
+        "Обнаружено несоответствие в архиве. Источник не определён.",
+        "Сигнал памяти нестабилен. Повторная проверка отложена.",
+        "В журнале найден фрагмент без временной метки."
+      ];
+      let anomalyShown = false;
+      let diagnosticTimer = null;
+
+      function showOutput(lines, kind) {
+        output.hidden = false;
+        output.className = "system-output" + (kind ? " " + kind : "");
+        output.innerHTML = lines.map(line => '<div>' + line + '</div>').join("");
+      }
+      function runDiagnostics() {
+        clearTimeout(diagnosticTimer);
+        diagnostics.disabled = true;
+        diagnostics.textContent = "ИДЁТ ПРОВЕРКА…";
+        statusLabel.textContent = "ВЫПОЛНЯЕТСЯ ДИАГНОСТИКА";
+        const steps = [
+          "Инициализация интерфейса…",
+          "Проверка каналов связи…",
+          "Сверка целостности архива…",
+          "Шифрование соединения…",
+          "Канал готов. Ожидание авторизации."
+        ];
+        let index = 0;
+        showOutput([steps[0]], "is-running");
+        const advance = () => {
+          index++;
+          if (index < steps.length) {
+            showOutput(steps.slice(0,index + 1), "is-running");
+            diagnosticTimer = setTimeout(advance, 560);
+          } else {
+            diagnostics.disabled = false;
+            diagnostics.textContent = "ПОВТОРИТЬ ПРОВЕРКУ";
+            statusLabel.textContent = "СОЕДИНЕНИЕ УСТАНОВЛЕНО";
+            output.classList.remove("is-running");
+            if (!anomalyShown) {
+              diagnosticTimer = setTimeout(() => {
+                anomalyShown = true;
+                statusLabel.textContent = "ОБНАРУЖЕНО НЕСООТВЕТСТВИЕ";
+                showOutput(["ВНИМАНИЕ / СИСТЕМНОЕ СООБЩЕНИЕ", messages[0]], "is-warning");
+              }, 1700);
+            }
+          }
+        };
+        diagnosticTimer = setTimeout(advance, 560);
+      }
+      diagnostics.addEventListener("click", runDiagnostics);
+      scan.addEventListener("click", () => {
+        const active = document.body.classList.toggle("system-scan-active");
+        scan.textContent = active ? "ОСТАНОВИТЬ СКАНИРОВАНИЕ" : "СКАНИРОВАНИЕ";
+        showOutput([active ? "Режим сканирования активирован." : "Сканирование остановлено.", "Поверхность интерфейса анализируется."], "is-running");
+      });
+      status.addEventListener("click", () => {
+        if (anomalyShown) {
+          showOutput(["ЖУРНАЛ СИСТЕМЫ", messages[0], "Статус: источник не определён."], "is-warning");
+        } else {
+          showOutput(["ЖУРНАЛ СИСТЕМЫ", "Критических ошибок не зарегистрировано.", "Ожидание дополнительного сигнала."], "");
+        }
+      });
+
+      document.querySelectorAll(".system-data-panel").forEach(button => {
+        button.addEventListener("click", () => {
+          const detail = button.getAttribute("data-system-detail");
+          showOutput(["ДИАГНОСТИЧЕСКИЙ УЗЕЛ", detail, "Нажмите «Проверить соединение» для полной диагностики."], "");
+        });
+      });
+
+      const aura = document.createElement("div");
+      aura.className = "system-cursor-aura";
+      aura.setAttribute("aria-hidden","true");
+      document.body.appendChild(aura);
+      window.addEventListener("pointermove", event => {
+        if (event.pointerType === "touch") return;
+        aura.style.setProperty("--cursor-x", event.clientX + "px");
+        aura.style.setProperty("--cursor-y", event.clientY + "px");
+        aura.classList.add("is-visible");
+      }, {passive:true});
+      window.addEventListener("pointerleave", () => aura.classList.remove("is-visible"));
+
+      const panelData = [
+        ["NETWORK / 01","Канал связи: стабилен. Узел активен."],
+        ["MEMORY / LINK","Связь с архивом: частичная. Доступ ограничен."],
+        ["ARCHIVE STATUS","Целостность данных: проверка ожидает запуска."],
+        ["SIGNAL / 04","Входящий сигнал: слабый. Источник неизвестен."]
+      ];
+      if (window.innerWidth > 760) {
+        panelData.forEach((item,index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "system-data-panel system-data-panel-" + index;
+          button.textContent = item[0];
+          button.setAttribute("data-system-detail",item[1]);
+          button.setAttribute("aria-label","Открыть сведения: " + item[0]);
+          document.body.appendChild(button);
+          button.addEventListener("click", () => {
+            showOutput(["ДИАГНОСТИЧЕСКИЙ УЗЕЛ", item[1], "Нажмите «Проверить соединение» для полной диагностики."], "");
+          });
+        });
+      }
+
+      const anomalyDelay = 32000 + Math.floor(Math.random() * 18000);
+      setTimeout(() => {
+        if (document.hidden || anomalyShown) return;
+        anomalyShown = true;
+        statusLabel.textContent = "НЕИЗВЕСТНЫЙ СИГНАЛ";
+        status.classList.add("has-alert");
+      }, anomalyDelay);
+    })();
+  </script>
 </body>
 </html>

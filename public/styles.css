@@ -2970,8 +2970,7 @@ body.is-workstation .desktop-area {
   min-height: 620px;
 }
 body.is-workstation .desktop-date-panel,
-body.is-workstation .desktop-system-panel,
-body.is-workstation .desktop-notes-widget {
+body.is-workstation .desktop-system-panel {
   position: absolute;
   z-index: 2;
   border: 1px solid rgba(119,164,126,.25);
@@ -3038,37 +3037,6 @@ body.is-workstation .desktop-system-panel {
   font: 8px var(--mono);
   text-align: right;
 }
-body.is-workstation .desktop-notes-widget {
-  left: 28px;
-  bottom: 30px;
-  width: min(270px, calc(100% - 56px));
-  padding: 11px 12px 12px;
-}
-.desktop-widget-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.desktop-widget-heading span:last-child {
-  color: #6f8b70;
-  font-size: 7px;
-}
-#desktop-note-input {
-  display: block;
-  width: 100%;
-  min-height: 82px;
-  resize: vertical;
-  border: 1px solid rgba(119,164,126,.2);
-  border-radius: 2px;
-  padding: 9px;
-  color: #d0ddca;
-  background: rgba(2,9,5,.5);
-  outline: none;
-  font: 10px/1.65 var(--sans);
-}
-#desktop-note-input::placeholder { color: #637765; }
-#desktop-note-input:focus { border-color: rgba(143,185,145,.55); }
 body.is-workstation .desktop-notice-toast {
   position: absolute;
   z-index: 8;
@@ -3158,11 +3126,6 @@ body.is-workstation .desktop-notice-toast {
     top: 302px;
     right: 12px;
     width: min(230px, calc(100% - 24px));
-  }
-  body.is-workstation .desktop-notes-widget {
-    left: 12px;
-    bottom: 118px;
-    width: min(270px, calc(100% - 24px));
   }
   body.is-workstation .desktop-notice-toast {
     right: 12px;

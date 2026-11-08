@@ -1,0 +1,147 @@
+/* Materials archive catalogue and reading pane */
+#player-material-list { display: block; }
+.materials-toolbar {
+  display: grid;
+  grid-template-columns: minmax(190px, 1.6fr) repeat(4, minmax(115px, 1fr));
+  gap: 9px;
+  margin-bottom: 18px;
+  padding: 13px;
+  border: 1px solid rgba(174,145,108,.24);
+  background: rgba(12,14,13,.34);
+}
+.materials-search, .materials-filter { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.materials-search > span, .materials-filter > span {
+  color: #a99a82;
+  font: 7px var(--mono);
+  letter-spacing: .1em;
+}
+.materials-search input, .materials-filter select {
+  width: 100%;
+  min-width: 0;
+  min-height: 37px;
+  padding: 8px 9px;
+  border: 1px solid #51483b;
+  border-radius: 0;
+  outline: none;
+  background: #171816;
+  color: #ded4c2;
+  font: 10px var(--sans);
+}
+.materials-search input:focus, .materials-filter select:focus {
+  border-color: #a77a5b;
+  box-shadow: 0 0 0 2px rgba(167,122,91,.12);
+}
+.materials-catalog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.materials-catalog-kicker, .materials-catalog-count {
+  color: #b49b7c;
+  font: 8px var(--mono);
+  letter-spacing: .12em;
+}
+.materials-catalog-count { color: #857967; }
+.materials-catalog-layout {
+  display: grid;
+  grid-template-columns: minmax(175px, .82fr) minmax(0, 1.55fr);
+  min-height: 315px;
+  border: 1px solid rgba(174,145,108,.28);
+  background: rgba(12,14,13,.36);
+}
+.materials-catalog-list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-height: 475px;
+  overflow-y: auto;
+  border-right: 1px solid rgba(174,145,108,.22);
+}
+.materials-catalog-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  width: 100%;
+  padding: 12px 13px;
+  border: 0;
+  border-bottom: 1px solid rgba(174,145,108,.14);
+  background: transparent;
+  color: #d8cfbf;
+  text-align: left;
+  cursor: pointer;
+}
+.materials-catalog-entry:hover { background: rgba(177,143,105,.08); }
+.materials-catalog-entry.is-active {
+  background: rgba(151,105,79,.17);
+  box-shadow: inset 3px 0 #98645d;
+}
+.materials-entry-type, .materials-entry-date, .materials-entry-status {
+  color: #ad9271;
+  font: 7px var(--mono);
+  letter-spacing: .08em;
+}
+.materials-entry-title {
+  color: #e2d7c5;
+  font: 500 14px/1.35 var(--serif);
+  overflow-wrap: anywhere;
+}
+.materials-entry-case { color: #918879; font: 8px var(--sans); }
+.materials-entry-date { color: #817b70; }
+.materials-entry-status { color: #9da98f; }
+.materials-reader {
+  min-width: 0;
+  padding: 22px 24px;
+  background: linear-gradient(145deg, rgba(40,38,33,.72), rgba(22,24,22,.78));
+}
+.materials-reader-top { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.materials-reader-type { color: #b69a79; font: 8px var(--mono); letter-spacing: .12em; }
+.materials-reader-top time { color: #817b70; font: 8px var(--mono); }
+.materials-reader-title {
+  margin: 15px 0 8px;
+  color: #e8decd;
+  font: 500 24px/1.25 var(--serif);
+  overflow-wrap: anywhere;
+}
+.materials-reader-meta { margin: 0; color: #aa9a82; font: 8px/1.6 var(--mono); }
+.materials-reader-summary { margin: 17px 0; color: #c0b6a5; font: 11px/1.75 var(--sans); }
+.materials-reader-divider { height: 1px; margin: 17px 0; background: rgba(174,145,108,.18); }
+.materials-reader-content {
+  color: #d0c7b8;
+  font: 11px/1.9 var(--sans);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.materials-read-button { margin-top: 20px; }
+.materials-read-label, .materials-preview-note {
+  display: inline-block;
+  margin-top: 18px;
+  color: #9eaa91;
+  font: 8px var(--mono);
+  letter-spacing: .08em;
+}
+.materials-preview-note { display: block; color: #b69a79; line-height: 1.7; }
+.materials-preview-note.is-error { color: #d49a8c; }
+.materials-empty { margin: 0; padding: 24px 18px; border: 1px solid rgba(174,145,108,.22); color: #a99d89; font: 11px/1.8 var(--sans); }
+@media (max-width: 900px) {
+  .materials-toolbar { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .materials-search { grid-column: 1 / -1; }
+}
+@media (max-width: 620px) {
+  .materials-toolbar { grid-template-columns: minmax(0,1fr); }
+  .materials-search { grid-column: auto; }
+  .materials-catalog-layout { grid-template-columns: minmax(0,1fr); }
+  .materials-catalog-list {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    max-height: 235px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(174,145,108,.22);
+  }
+  .materials-catalog-entry { padding: 10px 8px; min-width: 0; }
+  .materials-entry-title { font-size: 12px; }
+  .materials-reader { padding: 17px 14px; min-height: 180px; }
+  .materials-reader-title { font-size: 20px; }
+}

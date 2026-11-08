@@ -1387,14 +1387,14 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
 }
 
 
-/* Natural atmospheric fog for the unauthenticated ITERUM portal */
+/* Visible layered fog for the unauthenticated ITERUM portal */
 #ambient-network {
   position: fixed;
   inset: 0;
   z-index: 1;
   display: block;
   pointer-events: none;
-  opacity: .92;
+  opacity: 1;
   mix-blend-mode: normal;
 }
 body:has(#workspace:not([hidden])) #ambient-network { display: none; }
@@ -1403,12 +1403,12 @@ body:not(:has(#workspace:not([hidden]))) {
 }
 body:not(:has(#workspace:not([hidden])))::before {
   background:
-    radial-gradient(ellipse at 48% 12%, rgba(116,137,126,.09), transparent 48%),
-    radial-gradient(ellipse at 14% 72%, rgba(56,75,70,.12), transparent 42%),
+    radial-gradient(ellipse at 48% 12%, rgba(116,137,126,.12), transparent 48%),
+    radial-gradient(ellipse at 14% 72%, rgba(56,75,70,.15), transparent 42%),
     linear-gradient(180deg, #101819 0%, #0a1214 54%, #050a0c 100%);
 }
 body:not(:has(#workspace:not([hidden])))::after {
-  background: radial-gradient(ellipse at center, transparent 8%, rgba(0,0,0,.64) 100%);
+  background: radial-gradient(ellipse at center, transparent 8%, rgba(0,0,0,.48) 100%);
 }
 body:not(:has(#workspace:not([hidden]))) .auth-panel {
   background: linear-gradient(145deg, rgba(19,27,27,.9), rgba(8,14,15,.95)) !important;
@@ -1416,8 +1416,8 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
   box-shadow: 0 28px 90px rgba(0,0,0,.58), 0 0 75px rgba(91,112,101,.07), inset 0 1px rgba(255,255,255,.035);
 }
 @media (max-width: 620px) {
-  #ambient-network { opacity: .78; }
+  #ambient-network { opacity: .9; }
 }
 @media (prefers-reduced-motion: reduce) {
-  #ambient-network { opacity: .68; }
+  #ambient-network { opacity: .9; }
 }

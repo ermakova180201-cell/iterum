@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=entry-screen-20">
+  <link rel="stylesheet" href="/styles.css?v=entry-screen-21">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -992,81 +992,112 @@
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const shards = [
-        {x:.13,y:.25,s:1.05,r:-.28,shape:[[-.9,-.35],[-.2,-.9],[.8,-.55],[.55,.35],[-.35,.9],[-.8,.25]]},
-        {x:.31,y:.72,s:.72,r:.42,shape:[[-.8,-.5],[.35,-.85],[.9,-.1],[.25,.8],[-.65,.55]]},
-        {x:.78,y:.19,s:.82,r:.18,shape:[[-.75,-.25],[-.15,-.9],[.8,-.55],[.65,.55],[-.2,.8]]},
-        {x:.9,y:.58,s:1.12,r:-.36,shape:[[-.7,-.55],[.15,-.9],[.85,-.2],[.45,.75],[-.55,.55]]},
-        {x:.18,y:.83,s:.48,r:-.12,shape:[[-.85,-.15],[-.25,-.8],[.75,-.45],[.55,.55],[-.35,.8]]},
-        {x:.68,y:.82,s:.62,r:.3,shape:[[-.75,-.4],[.1,-.85],[.85,-.15],[.35,.8],[-.65,.5]]},
-        {x:.48,y:.14,s:.42,r:-.2,shape:[[-.8,-.25],[-.1,-.8],[.8,-.35],[.5,.65],[-.55,.55]]}
-      ];
-      let w=0,h=0,dpr=1,frame=0,last=0,px=-1000,py=-1000;
-      const pointer={x:-1000,y:-1000,active:false};
+      let w=0,h=0,dpr=1,raf=0,last=0,pointerX=0,pointerY=0,pointerActive=false;
+      const cabinets = Array.from({length:9},(_,i)=>({
+        side:i%2===0?-1:1, depth:Math.floor(i/2), column:i%3,
+        phase:i*1.73, alert:i===3||i===7
+      }));
       function resize(){
-        w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,1.6);
+        w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,1.5);
         canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
         canvas.style.width=w+"px";canvas.style.height=h+"px";
         ctx.setTransform(dpr,0,0,dpr,0,0);
       }
-      function polygon(points){
-        ctx.beginPath();
-        points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
-        ctx.closePath();
+      function path(points,fill,stroke,lineWidth=1){
+        ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+        ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}
+        if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lineWidth;ctx.stroke();}
+      }
+      function line(points,color,width=1){
+        ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+        ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
+      }
+      function drawCabinet(side,depth,time,index){
+        const vanishX=w*.5,vanishY=h*.43;
+        const nearX=side<0?0:w, nearTop=h*.08, nearBottom=h*.94;
+        const t=.16+depth*.105;
+        const x=vanishX+(nearX-vanishX)*t;
+        const top=vanishY+(nearTop-vanishY)*t;
+        const bottom=vanishY+(nearBottom-vanishY)*t;
+        const width=Math.abs(nearX-x)*.66;
+        const x2=side<0?x-width:x+width;
+        const farTop=top+(bottom-top)*.035, farBottom=bottom-(bottom-top)*.035;
+        const frontTop=top+(bottom-top)*.11, frontBottom=bottom-(bottom-top)*.1;
+        const left=side<0?x2:x, right=side<0?x:x2;
+        path([[left,frontTop],[right,frontTop+(frontTop-top)*.12],[right,frontBottom],[left,frontBottom-(frontBottom-top)*.05]],
+          "rgba(17,29,34,"+(.32+depth*.035)+")","rgba(132,157,153,.17)",1);
+        const rows=7,cols=3;
+        for(let row=0;row<rows;row++){
+          const y1=frontTop+(frontBottom-frontTop)*row/rows;
+          const y2=frontTop+(frontBottom-frontTop)*(row+1)/rows;
+          for(let col=0;col<cols;col++){
+            const a=col/cols,b=(col+1)/cols;
+            const xa=left+(right-left)*a,xb=left+(right-left)*b;
+            const inset=(y2-y1)*.1;
+            const active=(index*5+row*3+col)%19===0;
+            path([[xa+2,y1+inset],[xb-2,y1+inset],[xb-2,y2-inset],[xa+2,y2-inset]],
+              "rgba(37,49,52,.62)", "rgba(142,161,153,.12)", .8);
+            line([[xa+7,(y1+y2)*.5],[xb-7,(y1+y2)*.5]],"rgba(173,184,169,.13)",.8);
+            const glow=active?(.18+.12*Math.sin(time*.0012+index+row)):0;
+            if(glow>.035){
+              const gx=side<0?xb-11:xa+11,gy=(y1+y2)*.5;
+              ctx.beginPath();ctx.arc(gx,gy,1.5,0,Math.PI*2);
+              ctx.fillStyle=active&&index%3===0?"rgba(183,105,88,"+glow+")":"rgba(129,190,177,"+glow+")";ctx.fill();
+              ctx.beginPath();ctx.arc(gx,gy,6,0,Math.PI*2);
+              ctx.fillStyle="rgba(130,177,166,"+(glow*.12)+")";ctx.fill();
+            }
+          }
+        }
+        line([[left,frontTop],[left,frontBottom],[right,frontBottom],[right,frontTop]],"rgba(175,190,180,.18)",1);
       }
       function draw(time){
-        frame=requestAnimationFrame(draw);
+        raf=requestAnimationFrame(draw);
         if(document.hidden)return;
-        if(!reduced&&time-last<30)return;last=time;
+        if(!reduced&&time-last<32)return;last=time;
         ctx.clearRect(0,0,w,h);
-        const scale=Math.min(w/1100,h/760,1.15);
-        shards.forEach((shard,i)=>{
-          const drift=reduced?0:Math.sin(time*.00022+i*1.8)*9;
-          const floatY=reduced?0:Math.cos(time*.00019+i*1.3)*7;
-          const cx=w*shard.x+drift,cy=h*shard.y+floatY;
-          const size=(82+((i*37)%48))*scale*shard.s;
-          const dx=pointer.active?cx-pointer.x:0,dy=pointer.active?cy-pointer.y:0;
-          const dist=Math.hypot(dx,dy)||1;
-          const influence=pointer.active?Math.max(0,1-dist/260):0;
-          const nudge=influence*18;
-          const angle=shard.r+(reduced?0:Math.sin(time*.00016+i)*.045)+dx*.00008*influence;
-          ctx.save();
-          ctx.translate(cx+(dx/dist)*nudge,cy+(dy/dist)*nudge);
-          ctx.rotate(angle);
-          ctx.scale(size,size);
-          polygon(shard.shape);
-          const glow=ctx.createLinearGradient(-.8,-.8,.8,.8);
-          glow.addColorStop(0,"rgba(170,224,222,"+(.055+influence*.09)+")");
-          glow.addColorStop(.48,"rgba(80,142,151,.035)");
-          glow.addColorStop(1,"rgba(18,39,50,.015)");
-          ctx.fillStyle=glow;ctx.fill();
-          ctx.strokeStyle="rgba(164,211,211,"+(.2+influence*.32)+")";
-          ctx.lineWidth=.009;ctx.stroke();
-          ctx.beginPath();ctx.moveTo(shard.shape[0][0],shard.shape[0][1]);ctx.lineTo(shard.shape[2][0],shard.shape[2][1]);ctx.lineTo(shard.shape[4][0],shard.shape[4][1]);
-          ctx.strokeStyle="rgba(170,220,218,.11)";ctx.lineWidth=.006;ctx.stroke();
-          ctx.beginPath();ctx.moveTo(-.62,-.12);ctx.lineTo(.42,.28);
-          ctx.strokeStyle="rgba(180,224,219,"+(.12+influence*.22)+")";ctx.lineWidth=.008;ctx.stroke();
-          ctx.restore();
-        });
-        // A restrained light leak follows the pointer, as if the surface were thin glass.
-        if(pointer.active&&!reduced){
-          const halo=ctx.createRadialGradient(pointer.x,pointer.y,0,pointer.x,pointer.y,210);
-          halo.addColorStop(0,"rgba(117,205,199,.075)");
-          halo.addColorStop(1,"rgba(117,205,199,0)");
-          ctx.fillStyle=halo;ctx.fillRect(pointer.x-210,pointer.y-210,420,420);
+        const px=pointerActive&&!reduced?(pointerX-w/2)*.008:0;
+        const py=pointerActive&&!reduced?(pointerY-h/2)*.006:0;
+        const horizonX=w*.5+px,horizonY=h*.43+py;
+        // Deep, almost invisible corridor and its impossible converging architecture.
+        const glow=ctx.createRadialGradient(horizonX,horizonY,0,horizonX,horizonY,Math.max(w,h)*.62);
+        glow.addColorStop(0,"rgba(103,143,137,.12)");glow.addColorStop(.48,"rgba(39,73,76,.055)");glow.addColorStop(1,"rgba(0,0,0,0)");
+        ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
+        path([[0,h*.04],[horizonX,horizonY],[w,h*.04],[w,h*.98],[horizonX,horizonY],[0,h*.98]],"rgba(7,15,19,.18)");
+        for(let i=0;i<6;i++){
+          const t=(i+1)/7;
+          const y=horizonY+(h-horizonY)*t*t;
+          line([[0,y],[w,y]],"rgba(134,155,148,"+(0.025+t*.025)+")",1);
         }
-        const vignette=ctx.createRadialGradient(w*.5,h*.48,Math.min(w,h)*.12,w*.5,h*.48,Math.max(w,h)*.72);
-        vignette.addColorStop(0,"rgba(0,4,9,0)");
-        vignette.addColorStop(1,"rgba(0,3,8,.62)");
+        // Receding ceiling ribs and floor seams make the archive feel larger than the screen.
+        for(let i=0;i<8;i++){
+          const t=(i+1)/9;
+          const x=horizonX+(0-horizonX)*t;
+          line([[x,horizonY],[x*.78,h*.02]],"rgba(137,157,151,.075)",1);
+          const xr=horizonX+(w-horizonX)*t;
+          line([[xr,horizonY],[w-(w-xr)*.78,h*.02]],"rgba(137,157,151,.075)",1);
+        }
+        line([[horizonX,horizonY],[0,h*.98]],"rgba(135,156,148,.09)",1);
+        line([[horizonX,horizonY],[w,h*.98]],"rgba(135,156,148,.09)",1);
+        cabinets.forEach((c,i)=>drawCabinet(c.side,c.depth,time,i));
+        // A distant sealed archive bay, deliberately subtle and partly obscured by darkness.
+        const bw=Math.min(w*.12,150),bh=Math.min(h*.28,190);
+        const bx=horizonX-bw/2,by=horizonY-bh*.35;
+        path([[bx,by],[bx+bw,by],[bx+bw,by+bh],[bx,by+bh]],"rgba(12,23,27,.34)","rgba(153,172,160,.16)",1);
+        for(let i=1;i<5;i++)line([[bx+8,by+bh*i/5],[bx+bw-8,by+bh*i/5]],"rgba(151,171,160,.12)",1);
+        const pulse=.25+.12*Math.sin(time*.0007);
+        ctx.fillStyle="rgba(184,105,86,"+pulse+")";ctx.fillRect(bx+bw*.82,by+bh*.12,3,3);
+        // Soft foreground shadows frame the login panel without competing with it.
+        const vignette=ctx.createRadialGradient(w*.5,h*.48,Math.min(w,h)*.12,w*.5,h*.48,Math.max(w,h)*.78);
+        vignette.addColorStop(0,"rgba(0,4,8,0)");vignette.addColorStop(1,"rgba(0,3,7,.78)");
         ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
       }
       addEventListener("resize",resize,{passive:true});
-      addEventListener("pointermove",e=>{pointer.x=e.clientX;pointer.y=e.clientY;pointer.active=true;},{passive:true});
-      addEventListener("pointerleave",()=>{pointer.active=false;},{passive:true});
-      addEventListener("pagehide",()=>cancelAnimationFrame(frame),{once:true});
-      resize();frame=requestAnimationFrame(draw);
+      addEventListener("pointermove",e=>{pointerX=e.clientX;pointerY=e.clientY;pointerActive=true;},{passive:true});
+      addEventListener("pointerleave",()=>{pointerActive=false;},{passive:true});
+      addEventListener("pagehide",()=>cancelAnimationFrame(raf),{once:true});
+      resize();raf=requestAnimationFrame(draw);
     })();
-  </script>
+  </script>t>
 
 
 

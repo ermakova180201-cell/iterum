@@ -2554,3 +2554,43 @@ body:not(.is-workstation) .available-case-list > .player-empty {
   body:not(.is-workstation) .available-case-cover::after,
   body:not(.is-workstation) .available-case-title { transition:none; }
 }
+
+
+/* Account logout action in the top navigation */
+.topbar-right .topbar-logout {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:32px;
+  margin-left:12px;
+  padding:0 12px;
+  border:1px solid rgba(137,177,143,.28);
+  border-radius:2px;
+  color:#b9d0bc;
+  background:rgba(8,20,12,.52);
+  font:8px var(--mono);
+  letter-spacing:.12em;
+  cursor:pointer;
+  transition:color .18s,border-color .18s,background .18s;
+}
+.topbar-right .topbar-logout:hover {
+  border-color:rgba(166,205,171,.62);
+  color:#e0eee1;
+  background:rgba(48,83,54,.28);
+}
+.topbar-right .topbar-logout:disabled {
+  opacity:.55;
+  cursor:wait;
+}
+.topbar-right .topbar-logout[hidden] { display:none; }
+@media(max-width:620px) {
+  .topbar-right .topbar-logout {
+    min-height:29px;
+    margin-left:5px;
+    padding:0 8px;
+    font-size:7px;
+    letter-spacing:.06em;
+  }
+  .topbar-right .topbar-version,
+  .topbar-right .topbar-divider { display:none; }
+}

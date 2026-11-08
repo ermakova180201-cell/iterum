@@ -100,19 +100,6 @@
               <div><span>ТЕКУЩЕЕ ДЕЛО</span><strong id="desktop-case-name">Обстоятельства аварии Ильи</strong><small>ЛИЧНОЕ РАССЛЕДОВАНИЕ</small></div>
             </div>
             <div class="desktop-wallpaper-mark">ITERUM</div>
-          </div>
-          <div class="desktop-taskbar">
-            <span class="taskbar-start"><b>I.</b> ITERUM</span>
-            <nav class="taskbar-apps" aria-label="Открыть приложение">
-              <button type="button" data-open-window="mail-window" title="Почта">✉ <span>Почта</span></button>
-              <button type="button" data-open-window="search-window" title="Поиск данных">⌕ <span>Поиск</span></button>
-              <button type="button" data-open-window="materials-window" title="Материалы дела">▤ <span>Архив</span></button>
-            </nav>
-            <span class="taskbar-clock" id="desktop-clock">ЛОКАЛЬНАЯ СИСТЕМА</span>
-          </div>
-        </div>
-        <div id="player-case-list" class="player-case-list" hidden></div>
-
         <section id="search-window" class="player-tool-section desktop-window" aria-labelledby="search-heading" hidden>
           <div class="player-tool-heading">
             <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 02</span><h2 id="search-heading">Поиск данных</h2></div>
@@ -143,6 +130,20 @@
           </div>
           <div id="player-material-list" class="player-material-list"></div>
         </section>
+
+          </div>
+          <div class="desktop-taskbar">
+            <span class="taskbar-start"><b>I.</b> ITERUM</span>
+            <nav class="taskbar-apps" aria-label="Открыть приложение">
+              <button type="button" data-open-window="mail-window" title="Почта">✉ <span>Почта</span></button>
+              <button type="button" data-open-window="search-window" title="Поиск данных">⌕ <span>Поиск</span></button>
+              <button type="button" data-open-window="materials-window" title="Материалы дела">▤ <span>Архив</span></button>
+            </nav>
+            <span class="taskbar-clock" id="desktop-clock">ЛОКАЛЬНАЯ СИСТЕМА</span>
+          </div>
+        </div>
+        <div id="player-case-list" class="player-case-list" hidden></div>
+
       </section>
 
       <div class="modules-heading">
@@ -594,16 +595,15 @@
         if (opener) {
           const win = document.getElementById(opener.dataset.openWindow);
           if (win) {
+            desktopShell.querySelectorAll(".desktop-window").forEach(other => { if (other !== win) other.hidden = true; });
             win.hidden = false;
-            win.scrollIntoView({ behavior: "smooth", block: "nearest" });
-            desktopShell.querySelectorAll(".desktop-icon").forEach(icon => icon.classList.toggle("is-selected", icon === opener));
+            desktopShell.querySelectorAll("[data-open-window]").forEach(button => button.classList.toggle("is-selected", button.dataset.openWindow === opener.dataset.openWindow));
           }
         }
         if (closer) {
           const win = document.getElementById(closer.dataset.closeWindow);
           if (win) win.hidden = true;
-          const related = desktopShell.querySelector('[data-open-window="' + closer.dataset.closeWindow + '"]');
-          if (related) related.classList.remove("is-selected");
+          desktopShell.querySelectorAll('[data-open-window="' + closer.dataset.closeWindow + '"]').forEach(related => related.classList.remove("is-selected"));
         }
       });
       const clock = document.getElementById("desktop-clock");

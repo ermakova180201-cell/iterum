@@ -6,5 +6,13 @@
   "assets": {
     "directory": "./public",
     "binding": "ASSETS"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "iterum-db",
+      "database_id": "98bea4dc-fc0d-4d8d-9559-648125a95bfc",
+      "migrations_dir": "migrations"
+    }
+  ]
 }

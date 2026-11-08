@@ -897,6 +897,18 @@ body.is-workstation .desktop-area {
   min-height: 0;
   overflow: visible;
 }
+body.is-workstation .desktop-icons {
+  position: absolute;
+  top: 34px;
+  left: 28px;
+  margin: 0;
+}
+@media (max-width: 620px) {
+  body.is-workstation .desktop-icons {
+    top: 24px;
+    left: 12px;
+  }
+}
 body.is-workstation .desktop-icons,
 body.is-workstation .desktop-icon {
   overflow: visible;

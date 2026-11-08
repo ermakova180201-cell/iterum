@@ -743,6 +743,11 @@
         document.getElementById("material-order").value = item.release_order;
         deliveryMode.value = item.delivery_mode || "automatic";
         refreshTriggerOptions(item.trigger_material_id || "");
+        document.getElementById("material-searchable").checked = Boolean(item.is_searchable);
+        document.getElementById("material-sender-name").value = item.sender_name || "";
+        document.getElementById("material-sender-address").value = item.sender_address || "";
+        document.getElementById("material-sent-at").value = item.sent_at || "";
+        syncMaterialTypeFields();
         document.getElementById("material-form-title").textContent = "Редактирование материала";
         materialForm.querySelector("button[type=submit]").textContent = "СОХРАНИТЬ ИЗМЕНЕНИЯ";
         materialForm.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -767,6 +772,14 @@
       }
     }
 
+    function syncMaterialTypeFields() {
+      emailFields.hidden = materialType.value !== "email";
+      searchableWrap.hidden = materialType.value !== "document";
+    }
+
+    materialType.addEventListener("change", syncMaterialTypeFields);
+    syncMaterialTypeFields();
+
     deliveryMode.addEventListener("change", () => {
       refreshTriggerOptions(materialTrigger.value);
     });
@@ -778,6 +791,7 @@
     function resetMaterialEditor() {
       materialForm.reset();
       materialTrigger.disabled = true;
+      syncMaterialTypeFields();
       document.getElementById("material-id").value = "";
       document.getElementById("material-form-title").textContent = "Новый материал";
       materialForm.querySelector("button[type=submit]").textContent = "СОХРАНИТЬ ЧЕРНОВИК";
@@ -803,7 +817,11 @@
             content: form.get("content"),
             releaseOrder: Number(form.get("releaseOrder")),
             deliveryMode: form.get("deliveryMode"),
-            triggerMaterialId: form.get("triggerMaterialId")
+            triggerMaterialId: form.get("triggerMaterialId"),
+            isSearchable: form.get("isSearchable") === "on",
+            senderName: form.get("senderName"),
+            senderAddress: form.get("senderAddress"),
+            sentAt: form.get("sentAt")
           })
         });
         resetMaterialEditor();

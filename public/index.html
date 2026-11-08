@@ -95,9 +95,32 @@
       </div>
     </section>
 
+    <section class="auth-panel" aria-label="Вход в архив">
+      <div class="auth-copy">
+        <p class="section-kicker">ЛИЧНЫЙ ДОСТУП</p>
+        <h2 id="auth-title">Войти в архив</h2>
+        <p id="auth-description">Войдите в свою учётную запись или создайте новую, чтобы начать работу с делом.</p>
+      </div>
+
+      <form id="auth-form">
+        <label for="auth-email">ЭЛЕКТРОННАЯ ПОЧТА</label>
+        <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="name@example.com">
+        <label for="auth-password">ПАРОЛЬ</label>
+        <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="10" maxlength="200" placeholder="Не менее 10 символов">
+        <button class="auth-submit" id="auth-submit" type="submit">ВОЙТИ</button>
+        <button class="auth-switch" id="auth-switch" type="button">Создать учётную запись</button>
+        <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="auth-user" id="auth-user" hidden>
+        <p id="auth-user-email"></p>
+        <button class="auth-submit" id="auth-logout" type="button">ВЫЙТИ</button>
+      </div>
+    </section>
+
     <section class="notice">
       <span class="notice-mark">i</span>
-      <p><strong>СИСТЕМНОЕ УВЕДОМЛЕНИЕ</strong><br>Это предварительная версия интерфейса. Регистрация, игровые материалы и сохранение прогресса будут подключены на следующих этапах.</p>
+      <p><strong>СИСТЕМНОЕ УВЕДОМЛЕНИЕ</strong><br>Это предварительная версия архива. Материалы дела будут открываться постепенно по мере расследования.</p>
     </section>
   </main>
 
@@ -171,6 +194,7 @@
         if (!response.ok) {
           showMessage(data.error || "Не удалось выполнить запрос.", true);
         } else {
+          const wasRegistering = registering;
           authForm.reset();
           setMode(false);
           await refreshAuth();

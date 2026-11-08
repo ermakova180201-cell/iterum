@@ -2915,3 +2915,51 @@ body:not(.is-workstation) .available-case-list > .player-empty {
 }
 .desktop-area .window-drag-handle.is-dragging { cursor: grabbing; }
 .desktop-area .window-drag-handle .window-close { cursor: pointer; }
+
+
+/* Short labels beneath desktop application icons */
+.desktop-icons {
+  width: 126px;
+  gap: 13px;
+}
+.desktop-icon {
+  width: 116px;
+  min-height: 88px;
+  height: 88px;
+  padding: 5px 4px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+}
+.desktop-icon-art {
+  flex: 0 0 54px;
+}
+.desktop-icon .icon-caption {
+  display: block !important;
+  max-width: 108px;
+  color: #e3ddce;
+  font: 10px/1.25 var(--sans);
+  letter-spacing: .015em;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0,0,0,.95), 0 0 7px rgba(0,0,0,.7);
+  white-space: normal;
+}
+@media (max-width: 620px) {
+  .desktop-icons {
+    width: 100%;
+    gap: 8px;
+  }
+  .desktop-icon {
+    width: 88px;
+    min-height: 82px;
+    height: 82px;
+    padding: 4px 2px 5px;
+    gap: 4px;
+  }
+  .desktop-icon .icon-caption {
+    max-width: 84px;
+    font-size: 9px;
+  }
+}

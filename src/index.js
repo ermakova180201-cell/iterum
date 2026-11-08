@@ -232,7 +232,8 @@ async function handleApi(request, env) {
           ).bind(id, materialId, originalName, file.type, file.size, fileData).run();
         } catch (error) {
           console.error("Material attachment save failed:", error);
-          return json({ error: "Материал сохранён, но фотографию «" + originalName + "» не удалось записать в базу данных. Попробуйте файл JPG или PNG размером до 1 МБ." }, 500);
+          const reason = error && error.message ? String(error.message).slice(0, 240) : "неизвестная ошибка базы данных";
+          return json({ error: "Материал сохранён, но фотографию «" + originalName + "» не удалось записать. Причина: " + reason }, 500);
         }
         saved.push({ id, file_name: originalName, content_type: file.type, file_size: file.size });
       }

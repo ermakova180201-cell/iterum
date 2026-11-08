@@ -20,11 +20,11 @@
 
   function renderReader(item, opened = Boolean(item.is_read)) {
     const reader = node("article", "search-dossier-reader");
-    const eyebrow = node("span", "search-reader-kicker", "МАТЕРИАЛ ДЕЛА");
+    const eyebrow = node("span", "search-reader-kicker", item.is_preview ? "ПРЕДПРОСМОТР ЧЕРНОВИКА" : "МАТЕРИАЛ ДЕЛА");
     const title = node("h3", "search-reader-title", item.title);
     const meta = node("p", "search-reader-meta", item.case_title || "Текущее дело");
     const summary = node("p", "search-reader-summary", item.summary || "Краткое описание отсутствует.");
-    const status = node("span", "search-reader-status" + (opened ? " is-open" : ""), opened ? "ДОСЬЕ ОТКРЫТО" : "ДОСТУПНО К ОЗНАКОМЛЕНИЮ");
+    const status = node("span", "search-reader-status" + (opened ? " is-open" : ""), item.is_preview ? "ЧЕРНОВИК / ПРЕДПРОСМОТР" : opened ? "ДОСЬЕ ОТКРЫТО" : "ДОСТУПНО К ОЗНАКОМЛЕНИЮ");
     reader.append(eyebrow, title, meta, summary, status);
 
     if (opened) {
@@ -68,7 +68,7 @@
 
     const header = node("div", "search-results-header");
     header.append(node("span", "search-results-label", "РЕЗУЛЬТАТЫ ПОИСКА"));
-    header.append(node("span", "search-results-count", items.length + (items.length === 1 ? " ДОСЬЕ" : " ДОСЬЕ")));
+    header.append(node("span", "search-results-count", items.length + " НАЙДЕНО"));
     results.append(header);
 
     const layout = node("div", "search-results-layout");
@@ -83,7 +83,7 @@
       const name = node("strong", "search-result-name", entry.title);
       const caseName = node("span", "search-result-case", entry.case_title || "Текущее дело");
       const description = node("span", "search-result-description", entry.summary || "Без краткого описания");
-      const state = node("span", "search-result-state" + (entry.is_read ? " is-open" : ""), entry.is_read ? "ИЗУЧЕНО" : "НЕ ИЗУЧЕНО");
+      const state = node("span", "search-result-state" + (entry.is_read ? " is-open" : ""), entry.is_preview ? "ЧЕРНОВИК" : entry.is_read ? "ИЗУЧЕНО" : "НЕ ИЗУЧЕНО");
       button.append(name, caseName, description, state);
       button.addEventListener("click", () => renderResults(currentResults, entry.id));
       list.append(button);

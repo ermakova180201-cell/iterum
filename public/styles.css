@@ -1387,50 +1387,33 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
 }
 
 
-/* Deep atmosphere: abstract underwater depth, light and slow currents */
+/* Natural atmospheric fog for the unauthenticated ITERUM portal */
 #ambient-network {
   position: fixed;
   inset: 0;
   z-index: 1;
   display: block;
   pointer-events: none;
-  opacity: .96;
+  opacity: .92;
   mix-blend-mode: normal;
 }
 body:has(#workspace:not([hidden])) #ambient-network { display: none; }
 body:not(:has(#workspace:not([hidden]))) {
-  background: #071013 !important;
+  background: #090f10 !important;
 }
 body:not(:has(#workspace:not([hidden])))::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 4%, rgba(111,145,132,.16), transparent 43%),
-    radial-gradient(ellipse at 12% 72%, rgba(46,83,83,.17), transparent 38%),
-    radial-gradient(ellipse at 88% 62%, rgba(45,73,78,.14), transparent 36%),
-    linear-gradient(180deg, #111d20 0%, #0a1519 48%, #050c10 100%);
+    radial-gradient(ellipse at 48% 12%, rgba(116,137,126,.09), transparent 48%),
+    radial-gradient(ellipse at 14% 72%, rgba(56,75,70,.12), transparent 42%),
+    linear-gradient(180deg, #101819 0%, #0a1214 54%, #050a0c 100%);
 }
 body:not(:has(#workspace:not([hidden])))::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 12%, rgba(0,0,0,.62) 100%);
-}
-body:not(:has(#workspace:not([hidden]))) > .topbar,
-body:not(:has(#workspace:not([hidden]))) > main,
-body:not(:has(#workspace:not([hidden]))) > footer {
-  position: relative;
-  z-index: 2;
+  background: radial-gradient(ellipse at center, transparent 8%, rgba(0,0,0,.64) 100%);
 }
 body:not(:has(#workspace:not([hidden]))) .auth-panel {
-  background: linear-gradient(145deg, rgba(18,29,30,.9), rgba(8,16,19,.95)) !important;
-  border-color: rgba(143,169,153,.25);
-  box-shadow: 0 28px 90px rgba(0,0,0,.58), 0 0 75px rgba(74,119,111,.1), inset 0 1px rgba(255,255,255,.04);
+  background: linear-gradient(145deg, rgba(19,27,27,.9), rgba(8,14,15,.95)) !important;
+  border-color: rgba(143,157,145,.2);
+  box-shadow: 0 28px 90px rgba(0,0,0,.58), 0 0 75px rgba(91,112,101,.07), inset 0 1px rgba(255,255,255,.035);
 }
 @media (max-width: 620px) {
   #ambient-network { opacity: .78; }

@@ -1624,19 +1624,59 @@ body.system-deep-scan .system-output { box-shadow:0 0 24px rgba(139,63,58,.1); }
 }
 
 
-/* Memory shards — quiet, tactile glass fragments for the entry screen */
-#ambient-network { opacity: .96; mix-blend-mode: screen; }
-.ambient-node-layer { display:none !important; }
+/* ITERUM memory archive — login screen atmosphere */
+#ambient-network {
+  position:fixed;inset:0;z-index:1;display:block;pointer-events:none;
+  opacity:1;mix-blend-mode:screen;
+}
+body:has(#workspace:not([hidden])) #ambient-network { display:none; }
+body:not(:has(#workspace:not([hidden]))) {
+  position:relative;isolation:isolate;background:#080d10 !important;
+}
 body:not(:has(#workspace:not([hidden])))::before {
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
-    radial-gradient(ellipse at 50% 48%, rgba(16,54,62,.18), transparent 54%),
-    radial-gradient(ellipse at 12% 18%, rgba(24,105,117,.16), transparent 36%),
-    radial-gradient(ellipse at 88% 78%, rgba(104,43,53,.08), transparent 32%),
-    linear-gradient(135deg, #09151d 0%, #07111a 52%, #080d15 100%);
+    radial-gradient(ellipse at 50% 42%,rgba(65,99,91,.13),transparent 48%),
+    radial-gradient(ellipse at 8% 55%,rgba(53,79,78,.13),transparent 38%),
+    radial-gradient(ellipse at 92% 48%,rgba(94,48,43,.10),transparent 34%),
+    linear-gradient(112deg,#111a1b 0%,#0b1316 48%,#080d11 100%);
 }
-@media (max-width:620px) {
-  #ambient-network { opacity:.72; }
+body:not(:has(#workspace:not([hidden])))::after {
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.22),transparent 22% 78%,rgba(0,0,0,.28)),
+    radial-gradient(ellipse at center,transparent 24%,rgba(0,0,0,.58) 100%);
 }
-@media (prefers-reduced-motion:reduce) {
-  #ambient-network { opacity:.8; }
+body:not(:has(#workspace:not([hidden]))) > .topbar,
+body:not(:has(#workspace:not([hidden]))) > main,
+body:not(:has(#workspace:not([hidden]))) > footer { position:relative;z-index:2; }
+body:not(:has(#workspace:not([hidden]))) .auth-panel {
+  background:linear-gradient(145deg,rgba(19,27,27,.94),rgba(9,15,17,.97)) !important;
+  border-color:rgba(151,171,151,.27);
+  box-shadow:0 28px 90px rgba(0,0,0,.68),0 0 65px rgba(82,116,103,.08),inset 0 1px rgba(220,230,213,.04);
 }
+body:not(:has(#workspace:not([hidden]))) .auth-panel::before {
+  background:#9b7868 !important;box-shadow:0 0 14px rgba(166,111,88,.22);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-copy h2 { color:#dce2d9; }
+body:not(:has(#workspace:not([hidden]))) .auth-copy > p:last-child { color:#9eaaa1; }
+body:not(:has(#workspace:not([hidden]))) .auth-panel label { color:#c0c9bf; }
+body:not(:has(#workspace:not([hidden]))) .auth-panel input {
+  color:#e3e9e1;border-color:rgba(142,165,151,.28);background:rgba(4,10,12,.76);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-panel input:focus {
+  border-color:rgba(166,190,168,.65);box-shadow:0 0 0 2px rgba(129,163,143,.1);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-submit {
+  color:#111816;background:linear-gradient(110deg,#b5c2ae,#839b8e);
+  border-color:rgba(195,211,190,.55);box-shadow:0 5px 24px rgba(105,139,119,.13);
+}
+body:not(:has(#workspace:not([hidden]))) .auth-switch { color:#aebdb0; }
+body:not(:has(#workspace:not([hidden]))) footer { color:rgba(174,189,176,.45); }
+@media(max-width:620px) {
+  #ambient-network { opacity:.78; }
+  body:not(:has(#workspace:not([hidden])))::before {
+    background:radial-gradient(ellipse at 50% 42%,rgba(65,99,91,.12),transparent 52%),linear-gradient(112deg,#111a1b,#080d11);
+  }
+}
+@media(prefers-reduced-motion:reduce) { #ambient-network { opacity:.84; } }

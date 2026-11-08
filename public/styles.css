@@ -1390,7 +1390,7 @@ body:not(:has(#workspace:not([hidden]))) .auth-panel {
 /* Distorted reality: a dim room, impossible mirror and cinematic shadows */
 #ambient-network {
   position: fixed; inset: 0; z-index: 1; display: block;
-  pointer-events: none; opacity: .96; mix-blend-mode: screen;
+  pointer-events: none; opacity: .96; mix-blend-mode: normal;
 }
 body:has(#workspace:not([hidden])) #ambient-network { display:none; }
 body:not(:has(#workspace:not([hidden]))) { background:#0c1112 !important; }

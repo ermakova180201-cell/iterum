@@ -992,7 +992,8 @@
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const glyphs = "アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&*+-=<>/\\";
+      const digits = "0123456789".repeat(5);
+      const glyphs = digits + "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZアイウエオカキクケコサシスセソタチツテトナニヌネノ#$%&*+-=<>/\\\";
       const fragments = [
         "MEMORY ACCESS DENIED","SUBJECT: ILYA","DATA CORRUPTED",
         "ITERATION CONTINUES","IDENTITY NOT FOUND","RECALL PROTOCOL",
@@ -1010,7 +1011,7 @@
         columns=Array.from({length:count},(_,i)=>({
           x:i*size*1.05,
           y:Math.random()*height/size,
-          speed:.18+Math.random()*.72,
+          speed:.055+Math.random()*.145,
           size:size+Math.random()*5,
           bright:Math.random()>.84,
           tint:Math.random()>.965
@@ -1046,7 +1047,7 @@
             ctx.fillText(glyphs[Math.floor(Math.random()*glyphs.length)],c.x,headY-c.size*2);
           }
           c.y+=c.speed*(reduced?0.25:1);
-          if(headY>height+30){c.y=-Math.random()*24;c.speed=.18+Math.random()*.72;}
+          if(headY>height+30){c.y=-Math.random()*24;c.speed=.055+Math.random()*.145;}
         }
         if(frame%2===0){
           for(const p of phraseMarks){

@@ -2034,3 +2034,175 @@ body.is-workstation .window-close:hover {
 @media(prefers-reduced-motion:reduce) {
   body.is-workstation .desktop-icon { transition:none; }
 }
+
+
+/* ITERUM case selection screen — gateway between access and workstation */
+body:not(.is-workstation) #workspace {
+  width:min(1160px,calc(100% - 56px));
+  margin:0 auto;
+  padding:28px 0 54px;
+}
+body:not(.is-workstation) #workspace > .section-heading {
+  margin-bottom:18px;
+}
+body:not(.is-workstation) .member-summary {
+  border:1px solid rgba(104,151,116,.2);
+  background:linear-gradient(100deg,rgba(8,20,12,.88),rgba(10,19,13,.68));
+  color:#b9cdbb;
+}
+body:not(.is-workstation) .member-email { color:#c6d8c8; }
+body:not(.is-workstation) .member-status { color:rgba(151,187,157,.72); }
+body:not(.is-workstation) .member-status i {
+  background:#86b78d;
+  box-shadow:0 0 9px rgba(111,191,126,.35);
+}
+body:not(.is-workstation) .available-cases {
+  position:relative;
+  margin:26px 0 34px;
+  padding:clamp(22px,4vw,42px);
+  border:1px solid rgba(104,151,116,.3);
+  background:
+    linear-gradient(rgba(104,151,116,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(104,151,116,.035) 1px,transparent 1px),
+    radial-gradient(ellipse at 90% 0%,rgba(43,100,56,.15),transparent 38%),
+    linear-gradient(145deg,rgba(7,17,10,.98),rgba(5,12,8,.98));
+  background-size:34px 34px,34px 34px,auto,auto;
+  box-shadow:0 22px 70px rgba(0,0,0,.28),inset 0 1px rgba(196,226,198,.035);
+}
+body:not(.is-workstation) .available-cases::before {
+  content:"";
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:2px;
+  background:linear-gradient(180deg,rgba(167,79,70,.8),rgba(111,165,121,.32),transparent);
+}
+body:not(.is-workstation) .case-selection-heading {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:30px;
+  padding-bottom:22px;
+  border-bottom:1px solid rgba(104,151,116,.2);
+}
+body:not(.is-workstation) .case-selection-heading h2 {
+  color:#d5e2d5;
+  font:500 clamp(27px,3.4vw,38px)/1.15 var(--mono);
+  letter-spacing:.025em;
+}
+body:not(.is-workstation) .case-selection-heading .section-kicker {
+  color:rgba(139,181,146,.7);
+  font:8px var(--mono);
+  letter-spacing:.17em;
+}
+body:not(.is-workstation) .case-selection-copy {
+  max-width:560px;
+  margin:12px 0 0;
+  color:rgba(169,190,171,.68);
+  font:11px/1.8 var(--sans);
+}
+body:not(.is-workstation) .case-selection-heading .archive-stamp {
+  flex:0 0 auto;
+  border-color:rgba(151,83,75,.48);
+  color:#b87970;
+  background:rgba(75,32,28,.12);
+  font:8px var(--mono);
+  letter-spacing:.12em;
+}
+body:not(.is-workstation) .available-case-list {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));
+  gap:16px;
+}
+body:not(.is-workstation) .available-case-card {
+  position:relative;
+  min-height:250px;
+  padding:22px;
+  border:1px solid rgba(107,151,115,.25);
+  background:linear-gradient(145deg,rgba(14,29,18,.88),rgba(6,14,9,.96));
+  box-shadow:inset 0 1px rgba(205,231,207,.035);
+  transition:border-color .18s,background .18s,transform .18s;
+}
+body:not(.is-workstation) .available-case-card::after {
+  content:"CASE FILE";
+  position:absolute;
+  right:18px;
+  top:53px;
+  color:rgba(146,184,151,.055);
+  font:500 25px var(--mono);
+  letter-spacing:.1em;
+  pointer-events:none;
+}
+body:not(.is-workstation) .available-case-card:hover {
+  border-color:rgba(132,185,141,.52);
+  background:linear-gradient(145deg,rgba(20,42,25,.94),rgba(7,17,10,.98));
+  transform:translateY(-2px);
+}
+body:not(.is-workstation) .available-case-top {
+  position:relative;
+  z-index:1;
+  margin-bottom:26px;
+}
+body:not(.is-workstation) .available-case-top .micro-label {
+  color:rgba(155,193,160,.75);
+  font:8px var(--mono);
+  letter-spacing:.15em;
+}
+body:not(.is-workstation) .available-case-top .case-state {
+  color:#b4776d;
+  font:8px var(--mono);
+}
+body:not(.is-workstation) .available-case-card h3 {
+  position:relative;
+  z-index:1;
+  color:#d4e0d4;
+  font:500 22px/1.3 var(--serif);
+}
+body:not(.is-workstation) .available-case-card p {
+  color:rgba(168,187,169,.68);
+  font:11px/1.75 var(--sans);
+}
+body:not(.is-workstation) .available-case-card .available-case-meta {
+  margin-top:auto;
+  color:rgba(132,174,139,.68);
+  font:8px var(--mono);
+  letter-spacing:.1em;
+}
+body:not(.is-workstation) .case-start-button {
+  position:relative;
+  z-index:1;
+  margin-top:16px;
+  border:1px solid rgba(126,176,135,.42);
+  color:#c2d8c4;
+  background:rgba(41,83,47,.13);
+  font:9px var(--mono);
+  letter-spacing:.12em;
+  transition:background .18s,border-color .18s;
+}
+body:not(.is-workstation) .case-start-button:hover {
+  border-color:rgba(151,202,158,.7);
+  background:rgba(54,105,61,.28);
+}
+body:not(.is-workstation) .available-case-list > .player-empty {
+  grid-column:1/-1;
+  padding:26px;
+  border:1px dashed rgba(108,154,116,.25);
+  color:rgba(164,188,167,.7);
+  background:rgba(5,13,8,.48);
+  font:10px/1.8 var(--mono);
+}
+@media(max-width:620px) {
+  body:not(.is-workstation) #workspace {
+    width:calc(100% - 28px);
+    padding:16px 0 34px;
+  }
+  body:not(.is-workstation) .available-cases { padding:20px 15px; }
+  body:not(.is-workstation) .case-selection-heading { flex-direction:column; gap:14px; }
+  body:not(.is-workstation) .case-selection-heading .archive-stamp { align-self:flex-start; }
+  body:not(.is-workstation) .available-case-list { grid-template-columns:1fr; }
+  body:not(.is-workstation) .available-case-card { min-height:220px; padding:18px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  body:not(.is-workstation) .available-case-card,
+  body:not(.is-workstation) .case-start-button { transition:none; }
+}

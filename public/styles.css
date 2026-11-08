@@ -3152,3 +3152,82 @@ body.is-workstation .desktop-icon > .icon-caption {
   white-space: normal;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
 }
+
+
+/* Desktop Help shortcut in the lower-right corner */
+body.is-workstation .desktop-help-shortcut {
+  position: absolute;
+  right: 28px;
+  bottom: 24px;
+  z-index: 3;
+  width: 92px;
+  min-height: 88px;
+  height: auto;
+  padding: 5px 4px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  overflow: visible;
+}
+body.is-workstation .desktop-help-shortcut .help-art {
+  position: relative;
+}
+body.is-workstation .desktop-help-shortcut .help-question {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border: 1px solid rgba(202,224,203,.8);
+  border-radius: 50%;
+  color: #e1eee0;
+  background: #294b32;
+  font: bold 12px/1 var(--sans);
+  text-shadow: none;
+}
+body.is-workstation .desktop-help-shortcut > .icon-caption {
+  display: block !important;
+  visibility: visible !important;
+  width: 100%;
+  color: #e3ddce;
+  font: 10px/1.3 var(--sans);
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,.95);
+}
+.help-window-content {
+  padding: 4px 2px 8px;
+  color: #c4d2c2;
+  font: 12px/1.7 var(--sans);
+}
+.help-window-content h3 {
+  margin: 0 0 12px;
+  color: #dce8d9;
+  font: 13px var(--sans);
+}
+.help-window-content p {
+  margin: 0 0 10px;
+}
+.help-window-content strong {
+  color: #a9c8aa;
+}
+@media (max-width: 620px) {
+  body.is-workstation .desktop-help-shortcut {
+    right: 12px;
+    bottom: 14px;
+    width: 76px;
+    min-height: 76px;
+    padding: 4px 2px;
+  }
+  body.is-workstation .desktop-help-shortcut .desktop-icon-art {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+  }
+  body.is-workstation .desktop-help-shortcut > .icon-caption {
+    font-size: 9px;
+  }
+}

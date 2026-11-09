@@ -5047,3 +5047,99 @@ body.is-workstation .desktop-shell .desktop-area > .desktop-window .news-window-
     max-height:calc(100% - 24px);
   }
 }
+
+
+/* ITERUM mail palette — align correspondence window with the cinematic workstation */
+body.is-workstation .desktop-shell #mail-window {
+  color:#dce4eb !important;
+  background:linear-gradient(145deg,rgba(13,25,37,.98),rgba(8,16,26,.99)) !important;
+  border:1px solid rgba(190,151,99,.34) !important;
+  box-shadow:0 28px 85px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.035) !important;
+}
+body.is-workstation .desktop-shell #mail-window .player-tool-heading {
+  background:linear-gradient(100deg,rgba(27,43,58,.98),rgba(13,25,37,.98)) !important;
+  border-bottom:1px solid rgba(190,151,99,.25) !important;
+}
+body.is-workstation .desktop-shell #mail-window .player-tool-heading h2,
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry strong,
+body.is-workstation .desktop-shell #mail-window .mail-reader-subject {color:#e7edf2 !important;}
+body.is-workstation .desktop-shell #mail-window .section-kicker,
+body.is-workstation .desktop-shell #mail-window .mail-reader-top .section-kicker {color:#c5a779 !important;}
+body.is-workstation .desktop-shell #mail-window .modules-note,
+body.is-workstation .desktop-shell #mail-window .mail-entry-sender,
+body.is-workstation .desktop-shell #mail-window .mail-reader-from {color:#c2cbd3 !important;}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-list,
+body.is-workstation .desktop-shell #mail-window .player-mail-list {background:rgba(7,14,23,.78) !important;}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-list {
+  border-right-color:rgba(180,194,207,.16) !important;
+  scrollbar-color:#586a7c #111d29 !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry {
+  border-bottom-color:rgba(180,194,207,.12) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry:hover {
+  background:rgba(190,151,99,.09) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry.is-active {
+  background:linear-gradient(90deg,rgba(190,151,99,.19),rgba(52,73,91,.13)) !important;
+  box-shadow:inset 2px 0 #c5a779 !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry time,
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry small,
+body.is-workstation .desktop-shell #mail-window .mail-reader-top time,
+body.is-workstation .desktop-shell #mail-window .player-empty {color:#9eacb8 !important;}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry.is-unread .mail-entry-sender:before {
+  background:#d4ad72 !important;box-shadow:0 0 8px rgba(212,173,114,.42) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader {
+  background:radial-gradient(ellipse at 88% 0%,rgba(190,151,99,.09),transparent 38%),linear-gradient(145deg,rgba(20,34,48,.98),rgba(11,20,31,.99)) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader-top {border-bottom-color:rgba(190,151,99,.2) !important;}
+body.is-workstation .desktop-shell #mail-window .mail-reader-divider {background:rgba(190,151,99,.2) !important;}
+body.is-workstation .desktop-shell #mail-window .mail-reader-body {color:#d0d9e1 !important;}
+body.is-workstation .desktop-shell #mail-window .window-close {
+  color:#d1b487 !important;border-color:rgba(190,151,99,.34) !important;
+}
+body.is-workstation .desktop-shell #mail-window .window-close:hover {
+  background:rgba(190,151,99,.12) !important;color:#f0d9b4 !important;
+}
+
+/* ITERUM five-track music player */
+.iterum-music-player {
+  display:grid !important;
+  grid-template-columns:auto minmax(145px,210px) auto auto minmax(58px,92px) !important;
+  align-items:center !important;
+  gap:8px !important;
+  min-width:0;
+}
+.music-player-label,.ambient-volume-label {
+  color:#9ba9b7 !important;font:7px var(--mono) !important;letter-spacing:.12em;
+}
+.music-track-select {
+  width:100%;min-width:0;height:27px;padding:0 7px;
+  color:#dce4eb;background:#111e2b;border:1px solid rgba(190,151,99,.28);
+  border-radius:3px;font:8px var(--mono);outline:none;
+}
+.music-track-select:focus {border-color:#c5a779;}
+.iterum-music-player .ambient-toggle {
+  display:flex;align-items:center;gap:7px;white-space:nowrap;
+  color:#e5d3b5;border-color:rgba(190,151,99,.34);
+}
+.iterum-music-player .ambient-toggle[aria-pressed="true"] {
+  background:rgba(190,151,99,.13);color:#f0d9b4;
+}
+.iterum-music-player .ambient-volume {
+  width:100%;min-width:55px;accent-color:#c5a779;
+}
+@media(max-width:900px) {
+  .iterum-music-player {grid-template-columns:auto minmax(120px,1fr) auto !important;}
+  .iterum-music-player .ambient-volume-label {display:none;}
+  .iterum-music-player .ambient-volume {grid-column:2 / 3;}
+}
+@media(max-width:620px) {
+  .iterum-music-player {grid-template-columns:minmax(0,1fr) auto !important;gap:5px !important;}
+  .music-player-label {display:none;}
+  .music-track-select {grid-column:1 / 2;}
+  .iterum-music-player .ambient-toggle {grid-column:2 / 3;}
+  .iterum-music-player .ambient-volume {grid-column:1 / 3;}
+}

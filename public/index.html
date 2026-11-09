@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=ambient-player-01">
+  <link rel="stylesheet" href="/styles.css?v=centered-unified-windows-01">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -685,6 +685,15 @@
           if (win) {
             desktopShell.querySelectorAll(".desktop-window").forEach(other => { if (other !== win) other.hidden = true; });
             win.hidden = false;
+            // Открываем каждое приложение по центру рабочего пространства.
+            win.style.left = "50%";
+            win.style.top = "50%";
+            win.style.right = "auto";
+            win.style.bottom = "auto";
+            win.style.width = "";
+            win.style.height = "";
+            win.style.transform = "translate(-50%, -50%)";
+            win.style.zIndex = String(++topWindowZ);
             desktopShell.querySelectorAll("[data-open-window]").forEach(button => button.classList.toggle("is-selected", button.dataset.openWindow === opener.dataset.openWindow));
             if (window.iterumSystemLock) window.iterumSystemLock.noteAppOpen();
           }
@@ -713,6 +722,7 @@
           const startTop = winRect.top - areaRect.top;
           const width = winRect.width;
           const height = winRect.height;
+          win.style.transform = "none";
           win.style.left = startLeft + "px";
           win.style.top = startTop + "px";
           win.style.right = "auto";

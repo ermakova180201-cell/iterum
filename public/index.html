@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=desktop-fixes-03">
+  <link rel="stylesheet" href="/styles.css?v=mail-notifications-01">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -71,9 +71,8 @@
           <div class="desktop-area">
             <div class="desktop-icons" aria-label="Приложения">
               <button class="desktop-icon" type="button" data-open-window="mail-window" aria-label="Почта" title="Почта">
-                <span class="desktop-icon-art mail-art" aria-hidden="true"><span class="mail-symbol"></span></span>
+                <span class="desktop-icon-art mail-art" aria-hidden="true"><span class="mail-symbol"></span><span id="desktop-mail-badge" class="desktop-mail-badge" hidden>1</span></span>
                 <span class="icon-caption">Почта</span>
-                <small id="desktop-mail-badge" hidden>ВХОДЯЩИЕ</small>
               </button>
               <button class="desktop-icon" type="button" data-open-window="search-window" aria-label="Поиск данных" title="Поиск данных">
                 <span class="desktop-icon-art search-art" aria-hidden="true"><span class="search-lens"></span></span>
@@ -420,6 +419,11 @@
     const playerMailCount = document.getElementById("player-mail-count");
     const openedMailIds = new Set();
     let selectedMailId = null;
+    const knownMailIds = new Set();
+    let mailBaselineReady = false;
+    let mailPollingTimer = null;
+    let mailPollInFlight = false;
+    let mailAudioContext = null;
 
     const adminMaterialList = document.getElementById("admin-material-list");
     const adminCaseList = document.getElementById("admin-case-list");
@@ -476,10 +480,14 @@
           adminSetupNote.hidden = data.adminConfigured || data.isAdmin;
 
           await loadPlayerArchive();
+          startMailPolling();
           if (data.isAdmin) await loadAdminOverview();
         } else {
           authPanel.hidden = false;
           workspace.hidden = true;
+          stopMailPolling();
+          knownMailIds.clear();
+          mailBaselineReady = false;
           isAdminSession = false;
           adminPanel.hidden = true;
           adminSetupNote.hidden = true;
@@ -555,6 +563,120 @@
       if (!response.ok) throw new Error("Не удалось открыть материал.");
     }
 
+    function updateMailBadge() {
+      const badge = document.getElementById("desktop-mail-badge");
+      const shortcut = badge?.closest("[data-open-window='mail-window']");
+      if (!badge || !currentCaseId) {
+        if (badge) badge.hidden = true;
+        return;
+      }
+      const unread = archiveMaterials.filter(item =>
+        item.case_id === currentCaseId &&
+        item.material_type === "email" &&
+        !item.is_read &&
+        !item.is_preview
+      ).length;
+      badge.textContent = unread > 99 ? "99+" : String(unread);
+      badge.hidden = unread === 0;
+      if (shortcut) shortcut.setAttribute("aria-label", unread ? "Почта, непрочитанных писем: " + unread : "Почта");
+    }
+
+    function playMailNotificationSound() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      try {
+        if (!mailAudioContext) mailAudioContext = new AudioContextClass();
+        const context = mailAudioContext;
+        if (context.state === "suspended") context.resume().catch(() => {});
+        const now = context.currentTime;
+        [880, 1174].forEach((frequency, index) => {
+          const oscillator = context.createOscillator();
+          const gain = context.createGain();
+          const start = now + index * 0.11;
+          oscillator.type = "sine";
+          oscillator.frequency.setValueAtTime(frequency, start);
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(0.12, start + 0.018);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.24);
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start(start);
+          oscillator.stop(start + 0.25);
+        });
+      } catch {
+        // Уведомление остаётся визуальным, если браузер блокирует звук.
+      }
+    }
+
+    function rememberIncomingEmails(materials) {
+      const emails = (materials || []).filter(item =>
+        item.material_type === "email" && !item.is_preview
+      );
+      if (!mailBaselineReady) {
+        emails.forEach(item => knownMailIds.add(item.id));
+        mailBaselineReady = true;
+        return [];
+      }
+      const incoming = emails.filter(item => !knownMailIds.has(item.id));
+      emails.forEach(item => knownMailIds.add(item.id));
+      return incoming;
+    }
+
+    function announceIncomingEmails(incoming) {
+      const relevant = incoming.filter(item => item.case_id === currentCaseId);
+      if (!relevant.length) return;
+      updateMailBadge();
+      playMailNotificationSound();
+      const toast = document.getElementById("desktop-notice-toast");
+      if (toast) {
+        toast.textContent = relevant.length === 1
+          ? "Новое письмо: " + relevant[0].title
+          : "Поступили новые письма: " + relevant.length;
+        toast.hidden = false;
+        window.clearTimeout(toast._mailNoticeTimer);
+        toast._mailNoticeTimer = window.setTimeout(() => { toast.hidden = true; }, 4800);
+      }
+      const mailWindow = document.getElementById("mail-window");
+      if (mailWindow && !mailWindow.hidden) {
+        const caseId = currentCaseId;
+        openCase(caseId);
+        mailWindow.hidden = false;
+        const mailShortcut = document.querySelector("[data-open-window='mail-window']");
+        if (mailShortcut) mailShortcut.classList.add("is-selected");
+      }
+    }
+
+    async function refreshMailNotifications() {
+      if (mailPollInFlight || !currentCaseId || playerArchive.hidden) return;
+      mailPollInFlight = true;
+      try {
+        const response = await fetch("/api/player/archive", { credentials: "same-origin" });
+        if (!response.ok) return;
+        const data = await response.json();
+        const nextMaterials = data.materials || [];
+        const incoming = rememberIncomingEmails(nextMaterials);
+        archiveMaterials = nextMaterials;
+        updateMailBadge();
+        if (incoming.length) announceIncomingEmails(incoming);
+      } catch {
+        // Временная ошибка связи не должна прерывать работу рабочего стола.
+      } finally {
+        mailPollInFlight = false;
+      }
+    }
+
+    function startMailPolling() {
+      if (mailPollingTimer) return;
+      mailPollingTimer = window.setInterval(() => {
+        if (document.visibilityState === "visible") refreshMailNotifications();
+      }, 15000);
+    }
+
+    function stopMailPolling() {
+      if (mailPollingTimer) window.clearInterval(mailPollingTimer);
+      mailPollingTimer = null;
+    }
+
     function showCaseList(preserveLastCase = false) {
       document.body.classList.remove('is-workstation');
       currentCaseId = null;
@@ -591,7 +713,7 @@
       const emails = caseMaterials.filter(item => item.material_type === "email");
       const unreadEmails = emails.filter(item => !item.is_read).length;
       playerMailCount.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
-      document.getElementById("desktop-mail-badge").textContent = unreadEmails ? unreadEmails + " НОВЫХ" : "ВХОДЯЩИЕ";
+      updateMailBadge();
       if (!emails.length) {
         selectedMailId = null;
         const empty = document.createElement("p");
@@ -645,7 +767,10 @@
         if (!response.ok) throw new Error("Не удалось загрузить архив.");
         const data = await response.json();
         archiveCases = data.cases || [];
-        archiveMaterials = data.materials || [];
+        const nextMaterials = data.materials || [];
+        const incomingEmails = rememberIncomingEmails(nextMaterials);
+        archiveMaterials = nextMaterials;
+        if (incomingEmails.length) announceIncomingEmails(incomingEmails);
         availableCaseList.replaceChildren();
         if (!archiveCases.length) {
           const empty = document.createElement("p");
@@ -692,12 +817,16 @@
 
     const desktopShell = document.querySelector(".desktop-shell");
     if (desktopShell) {
-      playerArchive.addEventListener("click", event => {
+      playerArchive.addEventListener("click", async event => {
         const opener = event.target.closest("[data-open-window]");
         const closer = event.target.closest("[data-close-window]");
         if (opener) {
           const lockOverlay = document.getElementById("system-lock-overlay");
           if (lockOverlay && !lockOverlay.hidden) return;
+          if (opener.dataset.openWindow === "mail-window" && currentCaseId) {
+            await refreshMailNotifications();
+            openCase(currentCaseId);
+          }
           const win = document.getElementById(opener.dataset.openWindow);
           if (win) {
             desktopShell.querySelectorAll(".desktop-window").forEach(other => { if (other !== win) other.hidden = true; });

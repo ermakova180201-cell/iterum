@@ -5143,3 +5143,61 @@ body.is-workstation .desktop-shell #mail-window .window-close:hover {
   .iterum-music-player .ambient-toggle {grid-column:2 / 3;}
   .iterum-music-player .ambient-volume {grid-column:1 / 3;}
 }
+
+
+/* ITERUM taskbar — show only currently open applications */
+body.is-workstation .desktop-shell .taskbar-running-apps {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  flex:1 1 auto;
+  padding:0 8px;
+}
+body.is-workstation .desktop-shell .taskbar-running-apps:empty {
+  display:none;
+}
+body.is-workstation .desktop-shell .taskbar-running-apps button {
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  min-height:36px;
+  max-width:190px;
+  padding:0 14px;
+  border:1px solid rgba(178,194,207,.19);
+  border-bottom:2px solid rgba(178,194,207,.42);
+  border-radius:5px 5px 2px 2px;
+  background:rgba(29,43,56,.72);
+  color:#dce5ec;
+  font:500 11px "Space Grotesk",sans-serif;
+  letter-spacing:.035em;
+  cursor:pointer;
+  transition:background .18s,border-color .18s;
+}
+body.is-workstation .desktop-shell .taskbar-running-apps button:hover,
+body.is-workstation .desktop-shell .taskbar-running-apps button.is-selected {
+  background:rgba(52,69,83,.88);
+  border-color:rgba(220,170,104,.48);
+  border-bottom-color:#d5a568;
+  color:#fff;
+}
+body.is-workstation .desktop-shell .taskbar-running-icon {
+  display:grid;
+  place-items:center;
+  width:20px;
+  height:20px;
+  flex:0 0 20px;
+  color:#e2b477;
+  font-size:15px;
+}
+@media (max-width:760px) {
+  body.is-workstation .desktop-shell .taskbar-running-apps {
+    flex:1 1 100%;
+    order:2;
+    padding:0;
+  }
+  body.is-workstation .desktop-shell .taskbar-running-apps button {
+    min-height:32px;
+    max-width:100%;
+  }
+}

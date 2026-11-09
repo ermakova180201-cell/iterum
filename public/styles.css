@@ -6668,3 +6668,34 @@ body.is-workstation .iterum-assistant-chat{position:absolute;z-index:30;left:cal
 .iterum-assistant-topics button{padding:8px 6px;border:1px solid rgba(133,204,217,.2);border-radius:3px;background:transparent;color:#bcd3da;font:8px var(--sans);cursor:pointer}
 .iterum-assistant-topics button:hover{border-color:rgba(133,204,217,.6);background:rgba(95,161,180,.1)}
 @media(max-width:650px){.assistant-launch-panel{padding:22px}.assistant-launch-actions{grid-template-columns:1fr}body.is-workstation .iterum-assistant-chat{left:12px;top:auto;bottom:14px;width:min(330px,calc(100% - 24px))}}
+
+
+/* Living personality for the ITERUM ghost assistant */
+.iterum-assistant-chat .assistant-chat-compose{display:flex;gap:7px;padding:10px;border-top:1px solid rgba(133,204,217,.14)}
+.assistant-chat-compose input{flex:1;min-width:0;padding:9px 10px;border:1px solid rgba(133,204,217,.22);border-radius:3px;outline:none;background:rgba(4,13,22,.55);color:#dce8ed;font:9px var(--sans)}
+.assistant-chat-compose input:focus{border-color:rgba(142,220,229,.65)}
+.assistant-chat-compose input::placeholder{color:#78909e}
+.assistant-chat-compose button{width:35px;border:1px solid rgba(133,204,217,.28);border-radius:3px;background:rgba(95,161,180,.13);color:#bcebf0;cursor:pointer}
+body.is-workstation .iterum-ghost-helper{transition:filter .35s ease,transform .35s ease}
+body.is-workstation .iterum-ghost-helper.is-happy{filter:drop-shadow(0 0 9px rgba(135,237,226,.45))}
+body.is-workstation .iterum-ghost-helper.is-happy .iterum-ghost-body{transform:scale(1.04);border-color:rgba(190,255,238,.9)}
+body.is-workstation .iterum-ghost-helper.is-curious .iterum-ghost-body{transform:rotate(7deg) translateY(-3px);filter:brightness(1.2)}
+body.is-workstation .iterum-ghost-helper.is-curious .iterum-ghost-halo{transform:scale(1.2);opacity:.95}
+body.is-workstation .iterum-ghost-helper.is-surprised .iterum-ghost-eyes i{width:7px;height:9px;box-shadow:0 0 9px 3px rgba(139,245,255,.95)}
+body.is-workstation .iterum-ghost-helper.is-surprised .iterum-ghost-body{transform:translateY(-7px) scale(1.05)}
+body.is-workstation .iterum-ghost-helper.is-thinking .iterum-ghost-body{transform:rotate(-5deg) translateY(2px);filter:saturate(.75)}
+body.is-workstation .iterum-ghost-helper.is-thinking .iterum-ghost-core{opacity:.45}
+body.is-workstation .iterum-ghost-helper.is-sleepy .iterum-ghost-body{transform:translateY(5px) scale(.96);filter:brightness(.82)}
+body.is-workstation .iterum-ghost-helper.is-sleepy .iterum-ghost-eyes i{height:2px;transform:translateY(3px)}
+body.is-workstation .iterum-ghost-helper.is-grumpy .iterum-ghost-body{filter:hue-rotate(-18deg) brightness(.92);transform:rotate(-4deg)}
+body.is-workstation .iterum-ghost-helper.is-grumpy .iterum-ghost-eyes i{transform:rotate(18deg) scaleY(.65)}
+body.is-workstation .iterum-ghost-helper.is-grumpy .iterum-ghost-aura{opacity:.45}
+.iterum-ghost-message{transition:opacity .25s ease,transform .25s ease}
+body.is-workstation .iterum-ghost-helper:hover .iterum-ghost-message,
+body.is-workstation .iterum-ghost-helper.is-happy .iterum-ghost-message,
+body.is-workstation .iterum-ghost-helper.is-curious .iterum-ghost-message,
+body.is-workstation .iterum-ghost-helper.is-surprised .iterum-ghost-message,
+body.is-workstation .iterum-ghost-helper.is-thinking .iterum-ghost-message,
+body.is-workstation .iterum-ghost-helper.is-sleepy .iterum-ghost-message,
+body.is-workstation .iterum-ghost-helper.is-grumpy .iterum-ghost-message{opacity:1;transform:translateY(-3px)}
+@media(prefers-reduced-motion:reduce){body.is-workstation .iterum-ghost-helper,body.is-workstation .iterum-ghost-helper .iterum-ghost-body{animation:none!important;transition:none!important}}

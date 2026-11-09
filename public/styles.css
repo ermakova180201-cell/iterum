@@ -4667,3 +4667,212 @@ body.is-workstation .connection-art span { font: 29px/1 var(--mono); }
   .desktop-shell .desktop-icon { transition:none; }
   .desktop-shell .desktop-icon:hover { transform:none; }
 }
+
+
+/* ITERUM desktop — force cinematic theme over legacy workstation skin */
+body.is-workstation .desktop-shell {
+  --cin-ink:#e7e9e8;
+  --cin-muted:#91a0aa;
+  --cin-gold:#c79b6b;
+  border:1px solid rgba(176,194,208,.2);
+  border-radius:14px;
+  background:#0a1017;
+  box-shadow:0 34px 100px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.025),inset 0 1px rgba(255,255,255,.045);
+}
+body.is-workstation .desktop-shell .desktop-toolbar {
+  min-height:76px;
+  display:grid;
+  grid-template-columns:minmax(210px,1fr) auto minmax(210px,1fr);
+  align-items:center;
+  padding:0 28px;
+  color:#dce4e9;
+  background:linear-gradient(90deg,#1a2531,#0f1720 48%,#19232e);
+  border-bottom:1px solid rgba(169,188,205,.16);
+}
+body.is-workstation .desktop-shell .desktop-window-title {
+  padding-bottom:8px;
+  font:600 13px "Space Grotesk",sans-serif;
+  letter-spacing:.14em;
+}
+body.is-workstation .desktop-shell .desktop-led {
+  background:#d9aa75;
+  box-shadow:0 0 0 4px rgba(217,170,117,.09),0 0 16px rgba(217,170,117,.8);
+}
+body.is-workstation .desktop-shell .desktop-toolbar-right {
+  width:auto;
+  justify-content:flex-end;
+  padding-bottom:8px;
+  color:#98a7b3;
+  gap:19px;
+  font-size:8px;
+}
+body.is-workstation .desktop-shell .desktop-toolbar-right span:last-child { color:#d6ad80; }
+body.is-workstation .desktop-shell .desktop-area {
+  flex:1 0 720px;
+  min-height:720px;
+  padding:26px 28px;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 51% 49%,rgba(91,112,130,.22),transparent 28%),
+    radial-gradient(ellipse at 52% 50%,rgba(199,155,107,.055),transparent 49%),
+    radial-gradient(ellipse at 100% 100%,rgba(65,91,108,.13),transparent 38%),
+    linear-gradient(132deg,#121c27 0%,#0b131d 47%,#111c27 100%);
+}
+body.is-workstation .desktop-shell .desktop-area::before {
+  inset:0;width:auto;height:auto;right:0;top:0;
+  border:0;transform:none;opacity:.42;
+  background-image:
+    linear-gradient(rgba(155,177,195,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(155,177,195,.045) 1px,transparent 1px),
+    linear-gradient(rgba(155,177,195,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(155,177,195,.018) 1px,transparent 1px);
+  background-size:56px 56px,56px 56px,14px 14px,14px 14px;
+  mask-image:linear-gradient(90deg,#000 0%,#000 82%,transparent 100%);
+}
+body.is-workstation .desktop-shell .desktop-area::after {
+  inset:auto;right:18%;top:2%;width:690px;height:690px;
+  border:1px solid rgba(173,194,208,.065);transform:none;
+  box-shadow:0 0 0 1px rgba(255,255,255,.012),0 0 0 38px rgba(173,194,208,.012),0 0 0 92px rgba(173,194,208,.009),0 0 0 158px rgba(173,194,208,.007),inset 0 0 100px rgba(120,151,174,.04);
+  background:radial-gradient(circle at center,rgba(125,151,174,.075),transparent 66%),conic-gradient(from 20deg,transparent 0 18%,rgba(199,165,127,.08) 18.2% 18.5%,transparent 18.8% 63%,rgba(145,174,191,.07) 63.2% 63.5%,transparent 63.8%);
+}
+body.is-workstation .desktop-shell .desktop-icons {
+  position:absolute;z-index:2;left:3.2%;top:6.5%;
+  display:grid;grid-template-columns:repeat(2,104px);
+  align-items:stretch;gap:12px;width:219px;margin:0;
+}
+body.is-workstation .desktop-shell .desktop-icon {
+  width:auto;height:auto;min-height:108px;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  gap:11px;padding:13px 12px 12px;
+  border:1px solid rgba(168,188,204,.15);border-radius:8px;
+  color:#dce4e9;
+  background:linear-gradient(145deg,rgba(36,51,65,.82),rgba(13,22,32,.91));
+  font:600 10px/1.3 "Space Grotesk",sans-serif;
+  letter-spacing:normal;text-shadow:0 1px 8px rgba(0,0,0,.4);
+  transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease;
+}
+body.is-workstation .desktop-shell .desktop-icon:hover,
+body.is-workstation .desktop-shell .desktop-icon.is-selected {
+  border-color:rgba(219,174,125,.58);
+  background:linear-gradient(145deg,rgba(49,62,74,.95),rgba(20,31,42,.97));
+  box-shadow:0 14px 32px rgba(0,0,0,.3),0 0 26px rgba(213,163,108,.09),inset 0 1px rgba(255,255,255,.08);
+  transform:translateY(-2px);
+}
+body.is-workstation .desktop-shell .desktop-icon-art {
+  position:relative;display:grid;place-items:center;
+  width:40px;height:40px;flex:0 0 40px;
+  border:1px solid rgba(219,177,131,.34);border-radius:10px;
+  color:#e5bd92;
+  background:linear-gradient(145deg,rgba(206,164,119,.22),rgba(74,92,108,.15)),#1b2935;
+  box-shadow:0 5px 15px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.09);
+}
+body.is-workstation .desktop-shell .desktop-icon-art span { color:#e5bd92; }
+body.is-workstation .desktop-shell .desktop-icon .icon-caption {
+  display:block;min-height:26px;color:#dce4e9;
+  font:600 10px/1.3 "Space Grotesk",sans-serif;
+}
+body.is-workstation .desktop-shell .desktop-icon small { display:none; }
+body.is-workstation .desktop-shell .desktop-case-shortcut {
+  left:34%;right:auto;top:39%;bottom:auto;z-index:2;
+  display:flex;align-items:center;gap:20px;
+  width:min(430px,42%);max-width:none;min-width:0;min-height:166px;
+  padding:32px 30px 34px;
+  border:1px solid rgba(213,171,128,.46);border-left:3px solid #d5a36c;border-radius:10px;
+  background:linear-gradient(112deg,rgba(43,56,68,.97),rgba(15,24,34,.985) 72%);
+  box-shadow:0 35px 90px rgba(0,0,0,.42),0 0 70px rgba(213,163,108,.065),inset 0 1px rgba(255,255,255,.09);
+}
+body.is-workstation .desktop-shell .desktop-case-shortcut span,
+body.is-workstation .desktop-shell .desktop-case-shortcut small { color:#aebac3; }
+body.is-workstation .desktop-shell .desktop-case-shortcut strong {
+  max-width:260px;margin:9px 0 8px;color:#f0f2f3;
+  font:600 17px/1.35 "Manrope",sans-serif;
+}
+body.is-workstation .desktop-shell .desktop-date-panel {
+  position:absolute;top:6.5%;right:4%;left:auto;bottom:auto;z-index:2;
+  width:230px;padding:19px 21px 18px;
+  border:1px solid rgba(170,190,205,.18);border-radius:8px;
+  background:linear-gradient(145deg,rgba(35,49,62,.88),rgba(12,20,29,.94));
+  box-shadow:0 18px 42px rgba(0,0,0,.23),inset 0 1px rgba(255,255,255,.055);
+  backdrop-filter:blur(14px);
+}
+body.is-workstation .desktop-shell .desktop-date-panel time { font:36px "DM Mono",monospace; }
+body.is-workstation .desktop-shell .desktop-system-panel {
+  position:absolute;right:4%;left:auto;top:auto;bottom:7%;z-index:2;
+  width:270px;padding:19px 21px;
+  border:1px solid rgba(170,190,205,.18);border-radius:8px;
+  background:linear-gradient(145deg,rgba(35,49,62,.88),rgba(12,20,29,.94));
+  box-shadow:0 18px 42px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.055);
+  backdrop-filter:blur(14px);
+}
+body.is-workstation .desktop-shell .desktop-panel-heading { color:#d8c0a7; }
+body.is-workstation .desktop-shell .system-status-row strong { color:#d5dedf;font:8px "IBM Plex Mono",monospace; }
+body.is-workstation .desktop-shell .desktop-help-shortcut {
+  left:3.2%;right:auto;top:auto;bottom:24px;z-index:2;
+  width:104px;min-height:82px;
+  border:1px dashed rgba(168,188,204,.2);
+  background:linear-gradient(145deg,rgba(31,44,57,.66),rgba(13,21,30,.78));
+}
+body.is-workstation .desktop-shell .desktop-wallpaper-mark {
+  top:22%;right:24%;left:auto;z-index:0;
+  color:rgba(197,211,221,.028);
+  font:700 clamp(86px,13vw,170px) "Space Grotesk",sans-serif;
+  letter-spacing:.24em;user-select:none;
+}
+body.is-workstation .desktop-shell .desktop-taskbar {
+  flex:0 0 auto;min-height:66px;padding:0 27px;
+  border-top:1px solid rgba(169,188,205,.16);
+  background:linear-gradient(90deg,#192430,#0e1721 50%,#1a2632);
+  color:#c2ccd2;
+}
+body.is-workstation .desktop-shell .desktop-area .desktop-window {
+  box-sizing:border-box;
+  top:24px;right:4%;bottom:22px;left:auto;
+  width:min(760px,calc(100% - 320px));max-width:calc(100% - 320px);
+  min-width:0;overflow-x:hidden;overflow-y:auto;
+  padding:0 20px 20px;
+  border:1px solid rgba(174,193,208,.25);border-radius:11px;
+  background:linear-gradient(145deg,rgba(24,35,47,.995),rgba(10,17,25,.998));
+  box-shadow:0 32px 90px rgba(0,0,0,.68),0 0 0 1px rgba(255,255,255,.025);
+}
+body.is-workstation .desktop-shell .desktop-area .desktop-window .player-tool-heading {
+  min-height:65px;margin:0 -20px 18px;padding:16px 19px;
+  border-bottom:1px solid rgba(169,188,205,.15);
+  background:linear-gradient(100deg,#253342,#17232f);
+}
+body.is-workstation .desktop-shell .desktop-area .desktop-window .player-tool-heading h2 { color:#e7e9e8;font-size:20px; }
+body.is-workstation .desktop-shell .desktop-area .desktop-window .section-kicker { color:#d7aa7a; }
+body.is-workstation .desktop-shell .desktop-area .desktop-window .window-close { width:30px;height:30px;border-radius:7px; }
+body.is-workstation .desktop-shell .desktop-notice-toast { z-index:8; }
+body.is-workstation .desktop-shell .desktop-wallpaper-mark,
+body.is-workstation .desktop-shell .desktop-case-shortcut,
+body.is-workstation .desktop-shell .desktop-date-panel,
+body.is-workstation .desktop-shell .desktop-system-panel,
+body.is-workstation .desktop-shell .desktop-icons { pointer-events:auto; }
+@media (max-width:1100px) and (min-width:761px) {
+  body.is-workstation .desktop-shell .desktop-icons { left:2%;grid-template-columns:repeat(2,94px);width:198px; }
+  body.is-workstation .desktop-shell .desktop-case-shortcut { left:28%;width:39%; }
+  body.is-workstation .desktop-shell .desktop-date-panel,
+  body.is-workstation .desktop-shell .desktop-system-panel { right:2%;width:205px; }
+  body.is-workstation .desktop-shell .desktop-area .desktop-window { width:calc(100% - 285px);max-width:calc(100% - 285px); }
+}
+@media (max-width:760px) {
+  body.is-workstation .desktop-shell .desktop-toolbar { display:flex;min-height:76px;flex-wrap:wrap;padding:7px 14px; }
+  body.is-workstation .desktop-shell .desktop-toolbar-right { width:100%;justify-content:flex-end;font-size:7px; }
+  body.is-workstation .desktop-shell .desktop-area { flex:1 0 870px;min-height:870px;padding:18px 12px;overflow:hidden; }
+  body.is-workstation .desktop-shell .desktop-icons { left:14px;top:18px;grid-template-columns:repeat(2,94px);gap:8px;width:196px; }
+  body.is-workstation .desktop-shell .desktop-icon { min-height:88px;padding:9px;gap:7px; }
+  body.is-workstation .desktop-shell .desktop-icon-art { width:34px;height:34px;flex-basis:34px; }
+  body.is-workstation .desktop-shell .desktop-icon .icon-caption { min-height:23px;font-size:9px; }
+  body.is-workstation .desktop-shell .desktop-date-panel { top:18px;right:14px;width:calc(100% - 232px);min-width:110px;padding:12px 10px; }
+  body.is-workstation .desktop-shell .desktop-date-panel time { font-size:23px; }
+  body.is-workstation .desktop-shell .desktop-case-shortcut { left:14px;top:365px;width:calc(100% - 28px);min-width:0;min-height:142px;padding:23px 17px 29px; }
+  body.is-workstation .desktop-shell .desktop-case-shortcut strong { font-size:14px; }
+  body.is-workstation .desktop-shell .desktop-system-panel { right:14px;bottom:18px;width:calc(100% - 28px); }
+  body.is-workstation .desktop-shell .desktop-help-shortcut { left:14px;bottom:168px;width:94px; }
+  body.is-workstation .desktop-shell .desktop-area .desktop-window { top:12px;right:8px;bottom:12px;left:8px;width:auto;max-width:none;padding:0 12px 14px; }
+  body.is-workstation .desktop-shell .desktop-area .desktop-window .player-tool-heading { margin:0 -12px 15px;padding:11px 13px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .desktop-icon { transition:none; }
+  body.is-workstation .desktop-shell .desktop-icon:hover { transform:none; }
+}

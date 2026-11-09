@@ -83,18 +83,13 @@
                 <span class="desktop-icon-art folder-art" aria-hidden="true"><span class="folder-paper"></span></span>
                 <span class="icon-caption">Материалы дела</span>
               </button>
-              <button class="desktop-icon" type="button" data-open-window="system-log-window" aria-label="Системный архив" title="Системный архив">
-                <span class="desktop-icon-art log-art" aria-hidden="true"><span class="log-paper"></span></span>
-                <span class="icon-caption">Системный архив</span>
+              <button class="desktop-icon" type="button" data-open-window="news-window" aria-label="Новости" title="Новости">
+                <span class="desktop-icon-art folder-art news-art" aria-hidden="true"><span class="folder-paper"></span></span>
+                <span class="icon-caption">Новости</span>
               </button>
-              <button class="desktop-icon" type="button" data-open-window="diagnostics-window" aria-label="Самодиагностика" title="Самодиагностика">
-                <span class="desktop-icon-art diagnostics-art" aria-hidden="true"><span>⌁</span></span>
-                <span class="icon-caption">Самодиагностика</span>
-              </button>
-              <button class="desktop-icon" type="button" data-open-window="connection-game-window" aria-label="Восстановление соединения" title="Восстановление соединения">
-                <span class="desktop-icon-art connection-art" aria-hidden="true"><span>⌘</span></span>
-                <span class="icon-caption">Восстановление соединения</span>
-              </button>
+              
+              
+              
             </div>
             <button class="desktop-icon desktop-help-shortcut" type="button" data-open-window="help-window" aria-label="Помощь" title="Помощь">
               <span class="desktop-icon-art folder-art help-art" aria-hidden="true"><span class="help-question">?</span></span>
@@ -154,14 +149,7 @@
           <div id="player-material-list" class="player-material-list"></div>
         </section>
 
-        <section id="system-log-window" class="player-tool-section desktop-window system-log-window" aria-labelledby="system-log-heading" hidden>
-          <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">СИСТЕМНОЕ ПРИЛОЖЕНИЕ / 04</span><h2 id="system-log-heading">Журнал событий</h2></div>
-            <button class="window-close" type="button" data-close-window="system-log-window" aria-label="Закрыть окно">×</button>
-          </div>
-          <p class="system-log-intro">История действий и уведомлений в рамках текущего сеанса.</p>
-          <div class="system-log-list" id="system-log-list" aria-live="polite"><p class="player-empty">Событий пока нет.</p></div>
-        </section>
+        
 
         <section id="help-window" class="player-tool-section desktop-window help-window" aria-labelledby="help-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
@@ -173,66 +161,32 @@
             <p><strong>Почта</strong> — сообщения и новые материалы по делу.</p>
             <p><strong>Поиск данных</strong> — поиск сведений и зацепок.</p>
             <p><strong>Материалы дела</strong> — изучение доступных документов и улик.</p>
-            <p><strong>Системный архив</strong> — журнал событий текущего сеанса.</p>
-            <p><strong>Самодиагностика</strong> — проверка состояния компонентов системы.</p>
-            <p><strong>Восстановление соединения</strong> — мини-игра по восстановлению системного канала.</p>
             <div class="help-lock-test"><span>ТЕСТИРОВАНИЕ СИСТЕМЫ</span><button type="button" class="admin-mini-button" id="help-trigger-lock">ВЫЗВАТЬ СИСТЕМНЫЙ СБОЙ</button></div>
             <p>Чтобы открыть приложение, нажмите на его значок. Окна можно перемещать за верхнюю панель, а закрыть — кнопкой ×.</p>
           </div>
         </section>
-
-        <section id="diagnostics-window" class="player-tool-section desktop-window diagnostics-window" aria-labelledby="diagnostics-heading" hidden>
+        
+        <section id="news-window" class="player-tool-section desktop-window news-window" aria-labelledby="news-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">СИСТЕМНОЕ ПРИЛОЖЕНИЕ / 05</span><h2 id="diagnostics-heading">Самодиагностика системы</h2></div>
-            <button class="window-close" type="button" data-close-window="diagnostics-window" aria-label="Закрыть окно">×</button>
+            <div><span class="section-kicker">ИНФОРМАЦИОННЫЙ РАЗДЕЛ</span><h2 id="news-heading">Новости</h2></div>
+            <button class="window-close" type="button" data-close-window="news-window" aria-label="Закрыть окно">×</button>
           </div>
-          <p class="diagnostics-intro">Проверка целостности компонентов и согласованности данных текущего сеанса.</p>
-          <div class="diagnostics-console">
-            <div class="diagnostics-console-top"><span>ITERUM / DIAGNOSTIC TOOL</span><span id="diagnostics-run-state">ОЖИДАНИЕ</span></div>
-            <div class="diagnostics-scanline" aria-hidden="true"><span id="diagnostics-scan-progress"></span></div>
-            <p id="diagnostics-message" class="diagnostics-message" aria-live="polite">Проверка ещё не запускалась. Для начала нажмите кнопку ниже.</p>
-          </div>
-          <div id="diagnostics-results" class="diagnostics-results" hidden>
-            <div class="diagnostics-metric"><span>Целостность данных</span><strong>98,7%</strong><i><b style="width:98.7%"></b></i></div>
-            <div class="diagnostics-metric"><span>Стабильность памяти</span><strong>94,2%</strong><i><b style="width:94.2%"></b></i></div>
-            <div class="diagnostics-metric"><span>Синхронизация</span><strong>100%</strong><i><b style="width:100%"></b></i></div>
-            <div class="diagnostics-metric"><span>Контроль процессов</span><strong>87,5%</strong><i><b style="width:87.5%"></b></i></div>
-            <div class="diagnostics-warning">
-              <span class="diagnostics-warning-label">ОБНАРУЖЕНО ОТКЛОНЕНИЕ · SYS-0041</span>
-              <strong>Несоответствие данных</strong>
-              <p>Контрольная сумма одного из сегментов не совпадает с предыдущей записью. Источник изменения не определён.</p>
+          <div class="news-window-content">
+            <div class="news-folder-banner">
+              <span class="news-folder-mark">N</span>
+              <div><span class="section-kicker">ITERUM / NEWS FEED</span><h3>Лента новостей</h3><p>Обновления и сообщения системы.</p></div>
+            </div>
+            <div class="news-empty-state">
+              <span class="news-empty-icon">—</span>
+              <strong>Пока нет новых публикаций</strong>
+              <p>Когда появятся новости, они будут собраны здесь.</p>
             </div>
           </div>
-          <div class="diagnostics-actions">
-            <button type="button" class="admin-mini-button" id="diagnostics-run">НАЧАТЬ ПРОВЕРКУ</button>
-            <span id="diagnostics-footnote">Проверка не изменяет материалы дела.</span>
-          </div>
         </section>
 
-        <section id="connection-game-window" class="player-tool-section desktop-window connection-game-window" aria-labelledby="connection-game-heading" hidden>
-          <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">СИСТЕМНАЯ УТИЛИТА / 06</span><h2 id="connection-game-heading">Восстановление соединения</h2></div>
-            <button class="window-close" type="button" data-close-window="connection-game-window" aria-label="Закрыть окно">×</button>
-          </div>
-          <p class="connection-game-intro">Поверните фрагменты схемы и восстановите непрерывный маршрут от входного узла к выходному. Каждый следующий уровень сложнее предыдущего.</p>
-          <div class="connection-levels" role="group" aria-label="Выбор уровня">
-            <button type="button" class="connection-level is-active" data-level="0">01 <span>ОБХОД</span></button>
-            <button type="button" class="connection-level" data-level="1" disabled>02 <span>РАЗВИЛКА</span></button>
-            <button type="button" class="connection-level" data-level="2" disabled>03 <span>ПЕРЕХВАТ</span></button>
-          </div>
-          <div class="connection-level-meta"><span id="connection-level-name">УРОВЕНЬ 01 / ОБХОД</span><span id="connection-level-size">СЕТКА 3 × 3</span></div>
-          <div class="connection-game-status"><span>УЗЕЛ ВХОДА <b>IN-01</b></span><span id="connection-game-state" aria-live="polite">СВЯЗЬ НЕ УСТАНОВЛЕНА</span><span>УЗЕЛ ВЫХОДА <b>OUT-09</b></span></div>
-          <div class="connection-board" id="connection-board" role="group" aria-label="Схема соединений"></div>
-          <div class="connection-game-bottom">
-            <span id="connection-moves">ПОВОРОТОВ: 0</span>
-            <button type="button" class="admin-mini-button" id="connection-reset">СБРОСИТЬ СХЕМУ</button>
-          </div>
-          <div id="connection-success" class="connection-success" hidden>
-            <strong>СОЕДИНЕНИЕ ВОССТАНОВЛЕНО</strong>
-            <p>Канал передачи данных активен. Обнаружен неизвестный пакет в очереди.</p>
-            <span>ПАКЕТ: UNIDENTIFIED / 00:00:07</span>
-          </div>
-        </section>
+        
+
+        
 
           </div>
           <div class="system-lock-overlay" id="system-lock-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="system-lock-title">

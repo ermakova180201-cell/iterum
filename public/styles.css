@@ -6640,3 +6640,31 @@ body.is-workstation #mail-window .mail-inbox-entry time {
     max-width:none;
   }
 }
+
+
+/* ITERUM virtual assistant: launch choice and help dialogue */
+.assistant-launch-overlay{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(3,9,15,.82);backdrop-filter:blur(8px)}
+.assistant-launch-overlay[hidden],.iterum-assistant-chat[hidden]{display:none!important}
+.assistant-launch-panel{width:min(480px,100%);padding:30px;border:1px solid rgba(142,201,213,.3);border-radius:5px;background:linear-gradient(145deg,#1a2c3c,#101c29);box-shadow:0 24px 80px rgba(0,0,0,.55);color:#dce7ed}
+.assistant-kicker{color:#9fcbd2;font:8px var(--mono);letter-spacing:.15em}
+.assistant-launch-panel h2{margin:17px 0 10px;color:#edf4f7;font:600 23px var(--sans)}
+.assistant-launch-panel p{color:#b7c6d0;font:11px/1.8 var(--sans)}
+.assistant-launch-character{display:flex;align-items:center;gap:14px;margin:22px 0;padding:13px;border:1px solid rgba(142,201,213,.18);background:rgba(117,190,204,.06)}
+.assistant-mini-ghost{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:radial-gradient(circle,rgba(175,246,250,.35),rgba(75,155,180,.08) 70%);color:#d5fbff;font-size:35px;text-shadow:0 0 15px #8ee5f0}
+.assistant-launch-character strong,.assistant-launch-character small{display:block}.assistant-launch-character strong{font:600 12px var(--sans);color:#e8f2f5}.assistant-launch-character small{margin-top:5px;color:#8fa8b7;font:8px var(--mono)}
+.assistant-launch-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:20px}
+.assistant-launch-actions button{min-height:42px;padding:9px;border:1px solid rgba(142,201,213,.35);background:rgba(109,185,199,.12);color:#d9f0f2;font:10px var(--sans);cursor:pointer}
+.assistant-launch-actions button+button{background:transparent;color:#aebdc7;border-color:rgba(174,190,205,.2)}
+.assistant-launch-actions button:hover{border-color:#9edce4;background:rgba(109,185,199,.2)}
+.assistant-launch-note{display:block;margin-top:15px;color:#8499a8;font:8px/1.6 var(--mono)}
+body.is-workstation .iterum-assistant-chat{position:absolute;z-index:30;left:calc(7% + 48px);top:calc(68% - 175px);width:min(330px,calc(100% - 28px));max-height:390px;display:flex;flex-direction:column;border:1px solid rgba(133,204,217,.35);border-radius:5px;background:rgba(13,27,40,.97);box-shadow:0 18px 55px rgba(0,0,0,.48);color:#dce8ed;overflow:hidden}
+.iterum-assistant-chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(133,204,217,.18);background:rgba(94,159,177,.08)}
+.iterum-assistant-chat-head strong,.iterum-assistant-chat-head small{display:block}.iterum-assistant-chat-head strong{font:600 9px var(--mono);letter-spacing:.12em}.iterum-assistant-chat-head small{margin-top:4px;color:#83a5b2;font:7px var(--mono);letter-spacing:.1em}.assistant-chat-status{display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:50%;background:#8edce3;box-shadow:0 0 8px #8edce3}
+.iterum-assistant-chat-head button{border:0;background:transparent;color:#b8cbd3;font-size:22px;cursor:pointer}
+.iterum-assistant-chat-body{display:flex;flex-direction:column;gap:8px;min-height:100px;max-height:205px;padding:13px;overflow:auto}
+.assistant-bubble{max-width:95%;margin:0;padding:10px 11px;border:1px solid rgba(133,204,217,.15);border-radius:4px;background:rgba(95,161,180,.09);color:#d4e2e8;font:10px/1.7 var(--sans)}
+.assistant-bubble-muted{color:#9aadb8}.assistant-bubble-user{align-self:flex-end;background:rgba(190,151,99,.1);border-color:rgba(190,151,99,.2)}
+.iterum-assistant-topics{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;border-top:1px solid rgba(133,204,217,.14)}
+.iterum-assistant-topics button{padding:8px 6px;border:1px solid rgba(133,204,217,.2);border-radius:3px;background:transparent;color:#bcd3da;font:8px var(--sans);cursor:pointer}
+.iterum-assistant-topics button:hover{border-color:rgba(133,204,217,.6);background:rgba(95,161,180,.1)}
+@media(max-width:650px){.assistant-launch-panel{padding:22px}.assistant-launch-actions{grid-template-columns:1fr}.body.is-workstation .iterum-assistant-chat{left:12px;top:auto;bottom:14px;width:min(330px,calc(100% - 24px))}}

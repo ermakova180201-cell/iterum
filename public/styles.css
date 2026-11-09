@@ -4876,3 +4876,17 @@ body.is-workstation .desktop-shell .desktop-icons { pointer-events:auto; }
   body.is-workstation .desktop-shell .desktop-icon { transition:none; }
   body.is-workstation .desktop-shell .desktop-icon:hover { transform:none; }
 }
+
+
+/* ITERUM news folder — cinematic desktop */
+body.is-workstation .desktop-shell .news-art { background:linear-gradient(145deg,rgba(199,155,107,.24),rgba(74,92,108,.18)),#1b2935; }
+body.is-workstation .desktop-shell .news-art::before { content:"";position:absolute;width:17px;height:21px;border:1px solid rgba(231,195,158,.78);border-radius:2px;background:linear-gradient(180deg,transparent 0 5px,rgba(231,195,158,.52) 5px 6px,transparent 6px 10px,rgba(231,195,158,.35) 10px 11px,transparent 11px); }
+body.is-workstation .desktop-shell .news-window-content { display:grid;gap:22px;padding:8px 2px 4px; }
+body.is-workstation .desktop-shell .news-folder-banner { display:flex;align-items:center;gap:18px;padding:22px;border:1px solid rgba(181,198,210,.16);border-radius:9px;background:linear-gradient(110deg,rgba(43,58,72,.8),rgba(17,27,38,.86)); }
+body.is-workstation .desktop-shell .news-folder-mark { display:grid;place-items:center;width:58px;height:58px;flex:0 0 58px;border:1px solid rgba(213,171,128,.42);border-radius:9px;color:#e7c39e;font:600 24px "Playfair Display",serif;background:rgba(199,155,107,.09); }
+body.is-workstation .desktop-shell .news-folder-banner h3 { margin:5px 0 4px;color:#e7e9e8;font:600 19px "Manrope",sans-serif; }
+body.is-workstation .desktop-shell .news-folder-banner p { margin:0;color:#9eabb5;font-size:12px; }
+body.is-workstation .desktop-shell .news-empty-state { display:grid;justify-items:center;gap:9px;padding:42px 20px;border:1px dashed rgba(169,188,205,.2);border-radius:9px;color:#aab6bf;text-align:center;background:rgba(8,15,22,.3); }
+body.is-workstation .desktop-shell .news-empty-icon { color:#c79b6b;font:24px "DM Mono",monospace; }
+body.is-workstation .desktop-shell .news-empty-state strong { color:#e0e5e8;font:600 13px "Manrope",sans-serif; }
+body.is-workstation .desktop-shell .news-empty-state p { margin:0;color:#8d9ba6;font-size:11px; }

@@ -5659,3 +5659,20 @@ body.is-workstation .desktop-shell .iterum-ghost-particle-three {
 @media (prefers-reduced-motion:reduce) {
   body.is-workstation .desktop-shell .iterum-ghost-particle {animation:none !important;opacity:.65;}
 }
+
+
+/* ITERUM desktop — keep Help folder anchored in the lower-right corner */
+body.is-workstation .desktop-shell .desktop-help-shortcut {
+  left:auto !important;
+  right:3.2% !important;
+  top:auto !important;
+  bottom:24px !important;
+}
+@media (max-width:760px) {
+  body.is-workstation .desktop-shell .desktop-help-shortcut {
+    left:auto !important;
+    right:14px !important;
+    top:auto !important;
+    bottom:168px !important;
+  }
+}

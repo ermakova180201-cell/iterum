@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=mail-client-11">
+  <link rel="stylesheet" href="/styles.css?v=mail-client-12">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -910,7 +910,11 @@
             senderHeading.textContent = "Отправитель";
             const dateHeading = document.createElement("span");
             dateHeading.textContent = "Дата и время";
-            columns.append(document.createElement("span"), senderHeading, dateHeading, document.createElement("span"));
+            const spacer = document.createElement("span");
+            spacer.setAttribute("aria-hidden","true");
+            senderHeading.className = "mail-column-sender";
+            dateHeading.className = "mail-column-date";
+            columns.append(spacer, senderHeading, dateHeading, document.createElement("span"));
             list.append(columns);
           }
           if (readerMode) {

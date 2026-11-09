@@ -5978,3 +5978,33 @@ body.is-workstation .desktop-shell .desktop-area > .desktop-help-shortcut {
     bottom:18px !important;
   }
 }
+
+
+/* Incoming mail counter — compact unread badge on the mail folder */
+body.is-workstation .mail-art {
+  position: relative;
+  overflow: visible;
+}
+body.is-workstation .desktop-icon .desktop-mail-badge {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  width: auto;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid rgba(255,239,235,.9);
+  border-radius: 999px;
+  color: #fff8f5;
+  background: #a84e49;
+  box-shadow: 0 2px 9px rgba(0,0,0,.48), 0 0 10px rgba(190,83,75,.35);
+  font: 600 10px/1 var(--mono);
+  letter-spacing: 0;
+  text-shadow: none;
+}
+body.is-workstation .desktop-icon .desktop-mail-badge[hidden] {
+  display: none !important;
+}

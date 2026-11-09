@@ -917,11 +917,14 @@
             senderHeading.textContent = "Отправитель";
             const dateHeading = document.createElement("span");
             dateHeading.textContent = "Дата и время";
+            const subjectHeading = document.createElement("span");
+            subjectHeading.setAttribute("aria-hidden","true");
             const spacer = document.createElement("span");
             spacer.setAttribute("aria-hidden","true");
             senderHeading.className = "mail-column-sender";
+            subjectHeading.className = "mail-column-subject";
             dateHeading.className = "mail-column-date";
-            columns.append(senderHeading, dateHeading, spacer);
+            columns.append(senderHeading, subjectHeading, dateHeading, spacer);
             list.append(columns);
           }
           if (readerMode) {
@@ -989,17 +992,18 @@
             row.className = "mail-inbox-entry" + (!item.is_read ? " is-unread" : "");
             const details = document.createElement("div"); details.className = "mail-entry-details";
             const sender = document.createElement("span"); sender.className = "mail-entry-sender"; sender.textContent = item.sender_name || "Неизвестный отправитель";
+            const address = document.createElement("span"); address.className = "mail-entry-address"; address.textContent = item.sender_address || "";
+            details.append(sender,address);
             const subjectLine = document.createElement("div"); subjectLine.className = "mail-entry-subject";
             const dot = document.createElement("span"); dot.className = "mail-unread-dot"; dot.setAttribute("aria-hidden","true");
             const subject = document.createElement("strong"); subject.textContent = item.title || "Без темы";
             subjectLine.append(dot,subject);
-            details.append(sender,subjectLine);
             const date = document.createElement("time"); date.textContent = item.sent_at || item.created_at || "";
             const actions = document.createElement("div"); actions.className = "mail-row-actions";
             const open = document.createElement("button"); open.type = "button"; open.className = "mail-open-check"; open.setAttribute("aria-label","Открыть письмо"); open.textContent = "✓";
             open.addEventListener("click", event => { event.stopPropagation(); openMessage(item); });
             actions.append(open);
-            row.append(details,date,actions);
+            row.append(details,subjectLine,date,actions);
             row.addEventListener("click", () => openMessage(item));
             list.append(row);
           });

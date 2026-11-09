@@ -3611,3 +3611,196 @@ body.is-workstation .connection-art span { font: 29px/1 var(--mono); }
   .search-terminal .player-search-row .admin-mini-button { grid-column:1/-1; margin-top:7px; }
   .search-results-toolbar { flex-direction:column; }
 }
+
+
+
+/* ITERUM desktop — modern research workstation */
+.desktop-shell {
+  --desk-ink: #dce8dc;
+  --desk-muted: #91a394;
+  --desk-line: rgba(133,166,139,.22);
+  border: 1px solid rgba(123,157,130,.38);
+  border-radius: 11px;
+  overflow: hidden;
+  background: #0c1411;
+  box-shadow: 0 26px 70px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.018);
+  font-family: "Space Grotesk", var(--sans);
+}
+.desktop-shell .desktop-toolbar {
+  min-height: 48px;
+  padding: 0 19px;
+  border-bottom: 1px solid var(--desk-line);
+  background: linear-gradient(105deg, #17241d, #111a16 65%, #17221b);
+  color: #a9bbaa;
+  font: 500 9px "IBM Plex Mono", var(--mono);
+  letter-spacing: .09em;
+}
+.desktop-shell .desktop-window-title { color: #d5e2d4; gap: 11px; }
+.desktop-shell .desktop-led {
+  width: 7px; height: 7px;
+  background: #8eae88;
+  box-shadow: 0 0 11px rgba(142,174,136,.55);
+}
+.desktop-shell .desktop-toolbar-right { color: #7f9583; }
+.desktop-shell .desktop-area {
+  min-height: 485px;
+  padding: 29px 30px;
+  background:
+    radial-gradient(ellipse at 78% 26%, rgba(83,132,91,.19), transparent 31%),
+    radial-gradient(ellipse at 20% 100%, rgba(52,91,67,.15), transparent 40%),
+    linear-gradient(rgba(142,174,145,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(142,174,145,.035) 1px, transparent 1px),
+    linear-gradient(135deg, #18231d 0%, #111a16 54%, #17221b 100%);
+  background-size: auto, auto, 32px 32px, 32px 32px, auto;
+}
+.desktop-shell .desktop-area:before,
+.desktop-shell .desktop-area:after {
+  border-color: rgba(141,177,145,.12);
+  border-radius: 28px;
+  transform: rotate(-17deg);
+}
+.desktop-shell .desktop-icons {
+  grid-template-columns: repeat(2, 104px);
+  gap: 15px 17px;
+  width: 225px;
+}
+.desktop-shell .desktop-icon {
+  width: 104px;
+  min-height: 108px;
+  gap: 9px;
+  padding: 9px 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: #d8e5d8;
+  font: 500 11px/1.35 "Space Grotesk", var(--sans);
+  text-shadow: 0 1px 7px rgba(0,0,0,.65);
+  transition: background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.desktop-shell .desktop-icon:hover,
+.desktop-shell .desktop-icon.is-selected {
+  border-color: rgba(139,179,143,.32);
+  background: rgba(117,158,121,.11);
+  box-shadow: inset 0 1px rgba(255,255,255,.045), 0 8px 22px rgba(0,0,0,.13);
+  transform: translateY(-2px);
+}
+.desktop-shell .desktop-icon-art {
+  width: 54px; height: 51px;
+  border: 1px solid rgba(145,181,149,.43);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(79,119,86,.58), rgba(25,43,32,.94));
+  color: #d2e5d0;
+  box-shadow: 0 9px 20px rgba(0,0,0,.27), inset 0 1px rgba(255,255,255,.12);
+}
+.desktop-shell .desktop-icon-art span { font-family: "Space Grotesk", var(--sans); }
+.desktop-shell .mail-art { border-radius: 12px; background: linear-gradient(145deg,#527c61,#20372a); }
+.desktop-shell .search-art { width: 51px; height: 51px; background: linear-gradient(145deg,#64816b,#263b2d); }
+.desktop-shell .folder-art { border-radius: 9px 11px 9px 9px; background: linear-gradient(145deg,#718b68,#344a34); }
+.desktop-shell .desktop-icon small {
+  color: #8fa993;
+  font: 7px "IBM Plex Mono", var(--mono);
+  letter-spacing: .11em;
+}
+.desktop-shell .desktop-case-shortcut {
+  right: 6%; bottom: 39px;
+  min-width: 270px;
+  padding: 15px 17px;
+  border: 1px solid rgba(134,174,139,.27);
+  border-radius: 10px;
+  background: linear-gradient(125deg, rgba(21,37,27,.88), rgba(11,20,15,.82));
+  box-shadow: 0 18px 38px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.04);
+  backdrop-filter: blur(14px);
+}
+.desktop-shell .desktop-case-glyph {
+  width: 47px; height: 51px;
+  border: 1px solid rgba(142,180,145,.45);
+  border-radius: 8px;
+  color: #c0d6bd;
+  background: linear-gradient(145deg, rgba(91,135,96,.25), rgba(20,34,24,.45));
+  font: 600 17px "Space Grotesk", var(--sans);
+}
+.desktop-shell .desktop-case-shortcut span,
+.desktop-shell .desktop-case-shortcut small {
+  color: #8fa993;
+  font: 7px "IBM Plex Mono", var(--mono);
+  letter-spacing: .11em;
+}
+.desktop-shell .desktop-case-shortcut strong {
+  color: #e0eadd;
+  font: 600 14px "Space Grotesk", var(--sans);
+}
+.desktop-shell .desktop-wallpaper-mark {
+  color: rgba(205,229,205,.055);
+  font: 600 clamp(54px, 9vw, 104px)/1 "Space Grotesk", var(--sans);
+  letter-spacing: .16em;
+}
+.desktop-shell .desktop-taskbar {
+  min-height: 51px;
+  padding: 0 16px;
+  border-top: 1px solid var(--desk-line);
+  background: linear-gradient(100deg, #17241c, #101814 60%, #17231b);
+  color: #8fa391;
+  font: 8px "IBM Plex Mono", var(--mono);
+  letter-spacing: .06em;
+}
+.desktop-shell .taskbar-start { color: #d1e0d0; }
+.desktop-shell .taskbar-start b {
+  width: 23px; height: 23px;
+  border: 1px solid rgba(141,180,145,.48);
+  border-radius: 7px;
+  color: #d6e8d3;
+  background: rgba(93,137,99,.16);
+  font: 600 12px "Space Grotesk", var(--sans);
+}
+.desktop-shell .taskbar-apps button {
+  border-radius: 7px;
+  color: #a9bba9;
+  font: 500 10px "Space Grotesk", var(--sans);
+}
+.desktop-shell .taskbar-apps button:hover,
+.desktop-shell .taskbar-apps button.is-selected {
+  border-color: rgba(138,177,141,.3);
+  background: rgba(102,145,106,.13);
+  box-shadow: inset 0 -2px #8cac87;
+}
+.desktop-shell .taskbar-clock { color: #c1d2be; font: 9px "IBM Plex Mono", var(--mono); }
+.desktop-shell .desktop-area .desktop-window {
+  border: 1px solid rgba(130,165,135,.38);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(25,37,29,.985), rgba(13,22,17,.99));
+  box-shadow: 0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.02);
+}
+.desktop-shell .desktop-area .desktop-window .player-tool-heading {
+  border-bottom-color: rgba(133,166,139,.2);
+  background: rgba(23,35,27,.97);
+}
+.desktop-shell .desktop-area .desktop-window .player-tool-heading h2 {
+  color: #dce8d8;
+  font-family: "Space Grotesk", var(--sans);
+  font-weight: 600;
+}
+.desktop-shell .desktop-area .desktop-window .section-kicker {
+  color: #8eaa91;
+  font-family: "IBM Plex Mono", var(--mono);
+}
+.desktop-shell .desktop-area .desktop-window .window-close {
+  border-color: rgba(137,171,139,.3);
+  border-radius: 7px;
+  background: rgba(72,104,76,.15);
+  color: #c2d5c0;
+}
+.desktop-shell .desktop-area .desktop-window .window-close:hover {
+  border-color: #a66e65;
+  background: rgba(126,63,57,.28);
+}
+.desktop-shell .desktop-date-panel,
+.desktop-shell .desktop-status-panel {
+  font-family: "IBM Plex Mono", var(--mono);
+}
+@media (max-width: 620px) {
+  .desktop-shell .desktop-toolbar { padding: 10px 13px; }
+  .desktop-shell .desktop-area { padding: 14px 8px; }
+  .desktop-shell .desktop-icons { grid-template-columns: repeat(2, 82px); gap: 9px 5px; width: 175px; }
+  .desktop-shell .desktop-icon { width: 82px; min-height: 102px; font-size: 10px; }
+  .desktop-shell .desktop-case-shortcut { right: 10px; bottom: 18px; left: 10px; min-width: 0; }
+  .desktop-shell .desktop-taskbar { padding: 8px 10px; }
+}

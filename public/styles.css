@@ -5515,3 +5515,147 @@ body.is-workstation .desktop-shell .desktop-toolbar .all-cases-button:hover {
   }
   body.is-workstation .desktop-shell .desktop-toolbar .all-cases-button:hover {transform:translateY(-1px);}
 }
+
+
+/* ITERUM ghost assistant — detailed apparition rendering */
+body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
+  width:86px;
+  height:104px;
+}
+body.is-workstation .desktop-shell .iterum-ghost-aura {
+  inset:-1px -13px -9px;
+  background:
+    radial-gradient(ellipse at 50% 52%,rgba(156,244,248,.25),rgba(85,190,211,.13) 37%,rgba(54,125,157,.06) 58%,transparent 75%),
+    radial-gradient(ellipse at 50% 90%,rgba(91,219,237,.2),transparent 56%);
+  filter:blur(7px);
+}
+body.is-workstation .desktop-shell .iterum-ghost-body {
+  left:17px;
+  top:8px;
+  width:52px;
+  height:72px;
+  overflow:visible;
+  clip-path:polygon(5% 4%,18% 0,82% 0,96% 7%,100% 69%,91% 77%,83% 70%,72% 91%,59% 79%,47% 100%,34% 81%,19% 91%,12% 77%,0 82%);
+  border:1px solid rgba(193,247,249,.78);
+  border-radius:48% 48% 38% 38% / 39% 39% 24% 24%;
+  background:
+    radial-gradient(ellipse at 50% 22%,rgba(244,255,255,.64),rgba(186,244,247,.26) 23%,transparent 51%),
+    linear-gradient(145deg,rgba(217,251,250,.52),rgba(99,190,207,.25) 43%,rgba(42,102,135,.19));
+  box-shadow:inset 0 0 7px rgba(236,255,255,.56),inset 0 -12px 20px rgba(76,177,204,.18),0 0 18px rgba(105,210,226,.48);
+}
+body.is-workstation .desktop-shell .iterum-ghost-body::before {
+  left:5px;right:5px;top:5px;height:36px;
+  border:1px solid rgba(235,255,255,.17);
+  background:linear-gradient(180deg,rgba(248,255,255,.36),rgba(204,250,255,.06) 58%,transparent);
+}
+body.is-workstation .desktop-shell .iterum-ghost-body::after {
+  content:"";
+  position:absolute;
+  left:9px;right:9px;bottom:7px;height:13px;
+  border-top:1px solid rgba(214,255,255,.28);
+  border-radius:50%;
+  filter:blur(1px);
+}
+body.is-workstation .desktop-shell .iterum-ghost-halo {
+  position:absolute;
+  z-index:-1;
+  left:-7px;top:-8px;
+  width:64px;height:78px;
+  border:1px solid rgba(160,237,244,.23);
+  border-radius:50%;
+  box-shadow:0 0 13px rgba(107,218,231,.13),inset 0 0 12px rgba(107,218,231,.08);
+  transform:scaleX(.88);
+}
+body.is-workstation .desktop-shell .iterum-ghost-forehead-mark {
+  position:absolute;
+  z-index:2;
+  left:23px;top:13px;
+  width:6px;height:6px;
+  border:1px solid rgba(216,255,255,.76);
+  border-radius:50%;
+  box-shadow:0 0 7px rgba(170,250,255,.65);
+}
+body.is-workstation .desktop-shell .iterum-ghost-eyes {
+  top:29px;left:12px;gap:10px;
+}
+body.is-workstation .desktop-shell .iterum-ghost-eyes i {
+  width:6px;height:8px;
+  background:#e4ffff;
+  box-shadow:0 0 8px 2px rgba(139,245,255,.95),0 0 15px rgba(98,224,241,.5);
+}
+body.is-workstation .desktop-shell .iterum-ghost-cheeks {
+  position:absolute;
+  z-index:1;
+  left:7px;top:39px;
+  width:38px;height:8px;
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(139,237,246,.2),transparent 70%);
+}
+body.is-workstation .desktop-shell .iterum-ghost-mouth {
+  position:absolute;
+  z-index:2;
+  left:23px;top:43px;
+  width:5px;height:2px;
+  border-radius:50%;
+  background:rgba(218,255,255,.88);
+  box-shadow:0 0 5px rgba(137,240,249,.65);
+}
+body.is-workstation .desktop-shell .iterum-ghost-core {
+  left:23px;top:54px;
+  width:6px;height:6px;
+  background:rgba(222,255,255,.95);
+  box-shadow:0 0 9px 3px rgba(105,220,238,.55);
+}
+body.is-workstation .desktop-shell .iterum-ghost-wisp {
+  position:absolute;
+  z-index:-1;
+  bottom:1px;
+  width:13px;height:27px;
+  border:1px solid rgba(174,239,245,.37);
+  border-top:0;
+  border-radius:0 0 60% 60%;
+  background:linear-gradient(180deg,rgba(154,232,240,.14),rgba(83,177,202,.02));
+  filter:blur(.2px);
+}
+body.is-workstation .desktop-shell .iterum-ghost-wisp-left {
+  left:3px;transform:rotate(13deg);
+}
+body.is-workstation .desktop-shell .iterum-ghost-wisp-right {
+  right:2px;height:21px;transform:rotate(-13deg);
+}
+body.is-workstation .desktop-shell .iterum-ghost-particle {
+  position:absolute;
+  display:block;
+  width:3px;height:3px;
+  border-radius:50%;
+  background:#d5ffff;
+  box-shadow:0 0 7px 2px rgba(125,231,243,.7);
+  pointer-events:none;
+}
+body.is-workstation .desktop-shell .iterum-ghost-particle-one {
+  left:5px;top:38px;
+  animation:iterumGhostSpark 3.2s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-particle-two {
+  right:3px;top:22px;width:2px;height:2px;
+  animation:iterumGhostSpark 4.1s .8s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-particle-three {
+  right:13px;bottom:4px;width:2px;height:2px;
+  animation:iterumGhostSpark 3.7s 1.4s ease-in-out infinite;
+}
+@keyframes iterumGhostSpark {
+  0%,100% {opacity:.18;transform:translate3d(0,3px,0) scale(.7);}
+  50% {opacity:1;transform:translate3d(2px,-5px,0) scale(1.25);}
+}
+@media (max-width:760px) {
+  body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
+    width:72px;height:90px;
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-body {
+    left:12px;top:6px;transform:scale(.86);transform-origin:top left;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .iterum-ghost-particle {animation:none !important;opacity:.65;}
+}

@@ -4963,3 +4963,87 @@ body.is-workstation .desktop-shell .ambient-volume {
   body.is-workstation .desktop-shell .ambient-volume { width:90px; }
   body.is-workstation .desktop-shell .taskbar-clock { font-size:7px; }
 }
+
+/* ITERUM unified centered application windows */
+body.is-workstation .desktop-shell .desktop-area > .desktop-window {
+  box-sizing:border-box;
+  position:absolute;
+  top:50%;
+  left:50%;
+  right:auto;
+  bottom:auto;
+  transform:translate(-50%,-50%);
+  width:min(760px,calc(100% - 300px));
+  max-width:760px;
+  min-width:0;
+  max-height:calc(100% - 44px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  border:1px solid rgba(174,193,208,.25);
+  border-radius:11px;
+  color:#dce4e8;
+  background:linear-gradient(145deg,rgba(24,35,47,.995),rgba(10,17,25,.998));
+  box-shadow:0 32px 90px rgba(0,0,0,.68),0 0 0 1px rgba(255,255,255,.025);
+  scrollbar-color:rgba(199,155,107,.45) rgba(9,16,23,.4);
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window[hidden] { display:none !important; }
+body.is-workstation .desktop-shell .desktop-area > .desktop-window .player-tool-heading {
+  color:#e7e9e8;
+  border-bottom:1px solid rgba(169,188,205,.15);
+  background:linear-gradient(100deg,#253342,#17232f);
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window .player-tool-heading h2,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window h2,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window h3 {
+  color:#e7e9e8;
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window .section-kicker {
+  color:#d7aa7a;
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window p,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window label,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window .modules-note {
+  color:#aab7c0;
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window .window-close {
+  color:#dce4e8;
+  border-color:rgba(174,193,208,.2);
+  background:rgba(8,15,22,.45);
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window.search-terminal {
+  background:linear-gradient(145deg,rgba(24,35,47,.995),rgba(10,17,25,.998));
+  color:#dce4e8;
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window.search-terminal .search-terminal-status,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window.search-terminal .search-results-toolbar {
+  color:#aab7c0;
+  border-color:rgba(169,188,205,.15);
+  background:rgba(10,18,26,.7);
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window.search-terminal .search-terminal-intro,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window.search-terminal .search-empty-state {
+  color:#dce4e8;
+  border-color:rgba(169,188,205,.16);
+  background:rgba(26,39,52,.65);
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window.search-terminal input,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window input:not([type="range"]),
+body.is-workstation .desktop-shell .desktop-area > .desktop-window textarea,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window select {
+  color:#e3e8eb;
+  border-color:rgba(169,188,205,.24);
+  background:#101b26;
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window .player-mail-list,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window .player-material-list,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window .help-window-content,
+body.is-workstation .desktop-shell .desktop-area > .desktop-window .news-window-content {
+  color:#dce4e8;
+}
+@media(max-width:760px) {
+  body.is-workstation .desktop-shell .desktop-area > .desktop-window {
+    width:calc(100% - 24px);
+    max-width:none;
+    max-height:calc(100% - 24px);
+  }
+}

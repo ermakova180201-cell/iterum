@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=mail-client-09">
+  <link rel="stylesheet" href="/styles.css?v=mail-client-10">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -747,19 +747,10 @@
         search.value = mailSearchQuery;
         search.addEventListener("input", () => { mailSearchQuery = search.value; renderMailClient(); });
         searchWrap.append(search);
-        const refresh = document.createElement("button");
-        refresh.type = "button";
-        refresh.className = "mail-refresh-button";
-        refresh.innerHTML = '<span aria-hidden="true">↻</span><span>Обновить</span>';
-        refresh.addEventListener("click", async () => {
-          refresh.disabled = true;
-          await loadPlayerArchive();
-          openCase(caseId);
-        });
         const account = document.createElement("div");
         account.className = "mail-account-email";
         account.textContent = accountEmail;
-        toolbar.append(brand, searchWrap, refresh, account);
+        toolbar.append(brand, searchWrap, account);
 
         const layout = document.createElement("div");
         layout.className = "mail-client-layout";
@@ -984,9 +975,7 @@
             const actions = document.createElement("div"); actions.className = "mail-row-actions";
             const open = document.createElement("button"); open.type = "button"; open.className = "mail-open-check"; open.setAttribute("aria-label","Открыть письмо"); open.textContent = "✓";
             open.addEventListener("click", event => { event.stopPropagation(); openMessage(item); });
-            const more = document.createElement("button"); more.type = "button"; more.className = "mail-more-button"; more.setAttribute("aria-label","Действия с письмом"); more.textContent = "⋮";
-            more.addEventListener("click", event => { event.stopPropagation(); menuFor(item,more); });
-            actions.append(open,more);
+            actions.append(open);
             row.append(dot,details,date,actions);
             row.addEventListener("click", () => openMessage(item));
             list.append(row);

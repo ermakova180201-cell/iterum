@@ -65,7 +65,7 @@
         <div class="desktop-shell">
           <div class="desktop-toolbar">
             <div class="desktop-window-title"><span class="desktop-led"></span> ITERUM / РАБОЧАЯ СТАНЦИЯ</div>
-            <button class="all-cases-button" id="all-cases-button" type="button">← ВСЕ ДЕЛА</button>
+            <button class="all-cases-button" id="all-cases-button" type="button">К СПИСКУ ДЕЛ</button>
             <div class="desktop-toolbar-right"><span class="desktop-account"><span class="desktop-account-label">АККАУНТ</span><strong id="desktop-account-name">—</strong></span><span id="desktop-case-label">ДЕЛО ОТКРЫТО</span><span id="desktop-case-name" hidden></span><span id="player-archive-count"></span></div>
           </div>
           <div class="desktop-area">
@@ -1263,7 +1263,7 @@
       if (caseName) {
         const observer = new MutationObserver(() => {
           const title = caseName.textContent.trim();
-          if (title) notify("Открыто дело: " + title);
+          // Уведомление об открытии дела отключено: не показываем всплывающий toast.
           const connection = document.getElementById("system-connection-status");
           if (connection) connection.textContent = "ДАННЫЕ ПОЛУЧЕНЫ";
           const archive = document.getElementById("system-archive-status");

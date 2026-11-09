@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=news-folder-01">
+  <link rel="stylesheet" href="/styles.css?v=account-header-01">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -66,7 +66,7 @@
           <div class="desktop-toolbar">
             <div class="desktop-window-title"><span class="desktop-led"></span> ITERUM / РАБОЧАЯ СТАНЦИЯ</div>
             <button class="all-cases-button" id="all-cases-button" type="button">← ВСЕ ДЕЛА</button>
-            <div class="desktop-toolbar-right"><span id="desktop-case-label">ДЕЛО ОТКРЫТО</span><span id="player-archive-count"></span></div>
+            <div class="desktop-toolbar-right"><span class="desktop-account"><span class="desktop-account-label">АККАУНТ</span><strong id="desktop-account-name">—</strong></span><span id="desktop-case-label">ДЕЛО ОТКРЫТО</span><span id="player-archive-count"></span></div>
           </div>
           <div class="desktop-area">
             <div class="desktop-icons" aria-label="Приложения">
@@ -440,6 +440,8 @@
           workspace.hidden = false;
           topbarStatus.textContent = "ЛИЧНЫЙ ДОСТУП АКТИВЕН";
           memberEmail.textContent = data.user.email;
+          const desktopAccountName = document.getElementById("desktop-account-name");
+          if (desktopAccountName) desktopAccountName.textContent = data.user.email;
           databaseStatus.textContent = data.databaseConnected
             ? "БАЗА ДАННЫХ ПОДКЛЮЧЕНА"
             : "НЕТ СВЯЗИ С БАЗОЙ";

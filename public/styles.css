@@ -6631,3 +6631,12 @@ body.is-workstation #mail-window .mail-inbox-entry time {
   }
   body.is-workstation #mail-window .mail-entry-address { font-size:7px; }
 }
+
+
+/* Slightly reduce the desktop mailbox footprint while keeping it spacious */
+@media (min-width:761px) {
+  body.is-workstation .desktop-shell .desktop-area > #mail-window {
+    width:min(1560px,calc(100% - 64px));
+    max-width:none;
+  }
+}

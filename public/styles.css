@@ -4459,3 +4459,211 @@ body.is-workstation .connection-art span { font: 29px/1 var(--mono); }
   .desktop-shell .desktop-icon,
   .desktop-shell .desktop-area .desktop-window .window-close { transition:none; }
 }
+
+
+/* ITERUM desktop — cinematic workstation refinement 03 */
+.desktop-shell {
+  --cin-ink:#e7e9e8;
+  --cin-muted:#91a0aa;
+  --cin-gold:#c79b6b;
+  overflow:hidden;
+}
+.desktop-shell .desktop-toolbar {
+  min-height:76px;
+  padding-left:30px;
+  padding-right:30px;
+}
+.desktop-shell .desktop-window-title {
+  font-family:"Space Grotesk",sans-serif;
+  font-weight:600;
+  letter-spacing:.14em;
+}
+.desktop-shell .desktop-area {
+  min-height:720px;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 51% 49%,rgba(91,112,130,.22),transparent 28%),
+    radial-gradient(ellipse at 52% 50%,rgba(199,155,107,.055),transparent 49%),
+    radial-gradient(ellipse at 100% 100%,rgba(65,91,108,.13),transparent 38%),
+    linear-gradient(132deg,#121c27 0%,#0b131d 47%,#111c27 100%);
+}
+.desktop-shell .desktop-area::before {
+  opacity:.42;
+  background-size:56px 56px,56px 56px,14px 14px,14px 14px;
+  mask-image:linear-gradient(90deg,#000 0%,#000 82%,transparent 100%);
+}
+.desktop-shell .desktop-area::after {
+  right:18%;
+  top:2%;
+  width:690px;
+  height:690px;
+  border-color:rgba(173,194,208,.065);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.012),
+    0 0 0 38px rgba(173,194,208,.012),
+    0 0 0 92px rgba(173,194,208,.009),
+    0 0 0 158px rgba(173,194,208,.007),
+    inset 0 0 100px rgba(120,151,174,.04);
+}
+.desktop-shell .desktop-icons {
+  top:6.5%;
+  gap:12px;
+}
+.desktop-shell .desktop-icon {
+  position:relative;
+  min-height:108px;
+  border-color:rgba(168,188,204,.15);
+  background:
+    linear-gradient(145deg,rgba(36,51,65,.82),rgba(13,22,32,.91));
+  transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease;
+}
+.desktop-shell .desktop-icon:hover {
+  transform:translateY(-2px);
+}
+.desktop-shell .desktop-icon-art {
+  position:relative;
+  overflow:hidden;
+  border-radius:10px;
+  background:
+    linear-gradient(145deg,rgba(206,164,119,.22),rgba(74,92,108,.15)),
+    #1b2935;
+}
+.desktop-shell .desktop-icon-art::after {
+  content:"";
+  position:absolute;
+  inset:5px;
+  border:1px solid rgba(230,198,165,.12);
+  border-radius:6px;
+  pointer-events:none;
+}
+.desktop-shell .desktop-icon .icon-caption {
+  text-shadow:0 1px 8px rgba(0,0,0,.4);
+}
+.desktop-shell .desktop-case-shortcut {
+  left:34%;
+  top:39%;
+  width:min(430px,42%);
+  min-height:166px;
+  padding:32px 30px 34px;
+  border-color:rgba(213,171,128,.46);
+  border-left-width:3px;
+  background:
+    linear-gradient(112deg,rgba(43,56,68,.97),rgba(15,24,34,.985) 72%),
+    #17232e;
+  box-shadow:
+    0 35px 90px rgba(0,0,0,.42),
+    0 0 70px rgba(213,163,108,.065),
+    inset 0 1px rgba(255,255,255,.09);
+}
+.desktop-shell .desktop-case-shortcut::before {
+  top:16px;
+  right:19px;
+  color:rgba(224,188,151,.76);
+}
+.desktop-shell .desktop-case-shortcut::after {
+  right:20px;
+  bottom:16px;
+  padding-top:9px;
+  border-top:1px solid rgba(213,163,108,.2);
+}
+.desktop-shell .desktop-case-glyph {
+  position:relative;
+  width:68px;
+  height:78px;
+  flex-basis:68px;
+  border:1px solid rgba(213,163,108,.28);
+  color:#e7c39e;
+  font-family:"DM Mono",monospace;
+  font-size:22px;
+}
+.desktop-shell .desktop-case-glyph::after {
+  content:"CASE";
+  position:absolute;
+  left:0;right:0;bottom:8px;
+  color:rgba(231,195,158,.55);
+  font:6px "IBM Plex Mono",monospace;
+  letter-spacing:.2em;
+  text-align:center;
+}
+.desktop-shell .desktop-case-shortcut strong {
+  max-width:260px;
+  font-family:"Manrope",sans-serif;
+  font-size:17px;
+  font-weight:600;
+  line-height:1.35;
+}
+.desktop-shell .desktop-date-panel,
+.desktop-shell .desktop-system-panel {
+  backdrop-filter:blur(14px);
+  background:
+    linear-gradient(145deg,rgba(35,49,62,.88),rgba(12,20,29,.94));
+}
+.desktop-shell .desktop-date-panel {
+  width:230px;
+  padding:19px 21px 18px;
+}
+.desktop-shell .desktop-date-panel time {
+  font-family:"DM Mono",monospace;
+  font-size:36px;
+}
+.desktop-shell .desktop-system-panel {
+  width:270px;
+  padding:19px 21px;
+}
+.desktop-shell .desktop-panel-heading {
+  color:#d8c0a7;
+}
+.desktop-shell .system-status-row strong {
+  color:#d5dedf;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:8px;
+}
+.desktop-shell .desktop-help-shortcut {
+  border-style:dashed;
+  background:linear-gradient(145deg,rgba(31,44,57,.66),rgba(13,21,30,.78));
+}
+.desktop-shell .desktop-wallpaper-mark {
+  color:rgba(197,211,221,.028);
+  font-family:"Space Grotesk",sans-serif;
+  font-weight:700;
+  letter-spacing:.24em;
+  user-select:none;
+}
+.desktop-shell .desktop-taskbar {
+  min-height:66px;
+}
+.desktop-shell .taskbar-start b {
+  display:grid;
+  place-items:center;
+  font-family:"Playfair Display",serif;
+  font-size:15px;
+}
+.desktop-shell .desktop-area .desktop-window {
+  backdrop-filter:blur(18px);
+}
+.desktop-shell .desktop-area .desktop-window .player-tool-heading {
+  background:
+    linear-gradient(100deg,rgba(39,55,70,.98),rgba(20,32,44,.98));
+}
+@media (max-width:1100px) and (min-width:761px) {
+  .desktop-shell .desktop-case-shortcut { left:30%;width:39%; }
+  .desktop-shell .desktop-date-panel { width:200px; }
+  .desktop-shell .desktop-system-panel { width:225px; }
+}
+@media (max-width:760px) {
+  .desktop-shell .desktop-area { min-height:870px; }
+  .desktop-shell .desktop-area::after { width:430px;height:430px;right:-100px;top:34%; }
+  .desktop-shell .desktop-case-shortcut {
+    top:365px;
+    min-height:142px;
+    padding:23px 17px 29px;
+  }
+  .desktop-shell .desktop-case-glyph { width:52px;height:62px;flex-basis:52px; }
+  .desktop-shell .desktop-case-shortcut strong { font-size:14px; }
+  .desktop-shell .desktop-date-panel { backdrop-filter:blur(10px); }
+  .desktop-shell .desktop-system-panel { backdrop-filter:blur(10px); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .desktop-shell .desktop-icon { transition:none; }
+  .desktop-shell .desktop-icon:hover { transform:none; }
+}

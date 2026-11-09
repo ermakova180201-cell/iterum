@@ -6461,3 +6461,21 @@ body.is-workstation #mail-window .mail-client-content.is-reading .mail-reader-bo
     overflow-y:auto;
   }
 }
+
+
+/* Inbox list fills the mailbox area until a message is opened */
+body.is-workstation #mail-window .mail-client-content:not(.is-reading) {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) !important;
+  width:100%;
+  min-width:0;
+}
+body.is-workstation #mail-window .mail-client-content:not(.is-reading) .mail-inbox-list {
+  grid-column:1;
+  width:100%;
+  min-width:0;
+  border-right:0;
+}
+body.is-workstation #mail-window .mail-client-content:not(.is-reading) .mail-reader {
+  display:none;
+}

@@ -6448,3 +6448,16 @@ body.is-workstation #mail-window .mail-client-content.is-reading .mail-reader-bo
   width:100%;
   max-width:none;
 }
+
+
+/* Give ITERUM MAIL a larger workspace inside the desktop */
+@media (min-width:761px) {
+  body.is-workstation .desktop-shell .desktop-area > #mail-window {
+    width:min(1320px,calc(100% - 48px));
+    max-width:none;
+    height:min(860px,calc(100% - 40px));
+    max-height:calc(100% - 40px);
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+}

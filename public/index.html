@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=assistant-01">
+  <link rel="stylesheet" href="/styles.css?v=assistant-02">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -137,6 +137,7 @@
   <div class="iterum-assistant-chat-head"><div><span class="assistant-chat-status"></span><strong>ПРИВЕДЕНИЕ</strong><small>СИСТЕМНЫЙ ПОМОЩНИК</small></div><button type="button" id="assistant-chat-close" aria-label="Закрыть">×</button></div>
   <div class="iterum-assistant-chat-body" id="assistant-chat-body" aria-live="polite"><p class="assistant-bubble">О, привет! Я здесь вроде как за главного по технической части. Давай покажу, что здесь к чему. Ничего не сломаешь. Наверное.</p></div>
   <div class="iterum-assistant-topics"><button type="button" data-assistant-topic="mail">Почта</button><button type="button" data-assistant-topic="search">Поиск данных</button><button type="button" data-assistant-topic="materials">Материалы дела</button><button type="button" data-assistant-topic="windows">Окна и рабочий стол</button></div>
+  <form class="assistant-chat-compose" id="assistant-chat-compose"><input id="assistant-chat-input" type="text" maxlength="180" autocomplete="off" placeholder="Спроси меня о системе…" aria-label="Сообщение помощнику"><button type="submit" aria-label="Отправить сообщение">➤</button></form>
 </div>
 <div class="desktop-notice-toast" id="desktop-notice-toast" role="status" aria-live="polite" hidden></div>
             <div class="desktop-wallpaper-mark">ITERUM</div>
@@ -1091,9 +1092,28 @@
     const assistantLaunchOverlay = document.getElementById("assistant-launch-overlay");
     const assistantChat = document.getElementById("iterum-assistant-chat");
     const assistantChatBody = document.getElementById("assistant-chat-body");
+    const assistantGhost = document.querySelector(".iterum-ghost-helper");
+    const assistantGhostMessage = assistantGhost.querySelector(".iterum-ghost-message");
+    const assistantChatInput = document.getElementById("assistant-chat-input");
+    const assistantEmotions = ["happy","curious","surprised","thinking","sleepy","grumpy"];
+    function setAssistantMood(mood, phrase) {
+      assistantEmotions.forEach(name => assistantGhost.classList.remove("is-" + name));
+      assistantGhost.classList.add("is-" + (assistantEmotions.includes(mood) ? mood : "happy"));
+      if (phrase) assistantGhostMessage.textContent = phrase;
+      assistantGhost.setAttribute("aria-label", "Системный помощник ITERUM: " + mood);
+    }
+    function assistantSay(text, mood="happy", userText="") {
+      assistantChatBody.replaceChildren();
+      if (userText) {
+        const user = document.createElement("p"); user.className = "assistant-bubble assistant-bubble-user"; user.textContent = userText; assistantChatBody.append(user);
+      }
+      const reply = document.createElement("p"); reply.className = "assistant-bubble"; reply.textContent = text; assistantChatBody.append(reply);
+      setAssistantMood(mood, mood === "curious" ? "О, интересно…" : mood === "thinking" ? "Сейчас подумаю…" : mood === "surprised" ? "Ого!" : mood === "grumpy" ? "Ну вот опять…" : mood === "sleepy" ? "Я тут…" : "Хи-хи.");
+    }
     function showAssistantLaunch(caseId) {
       pendingAssistantCaseId = caseId;
       assistantLaunchOverlay.hidden = false;
+      setAssistantMood("curious", "Новое дело?");
     }
     function beginSelectedCase(withAssistant) {
       const caseId = pendingAssistantCaseId;
@@ -1103,28 +1123,64 @@
       openCase(caseId);
       if (withAssistant) {
         assistantChat.hidden = false;
-        assistantChatBody.innerHTML = '<p class="assistant-bubble">О, привет! Я здесь вроде как за главного по технической части. Давай покажу, что здесь к чему. Ничего не сломаешь. Наверное.</p><p class="assistant-bubble assistant-bubble-muted">Выбирай раздел ниже — объясню, как им пользоваться. Секреты расследования оставлю тебе.</p>';
-      }
+        assistantSay("О, привет! Я уже заждался. Ну что, осмотримся? Я могу объяснить, как тут всё устроено. А расследовать придётся тебе — у меня лапки. Почти буквально.", "happy");
+      } else { setAssistantMood("sleepy", "Ладно, буду рядом."); }
     }
     document.getElementById("assistant-launch-yes").addEventListener("click", () => beginSelectedCase(true));
     document.getElementById("assistant-launch-no").addEventListener("click", () => beginSelectedCase(false));
-    document.querySelector(".iterum-ghost-helper").addEventListener("click", () => {
+    assistantGhost.addEventListener("click", () => {
       assistantChat.hidden = !assistantChat.hidden;
+      if (!assistantChat.hidden) {
+        assistantSay("А вот и ты! Что случилось? Могу подсказать по устройству системы. Только не проси меня искать преступника — я вообще-то привидение, а не детектив.", "curious");
+        assistantChatInput.focus();
+      }
     });
-    document.getElementById("assistant-chat-close").addEventListener("click", () => { assistantChat.hidden = true; });
+    document.getElementById("assistant-chat-close").addEventListener("click", () => { assistantChat.hidden = true; setAssistantMood("sleepy", "Я здесь."); });
     const assistantHelp = {
-      mail: "Почта — здесь появляются сообщения по делу. Открой приложение «Почта» на рабочем столе, чтобы читать письма и просматривать вложения.",
-      search: "Поиск данных помогает искать сведения в базе текущего дела. Введи имя, идентификатор или ключевое слово. Поиск работает только в пределах доступных материалов.",
-      materials: "В разделе «Материалы дела» собраны документы и другие материалы, доступные в рамках расследования. Открывай их и изучай внимательно.",
-      windows: "Нажми на значок приложения, чтобы открыть его. Окно можно перемещать за верхнюю панель, а закрыть кнопкой ×. Я остаюсь на рабочем столе — нажми на меня, если понадобится помощь."
+      mail: "Почта — здесь появляются сообщения по делу. Открой приложение «Почта» на рабочем столе, чтобы читать письма и просматривать вложения. И да, иногда стоит перечитать письмо: люди не всегда говорят прямо.",
+      search: "Поиск данных помогает искать сведения в базе текущего дела. Введи имя, идентификатор или ключевое слово. Поиск работает только в пределах доступных материалов. Только не вводи сюда рецепт блинов — база такого не поймёт.",
+      materials: "В «Материалах дела» собраны документы и другие доступные материалы. Открывай их и изучай внимательно. Я бы на твоём месте ничего не выбрасывал… хотя у меня самого карманы насквозь.",
+      windows: "Нажми на значок приложения, чтобы открыть его. Окно можно перемещать за верхнюю панель, а закрыть кнопкой ×. Если потеряешься — нажми на меня. Я заметный. Особенно в темноте."
     };
+    const assistantLabels = {mail:"Почта",search:"Поиск данных",materials:"Материалы дела",windows:"Окна и рабочий стол"};
     document.querySelectorAll("[data-assistant-topic]").forEach(button => button.addEventListener("click", () => {
       const key = button.dataset.assistantTopic;
-      const labels = {mail:"Почта",search:"Поиск данных",materials:"Материалы дела",windows:"Окна и рабочий стол"};
-      assistantChatBody.innerHTML = '<p class="assistant-bubble assistant-bubble-user"></p><p class="assistant-bubble"></p>';
-      assistantChatBody.children[0].textContent = labels[key];
-      assistantChatBody.children[1].textContent = assistantHelp[key];
+      assistantSay(assistantHelp[key], key === "search" ? "curious" : key === "materials" ? "thinking" : "happy", assistantLabels[key]);
     }));
+    function answerAssistantQuestion(raw) {
+      const q = raw.toLowerCase().trim();
+      if (/привет|здравств|добрый|хай/.test(q)) return ["О, привет-привет! Рад, что заглянул. Чем займёмся?","И тебе привет! Я как раз тренировался выглядеть загадочно. Получается?"][Math.floor(Math.random()*2)];
+      if (/кто ты|как тебя зовут|ты кто/.test(q)) return "Я — системный помощник ITERUM. Местный специалист по кнопкам, окнам и внезапному появлению в самый неподходящий момент. Зови просто Приведением.";
+      if (/помощ|что умеешь|что можешь/.test(q)) return "Могу объяснить, где почта, как пользоваться поиском и где лежат материалы. А вот разгадывать дело за тебя не стану. У каждого свои обязанности!";
+      if (/почт|письм/.test(q)) return assistantHelp.mail;
+      if (/поиск|искать|баз/.test(q)) return assistantHelp.search;
+      if (/материал|документ|файл|вложен/.test(q)) return assistantHelp.materials;
+      if (/окно|закры|откры|рабоч.*стол/.test(q)) return assistantHelp.windows;
+      if (/скуч|устал|сложно|трудно/.test(q)) return "Не торопись. Расследования любят внимательных, а не быстрых. Сделай паузу, если нужно. Я посторожу рабочий стол. Хотя он и так никуда не денется.";
+      if (/спасибо|благодар/.test(q)) return "Всегда пожалуйста! Для этого я тут и парю. Буквально парю.";
+      return "Хм… я не совсем понял. Я пока умею отвечать на вопросы о работе сайта и его разделах. Попробуй спросить про почту, поиск или материалы дела. И не смотри так — я стараюсь!";
+    }
+    document.getElementById("assistant-chat-compose").addEventListener("submit", event => {
+      event.preventDefault();
+      const message = assistantChatInput.value.trim();
+      if (!message) return;
+      const answer = answerAssistantQuestion(message);
+      const mood = /спасибо|привет/.test(message.toLowerCase()) ? "happy" : /кто ты|что умеешь/.test(message.toLowerCase()) ? "curious" : /сложно|трудно|устал/.test(message.toLowerCase()) ? "thinking" : "happy";
+      assistantSay(answer, mood, message);
+      assistantChatInput.value = "";
+    });
+    document.addEventListener("click", event => {
+      const app = event.target.closest("[data-open-window]");
+      if (!app || !document.body.classList.contains("is-workstation")) return;
+      const reactions = {
+        "mail-window":["surprised","Письмо? Ого!"],
+        "search-window":["curious","Что будем искать?"],
+        "materials-window":["thinking","Изучаем улики…"],
+        "help-window":["happy","О, за помощью? Это ко мне!"]
+      };
+      const reaction = reactions[app.dataset.openWindow];
+      if (reaction) setAssistantMood(reaction[0], reaction[1]);
+    }, true);
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") {
         assistantLaunchOverlay.hidden = true;

@@ -4930,3 +4930,36 @@ body.is-workstation .desktop-shell #desktop-account-name {
   body.is-workstation .desktop-shell .desktop-account { max-width:145px;padding:5px 7px; }
   body.is-workstation .desktop-shell #desktop-account-name { max-width:125px;font-size:8px; }
 }
+
+/* ITERUM ambient sound control */
+body.is-workstation .desktop-shell .desktop-taskbar { gap:18px; }
+body.is-workstation .desktop-shell .ambient-player {
+  display:flex;align-items:center;gap:9px;
+  min-width:0;padding:7px 11px;
+  border:1px solid rgba(199,155,107,.22);border-radius:7px;
+  background:rgba(7,14,21,.34);
+}
+body.is-workstation .desktop-shell .ambient-toggle {
+  display:flex;align-items:center;gap:8px;
+  padding:5px 7px;border:0;border-radius:4px;
+  color:#d9e0e4;background:transparent;
+  font:8px "IBM Plex Mono",monospace;letter-spacing:.09em;
+  cursor:pointer;
+}
+body.is-workstation .desktop-shell .ambient-toggle:hover,
+body.is-workstation .desktop-shell .ambient-toggle[aria-pressed="true"] {
+  color:#e8c39c;background:rgba(199,155,107,.1);
+}
+body.is-workstation .desktop-shell .ambient-play-symbol { color:#d5a36c;font-size:10px; }
+body.is-workstation .desktop-shell .ambient-volume-label {
+  color:#8999a5;font:7px "IBM Plex Mono",monospace;letter-spacing:.1em;
+}
+body.is-workstation .desktop-shell .ambient-volume {
+  width:76px;height:3px;accent-color:#c79b6b;cursor:pointer;
+}
+@media(max-width:760px) {
+  body.is-workstation .desktop-shell .desktop-taskbar { flex-wrap:wrap;justify-content:space-between;padding:9px 12px;gap:8px; }
+  body.is-workstation .desktop-shell .ambient-player { order:3;width:100%;justify-content:center; }
+  body.is-workstation .desktop-shell .ambient-volume { width:90px; }
+  body.is-workstation .desktop-shell .taskbar-clock { font-size:7px; }
+}

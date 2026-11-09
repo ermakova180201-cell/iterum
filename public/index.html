@@ -107,10 +107,6 @@
               <div class="system-status-row"><span>Связь</span><strong id="system-connection-status">ПОДКЛЮЧЕНА</strong></div>
             </section>
 <div class="desktop-notice-toast" id="desktop-notice-toast" role="status" aria-live="polite" hidden></div>
-            <div class="desktop-case-shortcut">
-              <div class="desktop-case-glyph">01</div>
-              <div><span>ТЕКУЩЕЕ ДЕЛО</span><strong id="desktop-case-name">Обстоятельства аварии Ильи</strong><small>ЛИЧНОЕ РАССЛЕДОВАНИЕ</small></div>
-            </div>
             <div class="desktop-wallpaper-mark">ITERUM</div>
         <section id="search-window" class="player-tool-section desktop-window search-terminal" aria-labelledby="search-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
@@ -232,10 +228,18 @@
               <button type="button" data-open-window="search-window" title="Поиск данных">⌕ <span>Поиск</span></button>
               <button type="button" data-open-window="materials-window" title="Материалы дела">▤ <span>Архив</span></button>
             </nav>
-            <div class="ambient-player" aria-label="Атмосферная музыка ITERUM">
-              <button type="button" id="ambient-toggle" class="ambient-toggle" aria-pressed="false" title="Включить атмосферу"><span class="ambient-play-symbol">▶</span><span id="ambient-state">АТМОСФЕРА ВЫКЛ.</span></button>
+            <div class="ambient-player iterum-music-player" aria-label="Музыкальный плеер ITERUM">
+              <span class="music-player-label">САУНДТРЕК</span>
+              <select id="ambient-track" class="music-track-select" aria-label="Выбрать музыкальный трек">
+                <option value="0">01 / Тихое расследование</option>
+                <option value="1">02 / Холодный архив</option>
+                <option value="2">03 / След в темноте</option>
+                <option value="3">04 / Напряжение</option>
+                <option value="4">05 / Последняя запись</option>
+              </select>
+              <button type="button" id="ambient-toggle" class="ambient-toggle" aria-pressed="false" title="Воспроизвести"><span class="ambient-play-symbol">▶</span><span id="ambient-state">ВОСПРОИЗВЕСТИ</span></button>
               <label class="ambient-volume-label" for="ambient-volume">ГРОМКОСТЬ</label>
-              <input id="ambient-volume" class="ambient-volume" type="range" min="0" max="100" value="24" aria-label="Громкость фоновой атмосферы">
+              <input id="ambient-volume" class="ambient-volume" type="range" min="0" max="100" value="28" aria-label="Громкость музыки">
             </div>
             <span class="taskbar-clock" id="desktop-clock">ЛОКАЛЬНАЯ СИСТЕМА</span>
           </div>
@@ -1581,48 +1585,80 @@
       const toggle=document.getElementById("ambient-toggle");
       const volume=document.getElementById("ambient-volume");
       const state=document.getElementById("ambient-state");
-      if(!toggle||!volume||!state)return;
-      let context=null,master=null,voices=[],playing=false;
-      function createAtmosphere(){
+      const trackSelect=document.getElementById("ambient-track");
+      if(!toggle||!volume||!state||!trackSelect)return;
+
+      // Пять оригинальных процедурных музыкальных тем ITERUM.
+      // Мелодии синтезируются в браузере и не используют сторонние аудиозаписи.
+      const tracks=[
+        {name:"Тихое расследование",notes:[220,261.63,329.63,293.66,246.94,196,246.94,293.66],wave:"sine",tempo:720,low:55},
+        {name:"Холодный архив",notes:[146.83,174.61,220,196,164.81,130.81,164.81,196],wave:"triangle",tempo:620,low:43.65},
+        {name:"След в темноте",notes:[110,164.81,146.83,220,196,146.83,123.47,164.81],wave:"sine",tempo:540,low:36.71},
+        {name:"Напряжение",notes:[130.81,155.56,196,174.61,138.59,207.65,174.61,155.56],wave:"sawtooth",tempo:410,low:32.7},
+        {name:"Последняя запись",notes:[261.63,329.63,392,349.23,293.66,261.63,220,196],wave:"triangle",tempo:820,low:65.41}
+      ];
+      let context=null,master=null,playing=false,step=0,timer=null,trackOsc=null;
+      function ensureAudio(){
         const AudioCtx=window.AudioContext||window.webkitAudioContext;
         if(!AudioCtx)return false;
-        context=new AudioCtx();
-        master=context.createGain();
-        master.gain.value=0;
-        master.connect(context.destination);
-        const frequencies=[55,82.41,110,164.81];
-        frequencies.forEach((frequency,index)=>{
-          const osc=context.createOscillator(),gain=context.createGain(),lfo=context.createOscillator(),lfoGain=context.createGain();
-          osc.type=index===2?"triangle":"sine";
-          osc.frequency.value=frequency;
-          gain.gain.value=[.16,.085,.035,.018][index];
-          lfo.type="sine";
-          lfo.frequency.value=[.055,.037,.023,.017][index];
-          lfoGain.gain.value=[.045,.025,.012,.008][index];
-          lfo.connect(lfoGain);lfoGain.connect(gain.gain);
-          osc.connect(gain);gain.connect(master);
-          osc.start();lfo.start();
-          voices.push(osc,lfo);
-        });
-        const length=context.sampleRate*4,buffer=context.createBuffer(1,length,context.sampleRate),data=buffer.getChannelData(0);
-        let last=0;
-        for(let i=0;i<length;i++){last=last*.985+(Math.random()*2-1)*.015;data[i]=last*2.8;}
-        const noise=context.createBufferSource(),filter=context.createBiquadFilter(),noiseGain=context.createGain();
-        noise.buffer=buffer;noise.loop=true;filter.type="lowpass";filter.frequency.value=260;filter.Q.value=.45;
-        noiseGain.gain.value=.13;noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);noise.start();voices.push(noise);
+        if(!context){
+          context=new AudioCtx();
+          master=context.createGain();
+          master.gain.value=0;
+          master.connect(context.destination);
+        }
         return true;
       }
-      function setVolume(){if(master&&context)master.gain.setTargetAtTime(Number(volume.value)/100*.22,context.currentTime,.18);}
-      toggle.addEventListener("click",async()=>{
-        if(!context&&!createAtmosphere()){state.textContent="АУДИО НЕДОСТУПНО";return;}
-        if(!playing){
-          try{await context.resume();playing=true;setVolume();toggle.setAttribute("aria-pressed","true");toggle.title="Выключить атмосферу";toggle.querySelector(".ambient-play-symbol").textContent="Ⅱ";state.textContent="АТМОСФЕРА ВКЛ.";}
-          catch{state.textContent="АУДИО НЕДОСТУПНО";}
-        }else{
-          playing=false;master.gain.setTargetAtTime(0,context.currentTime,.2);toggle.setAttribute("aria-pressed","false");toggle.title="Включить атмосферу";toggle.querySelector(".ambient-play-symbol").textContent="▶";state.textContent="АТМОСФЕРА ВЫКЛ.";
-        }
+      function tone(frequency,when,duration,wave,level){
+        const osc=context.createOscillator(),gain=context.createGain();
+        osc.type=wave;osc.frequency.setValueAtTime(frequency,when);
+        gain.gain.setValueAtTime(.0001,when);
+        gain.gain.exponentialRampToValueAtTime(level,when+.035);
+        gain.gain.exponentialRampToValueAtTime(.0001,when+duration);
+        osc.connect(gain);gain.connect(master);
+        osc.start(when);osc.stop(when+duration+.04);
+      }
+      function scheduleBeat(){
+        if(!playing||!context)return;
+        const track=tracks[Number(trackSelect.value)]||tracks[0];
+        const now=context.currentTime;
+        const note=track.notes[step%track.notes.length];
+        tone(note,now,.48,track.wave,.105);
+        tone(note/2,now,.72,"sine",.055);
+        if(step%4===0)tone(track.low,now,.95,"sine",.12);
+        if(step%2===1)tone(note*2,now,.2,"sine",.018);
+        step++;
+      }
+      function setVolume(){
+        if(master&&context)master.gain.setTargetAtTime(Number(volume.value)/100*.42,context.currentTime,.12);
+      }
+      function stop(){
+        playing=false;
+        if(timer){clearInterval(timer);timer=null;}
+        if(master&&context)master.gain.setTargetAtTime(0,context.currentTime,.18);
+        toggle.setAttribute("aria-pressed","false");
+        toggle.title="Воспроизвести";
+        toggle.querySelector(".ambient-play-symbol").textContent="▶";
+        state.textContent="ПАУЗА";
+      }
+      async function play(){
+        if(!ensureAudio()){state.textContent="АУДИО НЕДОСТУПНО";return;}
+        try{
+          await context.resume();
+          playing=true;step=0;setVolume();
+          toggle.setAttribute("aria-pressed","true");
+          toggle.title="Пауза";
+          toggle.querySelector(".ambient-play-symbol").textContent="Ⅱ";
+          state.textContent="ИГРАЕТ";
+          scheduleBeat();
+          timer=setInterval(scheduleBeat,tracks[Number(trackSelect.value)].tempo);
+        }catch(error){state.textContent="АУДИО НЕДОСТУПНО";}
+      }
+      toggle.addEventListener("click",()=>playing?stop():play());
+      trackSelect.addEventListener("change",()=>{
+        if(playing){stop();play();}
       });
-      volume.addEventListener("input",()=>{if(playing)setVolume();});
+      volume.addEventListener("input",setVolume);
     })();
   </script>
 

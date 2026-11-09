@@ -6021,3 +6021,145 @@ body.is-workstation .desktop-icon .desktop-mail-badge[hidden] {
   color: #f0c2b9;
   background: rgba(110,43,37,.35);
 }
+
+
+/* ITERUM mail client — realistic inbox, folders and message reader */
+body.is-workstation .desktop-shell #mail-window .mail-client {
+  min-width:0;
+  color:#dce4eb;
+  background:#0c1722;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-toolbar {
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 15px;border-bottom:1px solid rgba(174,190,205,.13);
+  background:linear-gradient(180deg,#172636,#132130);
+}
+body.is-workstation .desktop-shell #mail-window .mail-search-wrap {
+  display:flex;align-items:center;gap:9px;width:min(420px,72%);
+  padding:0 11px;border:1px solid rgba(174,190,205,.2);border-radius:4px;
+  background:#0c1926;color:#9eafbd;
+}
+body.is-workstation .desktop-shell #mail-window .mail-search-wrap > span {font-size:20px;line-height:1;}
+body.is-workstation .desktop-shell #mail-window .mail-search-wrap input {
+  width:100%;min-width:0;height:34px;border:0;outline:0;background:transparent;
+  color:#e3eaf0;font:11px var(--sans);
+}
+body.is-workstation .desktop-shell #mail-window .mail-search-wrap input::placeholder {color:#7f91a1;}
+body.is-workstation .desktop-shell #mail-window .mail-refresh-button {
+  display:inline-flex;align-items:center;gap:7px;padding:8px 11px;
+  border:1px solid rgba(190,151,99,.28);border-radius:3px;
+  background:rgba(190,151,99,.06);color:#cbb58f;
+  font:9px var(--mono);cursor:pointer;
+}
+body.is-workstation .desktop-shell #mail-window .mail-refresh-button:hover {background:rgba(190,151,99,.14);}
+body.is-workstation .desktop-shell #mail-window .mail-refresh-button > span {font-size:15px;}
+body.is-workstation .desktop-shell #mail-window .mail-client-layout {
+  display:grid;grid-template-columns:190px minmax(0,1fr);min-height:390px;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-nav {
+  display:flex;flex-direction:column;gap:4px;padding:16px 10px;
+  border-right:1px solid rgba(174,190,205,.13);background:#101d2a;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button {
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;padding:10px 10px;border:1px solid transparent;border-radius:3px;
+  background:transparent;color:#aab8c4;text-align:left;font:10px var(--sans);cursor:pointer;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button span {display:flex;align-items:center;gap:9px;}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button i {width:14px;color:#c3a675;font-style:normal;text-align:center;}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button b {
+  min-width:19px;padding:2px 5px;border-radius:10px;background:rgba(155,174,191,.1);
+  color:#aebdca;font:8px var(--mono);text-align:center;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button:hover {background:rgba(190,151,99,.07);}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button.is-active {
+  border-color:rgba(190,151,99,.17);background:rgba(190,151,99,.11);color:#ead9bc;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-content {
+  display:grid;grid-template-columns:minmax(205px,.78fr) minmax(0,1.55fr);min-width:0;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-list {
+  min-width:0;max-height:min(570px,68vh);overflow-y:auto;
+  border-right:1px solid rgba(174,190,205,.13);background:#0c1722;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry {
+  display:grid;grid-template-columns:31px minmax(0,1fr) auto;align-items:start;
+  gap:0 9px;padding:13px 11px;border-bottom:1px solid rgba(174,190,205,.1);
+}
+body.is-workstation .desktop-shell #mail-window .mail-entry-avatar,
+body.is-workstation .desktop-shell #mail-window .mail-reader-avatar {
+  display:grid;place-items:center;width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(145deg,#43566a,#26394b);color:#e1d4bb;
+  font:11px var(--sans);font-weight:600;
+}
+body.is-workstation .desktop-shell #mail-window .mail-entry-details {
+  display:flex;flex-direction:column;gap:5px;min-width:0;
+}
+body.is-workstation .desktop-shell #mail-window .mail-entry-sender {
+  overflow:hidden;color:#c4d0d9;font:9px var(--sans);text-overflow:ellipsis;white-space:nowrap;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry time {
+  color:#8293a2;font:8px var(--mono);white-space:nowrap;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry strong {
+  grid-column:auto;overflow:hidden;color:#dce5ec;font:600 10px/1.4 var(--sans);
+  text-overflow:ellipsis;white-space:nowrap;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry small {
+  grid-column:auto;overflow:hidden;color:#8999a7;font:9px/1.45 var(--sans);
+  text-overflow:ellipsis;white-space:nowrap;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry.is-unread .mail-entry-sender {color:#e2d2b7;font-weight:600;}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry.is-unread .mail-entry-sender:before {
+  width:6px;height:6px;margin-right:6px;background:#d0a96e;box-shadow:0 0 6px rgba(208,169,110,.3);
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry.is-active {
+  background:linear-gradient(90deg,rgba(190,151,99,.14),rgba(52,73,91,.08));
+  box-shadow:inset 2px 0 #c5a779;
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader {
+  min-height:390px;padding:24px clamp(17px,3vw,36px);
+  background:linear-gradient(145deg,#142334,#101c29);
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader-top {
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding-bottom:13px;border-bottom:1px solid rgba(174,190,205,.15);
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader-subject {
+  margin:22px 0 18px;color:#e8edf1;font:500 clamp(19px,2vw,25px)/1.3 var(--sans);
+}
+body.is-workstation .desktop-shell #mail-window .mail-sender-row {display:flex;align-items:center;gap:11px;}
+body.is-workstation .desktop-shell #mail-window .mail-reader-avatar {width:36px;height:36px;}
+body.is-workstation .desktop-shell #mail-window .mail-reader-sender-details {display:flex;flex-direction:column;gap:4px;min-width:0;}
+body.is-workstation .desktop-shell #mail-window .mail-reader-sender-details strong {color:#dbe4eb;font:600 10px var(--sans);}
+body.is-workstation .desktop-shell #mail-window .mail-reader-sender-details span {color:#8fa0ae;font:9px var(--mono);overflow-wrap:anywhere;}
+body.is-workstation .desktop-shell #mail-window .mail-reader-divider {margin:21px 0;background:rgba(174,190,205,.15);}
+body.is-workstation .desktop-shell #mail-window .mail-reader-body {
+  max-width:760px;color:#d0d9e1;font:12px/1.95 var(--sans);white-space:pre-wrap;overflow-wrap:anywhere;
+}
+body.is-workstation .desktop-shell #mail-window .mail-list-empty,
+body.is-workstation .desktop-shell #mail-window .mail-reader-placeholder,
+body.is-workstation .desktop-shell #mail-window .mail-empty-state {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  min-height:250px;padding:25px;color:#93a4b2;text-align:center;
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader-placeholder {min-height:300px;}
+body.is-workstation .desktop-shell #mail-window .mail-reader-placeholder span,
+body.is-workstation .desktop-shell #mail-window .mail-empty-icon {color:#b79a6b;font-size:30px;opacity:.8;}
+body.is-workstation .desktop-shell #mail-window .mail-empty-state {grid-column:1/-1;min-height:330px;}
+body.is-workstation .desktop-shell #mail-window .mail-empty-state strong {color:#d8e0e6;font:500 14px var(--sans);}
+body.is-workstation .desktop-shell #mail-window .mail-empty-state p,
+body.is-workstation .desktop-shell #mail-window .mail-reader-placeholder p {margin:0;color:#8fa0ae;font:10px/1.6 var(--sans);}
+@media(max-width:820px) {
+  body.is-workstation .desktop-shell #mail-window .mail-client-layout {grid-template-columns:1fr;}
+  body.is-workstation .desktop-shell #mail-window .mail-folder-nav {flex-direction:row;border-right:0;border-bottom:1px solid rgba(174,190,205,.13);}
+  body.is-workstation .desktop-shell #mail-window .mail-folder-button {justify-content:center;}
+  body.is-workstation .desktop-shell #mail-window .mail-client-content {grid-template-columns:minmax(0,1fr);}
+  body.is-workstation .desktop-shell #mail-window .mail-inbox-list {max-height:220px;border-right:0;border-bottom:1px solid rgba(174,190,205,.13);}
+  body.is-workstation .desktop-shell #mail-window .mail-reader {min-height:220px;}
+}
+@media(max-width:520px) {
+  body.is-workstation .desktop-shell #mail-window .mail-client-toolbar {padding:9px;gap:7px;}
+  body.is-workstation .desktop-shell #mail-window .mail-refresh-button {font-size:0;}
+  body.is-workstation .desktop-shell #mail-window .mail-refresh-button > span {font-size:17px;}
+}

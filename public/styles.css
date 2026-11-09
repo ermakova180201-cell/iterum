@@ -6569,3 +6569,65 @@ body.is-workstation #mail-window .mail-row-actions {
   width:30px;
   justify-content:center;
 }
+
+
+/* Mail list: sender identity, subject, date and open control in separate columns */
+body.is-workstation #mail-window .mail-list-columns {
+  display:grid;
+  grid-template-columns:minmax(170px,1.05fr) minmax(220px,1.7fr) auto 30px;
+  align-items:center;
+  gap:13px;
+}
+body.is-workstation #mail-window .mail-inbox-entry {
+  grid-template-columns:minmax(170px,1.05fr) minmax(220px,1.7fr) auto 30px !important;
+  align-items:center;
+}
+body.is-workstation #mail-window .mail-entry-details {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+body.is-workstation #mail-window .mail-entry-sender {
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+body.is-workstation #mail-window .mail-entry-address {
+  display:block;
+  overflow:hidden;
+  color:#8293a2;
+  font:8px/1.35 var(--mono);
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+body.is-workstation #mail-window .mail-entry-subject {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+body.is-workstation #mail-window .mail-entry-subject strong {
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+body.is-workstation #mail-window .mail-inbox-entry.is-unread .mail-entry-sender:before {
+  content:none !important;
+}
+body.is-workstation #mail-window .mail-inbox-entry time {
+  justify-self:end;
+  text-align:right;
+  white-space:nowrap;
+}
+@media(max-width:760px) {
+  body.is-workstation #mail-window .mail-list-columns,
+  body.is-workstation #mail-window .mail-inbox-entry {
+    grid-template-columns:minmax(105px,.9fr) minmax(110px,1.2fr) auto 26px !important;
+    gap:8px;
+  }
+  body.is-workstation #mail-window .mail-entry-address { font-size:7px; }
+}

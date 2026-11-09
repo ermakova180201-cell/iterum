@@ -6795,3 +6795,25 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-
     animation:none!important;
   }
 }
+
+
+/* ITERUM ghost assistant — gentle mail-folder visits */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-folder {
+  z-index:15;
+  animation:none!important;
+  pointer-events:none;
+  transition:left 2.1s cubic-bezier(.2,.75,.25,1),top 2.1s cubic-bezier(.2,.75,.25,1),filter .3s ease;
+  filter:drop-shadow(0 0 13px rgba(151,244,255,.75));
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-folder .iterum-ghost-body {
+  animation:ghostHappyBob 1.8s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-folder .iterum-ghost-message {
+  opacity:1;
+  transform:translate(-50%,-5px);
+}
+@media(prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-folder {
+    transition:none!important;
+  }
+}

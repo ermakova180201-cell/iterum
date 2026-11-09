@@ -223,11 +223,7 @@
           </div>
           <div class="desktop-taskbar">
             <span class="taskbar-start"><b>I.</b> ITERUM</span>
-            <nav class="taskbar-apps" aria-label="Открыть приложение">
-              <button type="button" data-open-window="mail-window" title="Почта">✉ <span>Почта</span></button>
-              <button type="button" data-open-window="search-window" title="Поиск данных">⌕ <span>Поиск</span></button>
-              <button type="button" data-open-window="materials-window" title="Материалы дела">▤ <span>Архив</span></button>
-            </nav>
+            <nav class="taskbar-apps taskbar-running-apps" id="taskbar-running-apps" aria-label="Открытые приложения"></nav>
             <div class="ambient-player iterum-music-player" aria-label="Музыкальный плеер ITERUM">
               <span class="music-player-label">САУНДТРЕК</span>
               <select id="ambient-track" class="music-track-select" aria-label="Выбрать музыкальный трек">
@@ -699,6 +695,24 @@
             win.style.transform = "translate(-50%, -50%)";
             win.style.zIndex = String(++topWindowZ);
             desktopShell.querySelectorAll("[data-open-window]").forEach(button => button.classList.toggle("is-selected", button.dataset.openWindow === opener.dataset.openWindow));
+            const runningApps = document.getElementById("taskbar-running-apps");
+            if (runningApps) {
+              const appNames = { "mail-window": ["✉", "Почта"], "search-window": ["⌕", "Поиск данных"], "materials-window": ["▤", "Материалы дела"], "help-window": ["?", "Помощь"], "news-window": ["◈", "Новости"] };
+              const app = appNames[opener.dataset.openWindow] || ["▣", win.querySelector("h2")?.textContent.trim() || "Приложение"];
+              runningApps.replaceChildren();
+              const runningButton = document.createElement("button");
+              runningButton.type = "button";
+              runningButton.dataset.openWindow = opener.dataset.openWindow;
+              runningButton.className = "is-selected";
+              runningButton.title = app[1];
+              const appIcon = document.createElement("span");
+              appIcon.className = "taskbar-running-icon";
+              appIcon.textContent = app[0];
+              const appLabel = document.createElement("span");
+              appLabel.textContent = app[1];
+              runningButton.append(appIcon, appLabel);
+              runningApps.append(runningButton);
+            }
             if (window.iterumSystemLock) window.iterumSystemLock.noteAppOpen();
           }
         }
@@ -706,6 +720,8 @@
           const win = document.getElementById(closer.dataset.closeWindow);
           if (win) win.hidden = true;
           desktopShell.querySelectorAll('[data-open-window="' + closer.dataset.closeWindow + '"]').forEach(related => related.classList.remove("is-selected"));
+          const runningApps = document.getElementById("taskbar-running-apps");
+          if (runningApps) runningApps.replaceChildren();
         }
       });
       // Allow application windows to be moved around the desktop by their title bars.

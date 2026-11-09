@@ -1102,6 +1102,39 @@
       if (phrase) assistantGhostMessage.textContent = phrase;
       assistantGhost.setAttribute("aria-label", "Системный помощник ITERUM: " + mood);
     }
+
+    // The ghost occasionally visits visible mail folders and comments on them.
+    const ghostFolderVisits = [
+      { key:"sent", phrase:"В «Отправленных» пока спокойно. Никто никому не пишет… подозрительно.", mood:"curious" },
+      { key:"spam", phrase:"Спам. Даже привидению иногда приходят странные предложения.", mood:"grumpy" },
+      { key:"trash", phrase:"Корзина… Надеюсь, там нет чего-то действительно важного.", mood:"thinking" }
+    ];
+    let ghostFolderVisitIndex = 0;
+    let ghostFolderVisitTimer = null;
+    function visitMailFolder() {
+      if (!assistantChat.hidden) return;
+      const area = document.querySelector(".desktop-area");
+      const folder = document.querySelector(".mail-folder-button:nth-child(" + (ghostFolderVisitIndex + 1) + ")");
+      if (!area || !folder || !folder.getClientRects().length) return;
+      const areaRect = area.getBoundingClientRect();
+      const folderRect = folder.getBoundingClientRect();
+      if (areaRect.width < 1 || areaRect.height < 1) return;
+      const left = Math.max(48, Math.min(areaRect.width - 48, folderRect.left + folderRect.width / 2 - areaRect.left));
+      const top = Math.max(58, Math.min(areaRect.height - 58, folderRect.top + folderRect.height / 2 - areaRect.top));
+      const visit = ghostFolderVisits[ghostFolderVisitIndex];
+      ghostFolderVisitIndex = (ghostFolderVisitIndex + 1) % ghostFolderVisits.length;
+      assistantGhost.classList.add("is-visiting-folder");
+      assistantGhost.style.left = left + "px";
+      assistantGhost.style.top = top + "px";
+      setAssistantMood(visit.mood, visit.phrase);
+      window.clearTimeout(assistantGhost._visitReturnTimer);
+      assistantGhost._visitReturnTimer = window.setTimeout(() => {
+        assistantGhost.classList.remove("is-visiting-folder");
+        assistantGhost.style.removeProperty("left");
+        assistantGhost.style.removeProperty("top");
+      }, 3400);
+    }
+    if (!ghostFolderVisitTimer) ghostFolderVisitTimer = window.setInterval(visitMailFolder, 10500);
     function assistantSay(text, mood="happy", userText="") {
       assistantChatBody.replaceChildren();
       if (userText) {

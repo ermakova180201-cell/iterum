@@ -6409,3 +6409,25 @@ body.is-workstation #mail-window .mail-folder-button b { margin-left:2px; }
     white-space:normal;
   }
 }
+
+
+/* Message reading pane must use the full available mailbox width */
+body.is-workstation #mail-window .mail-client-content.is-reading {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) !important;
+  width:100%;
+  min-width:0;
+}
+body.is-workstation #mail-window .mail-client-content.is-reading .mail-reader {
+  display:block;
+  grid-column:1 / -1;
+  width:100%;
+  min-width:0;
+  max-width:none;
+  min-height:430px;
+  box-sizing:border-box;
+}
+body.is-workstation #mail-window .mail-client-content.is-reading .mail-reader-body {
+  width:100%;
+  max-width:none;
+}

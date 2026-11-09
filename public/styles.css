@@ -6667,4 +6667,4 @@ body.is-workstation .iterum-assistant-chat{position:absolute;z-index:30;left:cal
 .iterum-assistant-topics{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;border-top:1px solid rgba(133,204,217,.14)}
 .iterum-assistant-topics button{padding:8px 6px;border:1px solid rgba(133,204,217,.2);border-radius:3px;background:transparent;color:#bcd3da;font:8px var(--sans);cursor:pointer}
 .iterum-assistant-topics button:hover{border-color:rgba(133,204,217,.6);background:rgba(95,161,180,.1)}
-@media(max-width:650px){.assistant-launch-panel{padding:22px}.assistant-launch-actions{grid-template-columns:1fr}.body.is-workstation .iterum-assistant-chat{left:12px;top:auto;bottom:14px;width:min(330px,calc(100% - 24px))}}
+@media(max-width:650px){.assistant-launch-panel{padding:22px}.assistant-launch-actions{grid-template-columns:1fr}body.is-workstation .iterum-assistant-chat{left:12px;top:auto;bottom:14px;width:min(330px,calc(100% - 24px))}}

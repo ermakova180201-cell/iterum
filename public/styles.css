@@ -5925,3 +5925,56 @@ body:not(.is-workstation) .available-case-list > .player-empty {
   body:not(.is-workstation) .available-case-cover::after,
   body:not(.is-workstation) .available-case-title {transition:none;}
 }
+
+
+
+/* ITERUM desktop — final header and shortcut alignment */
+body.is-workstation .desktop-shell .desktop-toolbar {
+  background:linear-gradient(110deg,#111c28 0%,#0d1722 52%,#111c28 100%) !important;
+  border-bottom:1px solid rgba(151,180,198,.15) !important;
+  box-shadow:inset 0 1px rgba(218,235,245,.025) !important;
+}
+body.is-workstation .desktop-shell .desktop-led {
+  background:#8fb8c2 !important;
+  box-shadow:0 0 0 4px rgba(143,184,194,.08),0 0 13px rgba(115,190,204,.48) !important;
+}
+body.is-workstation .desktop-shell .desktop-toolbar-right span:last-child {
+  color:#a9c2cc !important;
+}
+body.is-workstation .desktop-shell .desktop-toolbar .all-cases-button {
+  transform:translateX(76px) !important;
+}
+body.is-workstation .desktop-shell .desktop-toolbar .all-cases-button:hover {
+  transform:translate(76px,-1px) !important;
+}
+body.is-workstation .desktop-shell .desktop-area {
+  position:relative !important;
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-help-shortcut {
+  position:absolute !important;
+  left:auto !important;
+  right:28px !important;
+  top:auto !important;
+  bottom:28px !important;
+  z-index:8 !important;
+}
+@media(max-width:1100px) {
+  body.is-workstation .desktop-shell .desktop-toolbar .all-cases-button {
+    transform:translateX(38px) !important;
+  }
+  body.is-workstation .desktop-shell .desktop-toolbar .all-cases-button:hover {
+    transform:translate(38px,-1px) !important;
+  }
+}
+@media(max-width:760px) {
+  body.is-workstation .desktop-shell .desktop-toolbar .all-cases-button {
+    transform:none !important;
+  }
+  body.is-workstation .desktop-shell .desktop-toolbar .all-cases-button:hover {
+    transform:translateY(-1px) !important;
+  }
+  body.is-workstation .desktop-shell .desktop-area > .desktop-help-shortcut {
+    right:16px !important;
+    bottom:18px !important;
+  }
+}

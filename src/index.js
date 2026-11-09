@@ -333,6 +333,22 @@ async function handleApi(request, env) {
         return json({ ok: true });
       }
 
+      if (request.method === "DELETE" && !isPublishRoute) {
+        const existing = await env.DB.prepare(
+          "SELECT id, is_published FROM materials WHERE id = ?"
+        ).bind(materialId).first();
+        if (!existing) return json({ error: "Материал не найден." }, 404);
+        if (existing.is_published === 1) {
+          return json({ error: "Опубликованный материал нельзя удалить. Сначала снимите его с публикации." }, 409);
+        }
+        await env.DB.prepare("DELETE FROM material_unlocks WHERE material_id = ?").bind(materialId).run();
+        await env.DB.prepare("DELETE FROM player_material_reads WHERE material_id = ?").bind(materialId).run();
+        await env.DB.prepare("DELETE FROM material_files WHERE material_id = ?").bind(materialId).run();
+        await env.DB.prepare("UPDATE materials SET trigger_material_id = NULL WHERE trigger_material_id = ?").bind(materialId).run();
+        await env.DB.prepare("DELETE FROM materials WHERE id = ? AND is_published = 0").bind(materialId).run();
+        return json({ ok: true });
+      }
+
       if (request.method === "POST" && isPublishRoute) {
         let body;
         try { body = await request.json(); } catch { return json({ error: "Проверьте действие." }, 400); }

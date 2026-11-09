@@ -6343,3 +6343,6 @@ body.is-workstation #mail-window .mail-list-empty { padding:45px 20px; color:#8f
   body.is-workstation #mail-window .mail-inbox-entry { grid-template-columns:8px minmax(0,1fr) auto; gap:9px; padding:11px 9px; }
   body.is-workstation #mail-window .mail-row-actions { grid-column:2/-1; justify-content:flex-end; }
 }
+
+body.is-workstation #mail-window .mail-clear-trash { margin-left:auto; padding:6px 9px; border:1px solid rgba(166,91,82,.38); border-radius:3px; background:rgba(88,35,31,.14); color:#d59a91; font:8px var(--mono); cursor:pointer; }
+body.is-workstation #mail-window .mail-clear-trash:hover { border-color:#b66d63; background:rgba(110,43,37,.25); color:#f0c2b9; }

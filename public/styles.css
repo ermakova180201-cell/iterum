@@ -4089,3 +4089,373 @@ body.is-workstation .connection-art span { font: 29px/1 var(--mono); }
   .desktop-shell .desktop-date-panel time { font-size:18px; }
   .desktop-shell .desktop-case-shortcut { top:345px; }
 }
+
+
+/* ITERUM desktop — cinematic workstation refinement 02 */
+.desktop-shell {
+  --cin-bg:#090e14;
+  --cin-line:rgba(169,188,205,.15);
+  --cin-accent:#d7a873;
+  position:relative;
+  isolation:isolate;
+  border:1px solid rgba(176,194,208,.2);
+  border-radius:16px;
+  background:#0a1017;
+  box-shadow:0 34px 100px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.025),inset 0 1px rgba(255,255,255,.045);
+}
+.desktop-shell::before {
+  content:"";
+  position:absolute;z-index:5;pointer-events:none;
+  inset:0;border-radius:inherit;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),inset 0 24px 55px rgba(255,255,255,.012);
+}
+.desktop-shell .desktop-toolbar {
+  position:relative;
+  min-height:70px;
+  grid-template-columns:minmax(210px,1fr) auto minmax(210px,1fr);
+  padding:0 28px;
+  background:
+    linear-gradient(90deg,rgba(26,37,49,.98),rgba(15,23,32,.98) 48%,rgba(25,35,46,.98)),
+    #121b25;
+  border-bottom:1px solid rgba(169,188,205,.16);
+}
+.desktop-shell .desktop-toolbar::after {
+  content:"SECURE ENVIRONMENT  /  NODE 04";
+  position:absolute;left:28px;bottom:7px;
+  color:rgba(143,161,177,.42);
+  font:7px "IBM Plex Mono",monospace;
+  letter-spacing:.16em;
+}
+.desktop-shell .desktop-window-title {
+  align-self:center;
+  padding-bottom:8px;
+  font-size:13px;
+  letter-spacing:.18em;
+}
+.desktop-shell .desktop-led {
+  width:7px;height:7px;
+  background:#d9aa75;
+  box-shadow:0 0 0 4px rgba(217,170,117,.09),0 0 16px rgba(217,170,117,.8);
+}
+.desktop-shell .all-cases-button {
+  padding:10px 15px;
+  border-color:rgba(169,188,205,.18);
+  background:rgba(7,12,18,.28);
+  transition:all .2s ease;
+}
+.desktop-shell .desktop-toolbar-right {
+  padding-bottom:8px;
+  gap:19px;
+  font-size:8px;
+}
+.desktop-shell .desktop-toolbar-right span:last-child {
+  color:#d6ad80;
+}
+.desktop-shell .desktop-area {
+  min-height:680px;
+  background:
+    radial-gradient(ellipse at 53% 48%,rgba(70,91,111,.19),transparent 31%),
+    radial-gradient(ellipse at 88% 16%,rgba(119,91,66,.11),transparent 28%),
+    radial-gradient(ellipse at 12% 100%,rgba(48,76,89,.13),transparent 34%),
+    linear-gradient(130deg,#111a24 0%,#0b121a 52%,#101923 100%);
+}
+.desktop-shell .desktop-area::before {
+  opacity:.5;
+  background-image:
+    linear-gradient(rgba(155,177,195,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(155,177,195,.045) 1px,transparent 1px),
+    linear-gradient(rgba(155,177,195,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(155,177,195,.018) 1px,transparent 1px);
+  background-size:48px 48px,48px 48px,12px 12px,12px 12px;
+  mask-image:linear-gradient(90deg,#000 0%,#000 70%,transparent 100%);
+}
+.desktop-shell .desktop-area::after {
+  width:620px;height:620px;
+  right:15%;top:4%;
+  border:1px solid rgba(166,188,204,.075);
+  box-shadow:
+    0 0 0 32px rgba(166,188,204,.014),
+    0 0 0 76px rgba(166,188,204,.012),
+    0 0 0 124px rgba(166,188,204,.009),
+    inset 0 0 70px rgba(120,151,174,.035);
+  background:
+    radial-gradient(circle at center,rgba(125,151,174,.075),transparent 66%),
+    conic-gradient(from 20deg,transparent 0 18%,rgba(199,165,127,.08) 18.2% 18.5%,transparent 18.8% 63%,rgba(145,174,191,.07) 63.2% 63.5%,transparent 63.8%);
+}
+.desktop-shell .desktop-icons {
+  left:3.2%;top:7%;
+  grid-template-columns:repeat(2,104px);
+  gap:11px;
+  width:219px;
+}
+.desktop-shell .desktop-icon {
+  min-height:104px;
+  padding:13px 12px 12px;
+  gap:11px;
+  border:1px solid rgba(162,183,200,.13);
+  border-radius:8px;
+  background:linear-gradient(145deg,rgba(32,46,60,.76),rgba(15,24,34,.84));
+  box-shadow:0 10px 24px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.045);
+  backdrop-filter:blur(8px);
+}
+.desktop-shell .desktop-icon::after {
+  content:"";
+  position:absolute;
+  width:17px;height:1px;
+  right:10px;top:10px;
+  background:rgba(201,169,132,.35);
+}
+.desktop-shell .desktop-icon:hover,
+.desktop-shell .desktop-icon.is-selected {
+  border-color:rgba(219,174,125,.58);
+  background:linear-gradient(145deg,rgba(49,62,74,.95),rgba(20,31,42,.97));
+  box-shadow:0 14px 32px rgba(0,0,0,.3),0 0 26px rgba(213,163,108,.09),inset 0 1px rgba(255,255,255,.08);
+}
+.desktop-shell .desktop-icon-art {
+  width:40px;height:40px;flex-basis:40px;
+  border:1px solid rgba(219,177,131,.34);
+  border-radius:9px;
+  background:linear-gradient(145deg,rgba(204,157,108,.19),rgba(76,91,103,.2));
+  box-shadow:0 5px 15px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.09);
+}
+.desktop-shell .desktop-icon-art span {
+  color:#e5bd92;
+  text-shadow:0 0 14px rgba(229,189,146,.18);
+}
+.desktop-shell .desktop-icon .icon-caption {
+  min-height:26px;
+  color:#dce4e9;
+  font:600 10px/1.3 "Space Grotesk",sans-serif;
+}
+.desktop-shell .desktop-icon small { display:none; }
+.desktop-shell .desktop-help-shortcut {
+  left:3.2%;bottom:24px;
+  width:104px;min-height:82px;
+}
+.desktop-shell .desktop-date-panel {
+  top:6.5%;right:4%;
+  width:218px;
+  padding:17px 19px 16px;
+  border:1px solid rgba(170,190,205,.18);
+  border-radius:8px;
+  background:
+    linear-gradient(135deg,rgba(31,44,57,.92),rgba(13,21,30,.94));
+  box-shadow:0 18px 42px rgba(0,0,0,.23),inset 0 1px rgba(255,255,255,.055);
+}
+.desktop-shell .desktop-date-panel::before,
+.desktop-shell .desktop-system-panel::before {
+  content:"";
+  position:absolute;top:-1px;left:16px;
+  width:42px;height:2px;
+  background:linear-gradient(90deg,#d5a36c,rgba(213,163,108,0));
+}
+.desktop-shell .desktop-date-panel strong {
+  margin:12px 0 5px;
+  font-size:14px;
+  letter-spacing:.02em;
+}
+.desktop-shell .desktop-date-panel time {
+  display:block;
+  font-size:34px;
+  letter-spacing:.07em;
+  text-shadow:0 0 24px rgba(226,179,128,.13);
+}
+.desktop-shell .desktop-system-panel {
+  right:4%;bottom:7%;
+  width:258px;
+  padding:18px 19px 17px;
+  border:1px solid rgba(170,190,205,.18);
+  border-radius:8px;
+  background:linear-gradient(135deg,rgba(29,42,55,.94),rgba(12,20,29,.96));
+  box-shadow:0 18px 42px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.055);
+}
+.desktop-shell .desktop-panel-heading {
+  padding-bottom:12px;
+  font-size:8px;
+  letter-spacing:.16em;
+}
+.desktop-shell .system-status-row {
+  padding:4px 0;
+  border-bottom:1px solid rgba(166,185,200,.07);
+  color:#98a7b3;
+}
+.desktop-shell .system-status-row:last-child { border-bottom:0; }
+.desktop-shell .system-status-row strong { letter-spacing:.08em; }
+.desktop-shell .desktop-case-shortcut {
+  left:34%;top:42%;
+  width:min(390px,39%);
+  min-width:330px;
+  min-height:146px;
+  gap:20px;
+  padding:25px 25px 27px;
+  border:1px solid rgba(218,173,126,.38);
+  border-left:3px solid #d5a36c;
+  border-radius:10px;
+  background:
+    linear-gradient(115deg,rgba(38,49,60,.97),rgba(16,25,35,.97)),
+    #17222d;
+  box-shadow:0 30px 75px rgba(0,0,0,.37),0 0 45px rgba(213,163,108,.045),inset 0 1px rgba(255,255,255,.075);
+  backdrop-filter:blur(16px);
+}
+.desktop-shell .desktop-case-shortcut::before {
+  content:"АКТИВНОЕ РАССЛЕДОВАНИЕ";
+  position:absolute;top:14px;right:17px;
+  color:rgba(211,177,143,.7);
+  font:7px "IBM Plex Mono",monospace;
+  letter-spacing:.15em;
+}
+.desktop-shell .desktop-case-shortcut::after {
+  content:"ОТКРЫТОЕ ДОСЬЕ  ↗";
+  position:absolute;right:18px;bottom:13px;
+  color:#d5a36c;
+  font:7px "IBM Plex Mono",monospace;
+  letter-spacing:.13em;
+}
+.desktop-shell .desktop-case-glyph {
+  width:61px;height:69px;flex-basis:61px;
+  border-radius:7px;
+  background:
+    linear-gradient(145deg,rgba(213,163,108,.19),rgba(72,83,91,.12)),
+    repeating-linear-gradient(0deg,transparent 0 7px,rgba(213,163,108,.05) 7px 8px);
+  box-shadow:inset 0 0 18px rgba(213,163,108,.06);
+  font-size:20px;
+}
+.desktop-shell .desktop-case-shortcut span,
+.desktop-shell .desktop-case-shortcut small {
+  color:#aebac3;
+  font-size:7px;
+  letter-spacing:.16em;
+}
+.desktop-shell .desktop-case-shortcut strong {
+  margin:9px 0 8px;
+  color:#f0f2f3;
+  font-size:16px;
+  line-height:1.25;
+}
+.desktop-shell .desktop-wallpaper-mark {
+  top:22%;right:24%;
+  color:rgba(192,209,222,.035);
+  font-size:clamp(86px,13vw,170px);
+  letter-spacing:.2em;
+  transform:translateX(8%);
+}
+.desktop-shell .desktop-taskbar {
+  min-height:62px;
+  padding:0 27px;
+  border-top:1px solid rgba(169,188,205,.16);
+  background:linear-gradient(90deg,#192430,#0e1721 50%,#1a2632);
+  box-shadow:0 -12px 35px rgba(0,0,0,.13);
+}
+.desktop-shell .taskbar-start {
+  display:flex;align-items:center;
+  color:#e3e9ed;font-size:11px;letter-spacing:.16em;
+}
+.desktop-shell .taskbar-start b {
+  width:29px;height:29px;
+  border-color:rgba(219,174,125,.5);
+  background:linear-gradient(145deg,rgba(213,163,108,.18),rgba(213,163,108,.04));
+  box-shadow:0 0 18px rgba(213,163,108,.06);
+}
+.desktop-shell .taskbar-apps button {
+  padding:9px 13px;
+  border:1px solid rgba(169,188,205,.09);
+  background:rgba(255,255,255,.018);
+}
+.desktop-shell .taskbar-apps button:hover,
+.desktop-shell .taskbar-apps button.is-selected {
+  border-color:rgba(213,163,108,.42);
+  background:rgba(213,163,108,.1);
+}
+.desktop-shell .taskbar-clock {
+  padding:8px 11px;
+  border:1px solid rgba(169,188,205,.12);
+  border-radius:5px;
+  background:rgba(4,9,14,.24);
+}
+.desktop-shell .desktop-area .desktop-window {
+  border:1px solid rgba(174,193,208,.25);
+  border-radius:11px;
+  background:linear-gradient(145deg,rgba(24,35,47,.995),rgba(10,17,25,.998));
+  box-shadow:0 32px 90px rgba(0,0,0,.68),0 0 0 1px rgba(255,255,255,.025);
+}
+.desktop-shell .desktop-area .desktop-window .player-tool-heading {
+  min-height:65px;
+  padding:16px 19px;
+  border-bottom:1px solid rgba(169,188,205,.15);
+  background:linear-gradient(100deg,#253342,#17232f);
+}
+.desktop-shell .desktop-area .desktop-window .player-tool-heading h2 {
+  font-size:20px;
+  letter-spacing:-.025em;
+}
+.desktop-shell .desktop-area .desktop-window .section-kicker {
+  color:#d7aa7a;
+  font-size:8px;
+  letter-spacing:.15em;
+}
+.desktop-shell .desktop-area .desktop-window .window-close {
+  width:30px;height:30px;
+  border-radius:7px;
+  transition:all .18s ease;
+}
+.desktop-shell .desktop-area .desktop-window .window-close:hover {
+  border-color:rgba(211,133,119,.6);
+  background:rgba(146,73,62,.2);
+  color:#f0b0a2;
+}
+.desktop-shell .desktop-icon:focus-visible,
+.desktop-shell .all-cases-button:focus-visible,
+.desktop-shell .taskbar-apps button:focus-visible {
+  outline:2px solid #d7a873;
+  outline-offset:3px;
+}
+@media (max-width:900px) and (min-width:761px) {
+  .desktop-shell .desktop-icons { left:2%;grid-template-columns:repeat(2,94px);width:198px; }
+  .desktop-shell .desktop-icon { min-height:96px;padding:10px; }
+  .desktop-shell .desktop-case-shortcut { left:29%;width:39%;min-width:290px; }
+  .desktop-shell .desktop-date-panel,.desktop-shell .desktop-system-panel { right:2%;width:205px; }
+}
+@media (max-width:760px) {
+  .desktop-shell .desktop-toolbar { min-height:76px; }
+  .desktop-shell .desktop-toolbar::after { left:14px;bottom:5px;font-size:6px; }
+  .desktop-shell .desktop-window-title { padding-bottom:9px;font-size:10px; }
+  .desktop-shell .desktop-area { min-height:850px; }
+  .desktop-shell .desktop-area::after { width:380px;height:380px;right:-70px;top:36%; }
+  .desktop-shell .desktop-icons {
+    left:14px;top:18px;
+    grid-template-columns:repeat(2,minmax(88px,1fr));
+    gap:8px;width:202px;
+  }
+  .desktop-shell .desktop-icon { min-height:88px;padding:9px;gap:7px; }
+  .desktop-shell .desktop-icon-art { width:34px;height:34px;flex-basis:34px; }
+  .desktop-shell .desktop-icon .icon-caption { font-size:9px;min-height:23px; }
+  .desktop-shell .desktop-date-panel {
+    top:18px;right:14px;width:calc(100% - 232px);
+    min-width:110px;padding:12px 10px;
+  }
+  .desktop-shell .desktop-date-panel time { font-size:23px; }
+  .desktop-shell .desktop-date-panel strong { font-size:10px; }
+  .desktop-shell .desktop-case-shortcut {
+    left:14px;top:355px;width:calc(100% - 28px);min-width:0;
+    min-height:132px;padding:22px 17px 27px;
+  }
+  .desktop-shell .desktop-case-shortcut::before { font-size:6px;right:12px; }
+  .desktop-shell .desktop-case-shortcut::after { right:12px; }
+  .desktop-shell .desktop-case-shortcut strong { font-size:14px; }
+  .desktop-shell .desktop-system-panel { right:14px;bottom:18px;width:calc(100% - 28px); }
+  .desktop-shell .desktop-help-shortcut { left:14px;bottom:168px;width:94px; }
+  .desktop-shell .desktop-wallpaper-mark { top:55%;right:3%;font-size:52px; }
+  .desktop-shell .desktop-taskbar { min-height:60px;padding:10px 13px; }
+}
+@media (max-width:420px) {
+  .desktop-shell .desktop-area { min-height:900px; }
+  .desktop-shell .desktop-icons { width:188px;grid-template-columns:repeat(2,minmax(80px,1fr)); }
+  .desktop-shell .desktop-date-panel { width:calc(100% - 215px);right:10px;padding:9px 7px; }
+  .desktop-shell .desktop-date-panel time { font-size:19px; }
+  .desktop-shell .desktop-case-shortcut { top:350px; }
+  .desktop-shell .desktop-case-glyph { width:48px;height:56px;flex-basis:48px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .desktop-shell .desktop-icon,
+  .desktop-shell .desktop-area .desktop-window .window-close { transition:none; }
+}

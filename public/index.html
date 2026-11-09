@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=mail-client-10">
+  <link rel="stylesheet" href="/styles.css?v=mail-client-11">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -903,6 +903,16 @@
             return false;
           }).filter(item => [item.sender_name,item.sender_address,item.title].join(" ").toLocaleLowerCase("ru").includes(query));
           visibleEmails.sort((a,b) => new Date(b.sent_at || b.created_at || 0) - new Date(a.sent_at || a.created_at || 0));
+          if (!readerMode) {
+            const columns = document.createElement("div");
+            columns.className = "mail-list-columns";
+            const senderHeading = document.createElement("span");
+            senderHeading.textContent = "Отправитель";
+            const dateHeading = document.createElement("span");
+            dateHeading.textContent = "Дата и время";
+            columns.append(document.createElement("span"), senderHeading, dateHeading, document.createElement("span"));
+            list.append(columns);
+          }
           if (readerMode) {
             const item = visibleEmails.find(entry => entry.id === selectedMailId);
             if (!item) { readerMode = false; }

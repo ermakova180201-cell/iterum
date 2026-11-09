@@ -6411,6 +6411,23 @@ body.is-workstation #mail-window .mail-folder-button b { margin-left:2px; }
 }
 
 
+
+/* Before a message is opened, keep the inbox and preview pane balanced */
+body.is-workstation #mail-window .mail-client-content:not(.is-reading) {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  width:100%;
+  min-width:0;
+}
+body.is-workstation #mail-window .mail-client-content:not(.is-reading) .mail-reader {
+  display:block;
+  grid-column:2;
+  width:100%;
+  min-width:0;
+  max-width:none;
+  box-sizing:border-box;
+}
+
 /* Message reading pane must use the full available mailbox width */
 body.is-workstation #mail-window .mail-client-content.is-reading {
   display:grid;

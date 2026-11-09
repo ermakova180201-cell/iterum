@@ -965,11 +965,8 @@
               return;
             }
           }
-          const heading = document.createElement("div"); heading.className = "mail-list-heading";
-          heading.innerHTML = '<strong></strong><span></span>';
-          heading.querySelector("strong").textContent = folderDefinitions.find(x=>x[0]===currentFolder)[2];
-          heading.querySelector("span").textContent = visibleEmails.length + " писем";
           if (currentFolder === "trash" && visibleEmails.length) {
+            const heading = document.createElement("div"); heading.className = "mail-list-heading";
             const clearTrash = document.createElement("button");
             clearTrash.type = "button";
             clearTrash.className = "mail-clear-trash";
@@ -985,8 +982,8 @@
               }
             });
             heading.append(clearTrash);
+            list.append(heading);
           }
-          list.append(heading);
           visibleEmails.forEach(item => {
             const row = document.createElement("div");
             row.className = "mail-inbox-entry" + (!item.is_read ? " is-unread" : "");

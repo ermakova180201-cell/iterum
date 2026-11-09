@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=account-header-01">
+  <link rel="stylesheet" href="/styles.css?v=ambient-player-01">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -232,6 +232,11 @@
               <button type="button" data-open-window="search-window" title="Поиск данных">⌕ <span>Поиск</span></button>
               <button type="button" data-open-window="materials-window" title="Материалы дела">▤ <span>Архив</span></button>
             </nav>
+            <div class="ambient-player" aria-label="Атмосферная музыка ITERUM">
+              <button type="button" id="ambient-toggle" class="ambient-toggle" aria-pressed="false" title="Включить атмосферу"><span class="ambient-play-symbol">▶</span><span id="ambient-state">АТМОСФЕРА ВЫКЛ.</span></button>
+              <label class="ambient-volume-label" for="ambient-volume">ГРОМКОСТЬ</label>
+              <input id="ambient-volume" class="ambient-volume" type="range" min="0" max="100" value="24" aria-label="Громкость фоновой атмосферы">
+            </div>
             <span class="taskbar-clock" id="desktop-clock">ЛОКАЛЬНАЯ СИСТЕМА</span>
           </div>
         </div>
@@ -1557,6 +1562,57 @@
       // Ручной запуск через кнопку тестирования и сама головоломка сохранены.
       window.iterumSystemLock={noteAppOpen(){}};
       window.iterumSystemLock.lockNow=lock;
+    })();
+  </script>
+
+
+  <script>
+    (() => {
+      const toggle=document.getElementById("ambient-toggle");
+      const volume=document.getElementById("ambient-volume");
+      const state=document.getElementById("ambient-state");
+      if(!toggle||!volume||!state)return;
+      let context=null,master=null,voices=[],playing=false;
+      function createAtmosphere(){
+        const AudioCtx=window.AudioContext||window.webkitAudioContext;
+        if(!AudioCtx)return false;
+        context=new AudioCtx();
+        master=context.createGain();
+        master.gain.value=0;
+        master.connect(context.destination);
+        const frequencies=[55,82.41,110,164.81];
+        frequencies.forEach((frequency,index)=>{
+          const osc=context.createOscillator(),gain=context.createGain(),lfo=context.createOscillator(),lfoGain=context.createGain();
+          osc.type=index===2?"triangle":"sine";
+          osc.frequency.value=frequency;
+          gain.gain.value=[.16,.085,.035,.018][index];
+          lfo.type="sine";
+          lfo.frequency.value=[.055,.037,.023,.017][index];
+          lfoGain.gain.value=[.045,.025,.012,.008][index];
+          lfo.connect(lfoGain);lfoGain.connect(gain.gain);
+          osc.connect(gain);gain.connect(master);
+          osc.start();lfo.start();
+          voices.push(osc,lfo);
+        });
+        const length=context.sampleRate*4,buffer=context.createBuffer(1,length,context.sampleRate),data=buffer.getChannelData(0);
+        let last=0;
+        for(let i=0;i<length;i++){last=last*.985+(Math.random()*2-1)*.015;data[i]=last*2.8;}
+        const noise=context.createBufferSource(),filter=context.createBiquadFilter(),noiseGain=context.createGain();
+        noise.buffer=buffer;noise.loop=true;filter.type="lowpass";filter.frequency.value=260;filter.Q.value=.45;
+        noiseGain.gain.value=.13;noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);noise.start();voices.push(noise);
+        return true;
+      }
+      function setVolume(){if(master&&context)master.gain.setTargetAtTime(Number(volume.value)/100*.22,context.currentTime,.18);}
+      toggle.addEventListener("click",async()=>{
+        if(!context&&!createAtmosphere()){state.textContent="АУДИО НЕДОСТУПНО";return;}
+        if(!playing){
+          try{await context.resume();playing=true;setVolume();toggle.setAttribute("aria-pressed","true");toggle.title="Выключить атмосферу";toggle.querySelector(".ambient-play-symbol").textContent="Ⅱ";state.textContent="АТМОСФЕРА ВКЛ.";}
+          catch{state.textContent="АУДИО НЕДОСТУПНО";}
+        }else{
+          playing=false;master.gain.setTargetAtTime(0,context.currentTime,.2);toggle.setAttribute("aria-pressed","false");toggle.title="Включить атмосферу";toggle.querySelector(".ambient-play-symbol").textContent="▶";state.textContent="АТМОСФЕРА ВЫКЛ.";
+        }
+      });
+      volume.addEventListener("input",()=>{if(playing)setVolume();});
     })();
   </script>
 

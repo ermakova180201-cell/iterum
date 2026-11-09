@@ -1054,6 +1054,19 @@
       materialTrigger.disabled = deliveryMode.value !== "triggered" || available.length === 0;
     }
 
+    async function deleteDraftMaterial(id, title) {
+      const confirmed = window.confirm("Удалить черновик «" + title + "»?\n\nМатериал и прикреплённые к нему файлы будут удалены без возможности восстановления.");
+      if (!confirmed) return;
+      try {
+        await adminRequest("/api/admin/materials/" + encodeURIComponent(id), { method: "DELETE" });
+        showAdminMessage(materialMessage, "Черновик «" + title + "» удалён.");
+        await loadAdminOverview();
+        await loadPlayerArchive();
+      } catch (error) {
+        showAdminMessage(materialMessage, error.message, true);
+      }
+    }
+
     async function loadAdminOverview() {
       try {
         const data = await adminRequest("/api/admin/overview");
@@ -1146,6 +1159,14 @@
             publish.textContent = item.is_published ? "СНЯТЬ С ПУБЛИКАЦИИ" : "ОПУБЛИКОВАТЬ";
             publish.addEventListener("click", () => setMaterialPublished(item.id, !item.is_published));
             actions.append(edit, publish);
+            if (!item.is_published) {
+              const remove = document.createElement("button");
+              remove.type = "button";
+              remove.className = "admin-mini-button admin-delete-draft";
+              remove.textContent = "УДАЛИТЬ ЧЕРНОВИК";
+              remove.addEventListener("click", () => deleteDraftMaterial(item.id, item.title));
+              actions.append(remove);
+            }
             card.append(info, actions);
             adminMaterialList.append(card);
           }

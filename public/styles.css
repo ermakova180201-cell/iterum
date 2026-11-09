@@ -6163,3 +6163,36 @@ body.is-workstation .desktop-shell #mail-window .mail-reader-placeholder p {marg
   body.is-workstation .desktop-shell #mail-window .mail-refresh-button {font-size:0;}
   body.is-workstation .desktop-shell #mail-window .mail-refresh-button > span {font-size:17px;}
 }
+
+
+/* Mail layout fix: the new client is a single full-width child, not a second
+   two-column archive grid. The old archive grid was constraining it to one cell. */
+body.is-workstation #mail-window .player-mail-list {
+  display:block !important;
+  width:100%;
+  min-width:0;
+  grid-template-columns:none !important;
+}
+body.is-workstation #mail-window .mail-client {
+  display:block;
+  width:100%;
+  min-width:0;
+}
+body.is-workstation #mail-window .mail-client-layout,
+body.is-workstation #mail-window .mail-client-content,
+body.is-workstation #mail-window .mail-reader {
+  min-width:0;
+}
+body.is-workstation #mail-window .mail-client-content {
+  grid-template-columns:minmax(190px,.78fr) minmax(0,1.55fr);
+}
+body.is-workstation #mail-window .mail-reader-subject,
+body.is-workstation #mail-window .mail-reader-body {
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+@media(max-width:820px) {
+  body.is-workstation #mail-window .mail-client-content {
+    grid-template-columns:minmax(0,1fr);
+  }
+}

@@ -6479,3 +6479,31 @@ body.is-workstation #mail-window .mail-client-content:not(.is-reading) .mail-inb
 body.is-workstation #mail-window .mail-client-content:not(.is-reading) .mail-reader {
   display:none;
 }
+
+
+/* ITERUM MAIL: remove redundant controls and use a balanced checkmark */
+body.is-workstation .desktop-shell #mail-window .mail-refresh-button { display:none !important; }
+body.is-workstation #mail-window .mail-more-button { display:none !important; }
+body.is-workstation #mail-window .mail-open-check {
+  position:relative;
+  color:transparent !important;
+  font-size:0 !important;
+  border:0 !important;
+  background:transparent !important;
+  width:30px;
+  height:30px;
+  padding:0;
+}
+body.is-workstation #mail-window .mail-open-check::before {
+  content:"";
+  display:block;
+  width:8px;
+  height:14px;
+  border-right:2px solid #c9b184;
+  border-bottom:2px solid #c9b184;
+  transform:rotate(45deg) translate(-1px,-1px);
+  transform-origin:center;
+}
+body.is-workstation #mail-window .mail-open-check:hover::before {
+  border-color:#f0dfc0;
+}

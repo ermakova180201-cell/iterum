@@ -1103,38 +1103,60 @@
       assistantGhost.setAttribute("aria-label", "Системный помощник ITERUM: " + mood);
     }
 
-    // The ghost occasionally visits visible mail folders and comments on them.
-    const ghostFolderVisits = [
-      { key:"sent", phrase:"В «Отправленных» пока спокойно. Никто никому не пишет… подозрительно.", mood:"curious" },
-      { key:"spam", phrase:"Спам. Даже привидению иногда приходят странные предложения.", mood:"grumpy" },
-      { key:"trash", phrase:"Корзина… Надеюсь, там нет чего-то действительно важного.", mood:"thinking" }
+    // The ghost occasionally visits desktop app icons and comments on them.
+    const ghostAppVisits = [
+      { key:"mail-window", phrase:"Почта! Люблю письма. Особенно те, где нет счетов за электричество.", mood:"happy" },
+      { key:"search-window", phrase:"Поиск данных… Сейчас найдём что-нибудь любопытное. Или хотя бы опечатку.", mood:"curious" },
+      { key:"materials-window", phrase:"Материалы дела. Бумаги, документы… У вас, людей, столько всего хранится.", mood:"thinking" },
+      { key:"news-window", phrase:"Новости? Надеюсь, сегодня без сенсаций про привидений.", mood:"surprised" },
+      { key:"help-window", phrase:"Помощь? Эй, это моя работа! Хотя иногда и мне нужна помощь.", mood:"happy" }
     ];
-    let ghostFolderVisitIndex = 0;
-    let ghostFolderVisitTimer = null;
-    function visitMailFolder() {
-      if (!assistantChat.hidden) return;
+    let ghostAppVisitIndex = 0;
+    let ghostAppVisitTimer = null;
+    function visitDesktopApp() {
+      if (!assistantChat.hidden || assistantGhost.classList.contains("is-sleeping")) return;
       const area = document.querySelector(".desktop-area");
-      const folder = document.querySelector(".mail-folder-button:nth-child(" + (ghostFolderVisitIndex + 1) + ")");
-      if (!area || !folder || !folder.getClientRects().length) return;
+      const icons = [...document.querySelectorAll(".desktop-icons [data-open-window], .desktop-help-shortcut[data-open-window]")];
+      if (!area || !icons.length) return;
       const areaRect = area.getBoundingClientRect();
-      const folderRect = folder.getBoundingClientRect();
-      if (areaRect.width < 1 || areaRect.height < 1) return;
-      const left = Math.max(48, Math.min(areaRect.width - 48, folderRect.left + folderRect.width / 2 - areaRect.left));
-      const top = Math.max(58, Math.min(areaRect.height - 58, folderRect.top + folderRect.height / 2 - areaRect.top));
-      const visit = ghostFolderVisits[ghostFolderVisitIndex];
-      ghostFolderVisitIndex = (ghostFolderVisitIndex + 1) % ghostFolderVisits.length;
-      assistantGhost.classList.add("is-visiting-folder");
+      const icon = icons[ghostAppVisitIndex % icons.length];
+      ghostAppVisitIndex = (ghostAppVisitIndex + 1) % icons.length;
+      const iconRect = icon.getBoundingClientRect();
+      if (!iconRect.width || !iconRect.height || !areaRect.width || !areaRect.height) return;
+      const left = Math.max(48, Math.min(areaRect.width - 48, iconRect.left + iconRect.width / 2 - areaRect.left));
+      const top = Math.max(58, Math.min(areaRect.height - 58, iconRect.top + iconRect.height / 2 - areaRect.top));
+      const visit = ghostAppVisits.find(item => item.key === icon.dataset.openWindow);
+      if (!visit) return;
+      assistantGhost.classList.add("is-visiting-app");
       assistantGhost.style.left = left + "px";
       assistantGhost.style.top = top + "px";
       setAssistantMood(visit.mood, visit.phrase);
       window.clearTimeout(assistantGhost._visitReturnTimer);
       assistantGhost._visitReturnTimer = window.setTimeout(() => {
-        assistantGhost.classList.remove("is-visiting-folder");
+        assistantGhost.classList.remove("is-visiting-app");
         assistantGhost.style.removeProperty("left");
         assistantGhost.style.removeProperty("top");
-      }, 3400);
+      }, 4300);
     }
-    if (!ghostFolderVisitTimer) ghostFolderVisitTimer = window.setInterval(visitMailFolder, 10500);
+    if (!ghostAppVisitTimer) ghostAppVisitTimer = window.setInterval(visitDesktopApp, 11500);
+
+    // Every now and then the little assistant takes a short nap.
+    let ghostNapTimer = null;
+    function scheduleGhostNap() {
+      window.clearTimeout(ghostNapTimer);
+      ghostNapTimer = window.setTimeout(() => {
+        if (assistantChat.hidden && !assistantGhost.classList.contains("is-visiting-app")) {
+          setAssistantMood("sleepy", "Тс-с… кажется, я на минутку…");
+          assistantGhost.classList.add("is-sleeping");
+          assistantGhost._napWakeTimer = window.setTimeout(() => {
+            assistantGhost.classList.remove("is-sleeping");
+            setAssistantMood("curious", "Ой! Я не уснул. Просто… моргал подольше.");
+          }, 7200);
+        }
+        scheduleGhostNap();
+      }, 32000 + Math.random() * 26000);
+    }
+    scheduleGhostNap();
     function assistantSay(text, mood="happy", userText="") {
       assistantChatBody.replaceChildren();
       if (userText) {

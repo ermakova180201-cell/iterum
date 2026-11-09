@@ -6797,23 +6797,72 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-
 }
 
 
-/* ITERUM ghost assistant — gentle mail-folder visits */
-body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-folder {
+/* ITERUM ghost assistant — visits app icons and takes occasional naps */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-app {
   z-index:15;
   animation:none!important;
   pointer-events:none;
   transition:left 2.1s cubic-bezier(.2,.75,.25,1),top 2.1s cubic-bezier(.2,.75,.25,1),filter .3s ease;
   filter:drop-shadow(0 0 13px rgba(151,244,255,.75));
 }
-body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-folder .iterum-ghost-body {
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-app .iterum-ghost-body {
   animation:ghostHappyBob 1.8s ease-in-out infinite;
 }
-body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-folder .iterum-ghost-message {
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-app .iterum-ghost-message {
   opacity:1;
   transform:translate(-50%,-5px);
 }
+body.is-workstation .desktop-shell .iterum-ghost-sleep-z {
+  position:absolute;
+  z-index:5;
+  right:-9px;
+  top:-3px;
+  color:#d9fbff;
+  font:700 12px/1 "Space Grotesk",sans-serif;
+  letter-spacing:.03em;
+  text-shadow:0 0 7px rgba(126,232,245,.9),0 0 15px rgba(126,232,245,.6);
+  opacity:0;
+  transform:translate(0,7px) scale(.75);
+  pointer-events:none;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping {
+  animation:none!important;
+  filter:drop-shadow(0 0 8px rgba(112,193,216,.35));
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-body {
+  animation:ghostSleepyFloat 4.8s ease-in-out infinite!important;
+  transform:translateY(6px) scale(.94);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-eyes i {
+  height:1px!important;
+  transform:scaleY(.08) translateY(4px)!important;
+  opacity:.8;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-mouth {
+  opacity:.35;
+  transform:scaleX(.7);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-sleep-z {
+  opacity:1;
+  animation:ghostSleepZ 1.8s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-message {
+  opacity:1;
+  transform:translate(-50%,-5px);
+}
+@keyframes ghostSleepZ {
+  0% {opacity:0;transform:translate(0,7px) scale(.75);}
+  25% {opacity:1;}
+  100% {opacity:0;transform:translate(9px,-13px) scale(1.12);}
+}
 @media(prefers-reduced-motion:reduce) {
-  body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-folder {
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-app,
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-body,
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-sleep-z {
     transition:none!important;
+    animation:none!important;
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-sleep-z {
+    opacity:1;
   }
 }

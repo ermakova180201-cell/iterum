@@ -6830,7 +6830,7 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping {
   filter:drop-shadow(0 0 8px rgba(112,193,216,.35));
 }
 body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-body {
-  animation:ghostSleepyFloat 4.8s ease-in-out infinite!important;
+  animation:none!important;
   transform:translateY(6px) scale(.94);
 }
 body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-eyes i {

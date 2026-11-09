@@ -6008,3 +6008,16 @@ body.is-workstation .desktop-icon .desktop-mail-badge {
 body.is-workstation .desktop-icon .desktop-mail-badge[hidden] {
   display: none !important;
 }
+
+
+/* Admin draft deletion action */
+.admin-mini-button.admin-delete-draft {
+  border-color: rgba(166,91,82,.55);
+  color: #d59a91;
+  background: rgba(88,35,31,.2);
+}
+.admin-mini-button.admin-delete-draft:hover {
+  border-color: #b66d63;
+  color: #f0c2b9;
+  background: rgba(110,43,37,.35);
+}

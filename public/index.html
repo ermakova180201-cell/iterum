@@ -420,6 +420,7 @@
     const openedMailIds = new Set();
     let selectedMailId = null;
     const knownMailIds = new Set();
+    const initialMailNotifiedCases = new Set();
     let mailBaselineReady = false;
     let mailPollingTimer = null;
     let mailPollInFlight = false;
@@ -714,6 +715,17 @@
       const unreadEmails = emails.filter(item => !item.is_read).length;
       playerMailCount.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
       updateMailBadge();
+      if (unreadEmails > 0 && !initialMailNotifiedCases.has(caseId)) {
+        initialMailNotifiedCases.add(caseId);
+        playMailNotificationSound();
+        const toast = document.getElementById("desktop-notice-toast");
+        if (toast) {
+          toast.textContent = unreadEmails === 1 ? "Новое письмо в папке «Почта»" : "Непрочитанных писем: " + unreadEmails;
+          toast.hidden = false;
+          window.clearTimeout(toast._mailNoticeTimer);
+          toast._mailNoticeTimer = window.setTimeout(() => { toast.hidden = true; }, 4800);
+        }
+      }
       if (!emails.length) {
         selectedMailId = null;
         const empty = document.createElement("p");

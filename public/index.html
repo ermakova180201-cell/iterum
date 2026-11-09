@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=mail-client-02">
+  <link rel="stylesheet" href="/styles.css?v=mail-client-03">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -805,7 +805,7 @@
         const storyAds = [
           {brand:"НАУЧНЫЙ ЦЕНТР «КОНТУР»",title:"Исследования нового поколения",copy:"Современные методы анализа и обработки данных.",mark:"К",story:true}
         ];
-        const availableAds = emails.length >= 2 ? [...ordinaryAds, ...storyAds] : ordinaryAds;
+        const availableAds = [...ordinaryAds, ...storyAds];
         let previousAdIndex = -1;
         let currentAd = ordinaryAds[0];
         function chooseAd() {
@@ -954,6 +954,23 @@
           heading.innerHTML = '<strong></strong><span></span>';
           heading.querySelector("strong").textContent = folderDefinitions.find(x=>x[0]===currentFolder)[2];
           heading.querySelector("span").textContent = visibleEmails.length + " писем";
+          if (currentFolder === "trash" && visibleEmails.length) {
+            const clearTrash = document.createElement("button");
+            clearTrash.type = "button";
+            clearTrash.className = "mail-clear-trash";
+            clearTrash.textContent = "Очистить корзину";
+            clearTrash.addEventListener("click", () => {
+              if (window.confirm("Удалить все письма из корзины навсегда? Восстановить их будет невозможно.")) {
+                const removed = getIds("trash");
+                setIds("deleted", [...getIds("deleted"), ...removed]);
+                setIds("trash", []);
+                setIds("spam", getIds("spam").filter(id => !removed.includes(id)));
+                readerMode = false;
+                renderMailClient();
+              }
+            });
+            heading.append(clearTrash);
+          }
           list.append(heading);
           visibleEmails.forEach(item => {
             const row = document.createElement("div");

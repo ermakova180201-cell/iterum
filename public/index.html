@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=mail-client-12">
+  <link rel="stylesheet" href="/styles.css?v=mail-client-13">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -736,7 +736,13 @@
         toolbar.className = "mail-client-toolbar";
         const brand = document.createElement("div");
         brand.className = "mail-brand";
+        brand.setAttribute("role","button");
+        brand.setAttribute("tabindex","0");
+        brand.setAttribute("aria-label","Вернуться во входящие");
         brand.innerHTML = '<strong>ITERUM</strong><span>MAIL</span>';
+        const goToInbox = () => { currentFolder = "inbox"; mailFolderFilter = "inbox"; readerMode = false; renderMailClient(); };
+        brand.addEventListener("click", goToInbox);
+        brand.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); goToInbox(); } });
         const searchWrap = document.createElement("label");
         searchWrap.className = "mail-search-wrap";
         searchWrap.innerHTML = '<span aria-hidden="true">⌕</span>';
@@ -758,7 +764,6 @@
         folders.className = "mail-folder-nav";
         folders.setAttribute("aria-label", "Папки почты");
         const folderDefinitions = [
-          ["inbox","▣","Входящие"],
           ["sent","↗","Отправленные"],
           ["spam","⚑","Спам"],
           ["trash","▤","Корзина"]
@@ -914,7 +919,7 @@
             spacer.setAttribute("aria-hidden","true");
             senderHeading.className = "mail-column-sender";
             dateHeading.className = "mail-column-date";
-            columns.append(spacer, senderHeading, dateHeading, document.createElement("span"));
+            columns.append(senderHeading, dateHeading, spacer);
             list.append(columns);
           }
           if (readerMode) {
@@ -980,17 +985,19 @@
           visibleEmails.forEach(item => {
             const row = document.createElement("div");
             row.className = "mail-inbox-entry" + (!item.is_read ? " is-unread" : "");
-            const dot = document.createElement("span"); dot.className = "mail-unread-dot"; dot.setAttribute("aria-hidden","true");
             const details = document.createElement("div"); details.className = "mail-entry-details";
             const sender = document.createElement("span"); sender.className = "mail-entry-sender"; sender.textContent = item.sender_name || "Неизвестный отправитель";
+            const subjectLine = document.createElement("div"); subjectLine.className = "mail-entry-subject";
+            const dot = document.createElement("span"); dot.className = "mail-unread-dot"; dot.setAttribute("aria-hidden","true");
             const subject = document.createElement("strong"); subject.textContent = item.title || "Без темы";
-            details.append(sender,subject);
+            subjectLine.append(dot,subject);
+            details.append(sender,subjectLine);
             const date = document.createElement("time"); date.textContent = item.sent_at || item.created_at || "";
             const actions = document.createElement("div"); actions.className = "mail-row-actions";
             const open = document.createElement("button"); open.type = "button"; open.className = "mail-open-check"; open.setAttribute("aria-label","Открыть письмо"); open.textContent = "✓";
             open.addEventListener("click", event => { event.stopPropagation(); openMessage(item); });
             actions.append(open);
-            row.append(dot,details,date,actions);
+            row.append(details,date,actions);
             row.addEventListener("click", () => openMessage(item));
             list.append(row);
           });

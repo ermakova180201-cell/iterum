@@ -728,24 +728,21 @@
           toast._mailNoticeTimer = window.setTimeout(() => { toast.hidden = true; }, 4800);
         }
       }
-      if (!emails.length) {
-        selectedMailId = null;
-        const empty = document.createElement("div");
-        empty.className = "mail-empty-state";
-        empty.innerHTML = '<span class="mail-empty-icon">✉</span><strong>Входящих писем пока нет</strong><p>Новые сообщения по делу появятся здесь.</p>';
-        playerMailList.append(empty);
-      } else {
-        if (!emails.some(item => item.id === selectedMailId)) selectedMailId = emails[0].id;
+      {
         const client = document.createElement("div");
         client.className = "mail-client";
+        const accountEmail = document.getElementById("desktop-account-name")?.textContent || memberEmail.textContent || "—";
         const toolbar = document.createElement("div");
         toolbar.className = "mail-client-toolbar";
+        const brand = document.createElement("div");
+        brand.className = "mail-brand";
+        brand.innerHTML = '<strong>ITERUM</strong><span>MAIL</span>';
         const searchWrap = document.createElement("label");
         searchWrap.className = "mail-search-wrap";
         searchWrap.innerHTML = '<span aria-hidden="true">⌕</span>';
         const search = document.createElement("input");
         search.type = "search";
-        search.placeholder = "Поиск во входящих";
+        search.placeholder = "Поиск по отправителю и теме";
         search.setAttribute("aria-label", "Поиск писем по отправителю и теме");
         search.value = mailSearchQuery;
         search.addEventListener("input", () => { mailSearchQuery = search.value; renderMailClient(); });
@@ -753,100 +750,286 @@
         const refresh = document.createElement("button");
         refresh.type = "button";
         refresh.className = "mail-refresh-button";
-        refresh.innerHTML = '<span aria-hidden="true">↻</span> Обновить';
+        refresh.innerHTML = '<span aria-hidden="true">↻</span><span>Обновить</span>';
         refresh.addEventListener("click", async () => {
           refresh.disabled = true;
-          refresh.classList.add("is-refreshing");
           await loadPlayerArchive();
           openCase(caseId);
         });
-        toolbar.append(searchWrap, refresh);
+        const account = document.createElement("div");
+        account.className = "mail-account-email";
+        account.textContent = accountEmail;
+        toolbar.append(brand, searchWrap, refresh, account);
+
         const layout = document.createElement("div");
         layout.className = "mail-client-layout";
         const folders = document.createElement("nav");
         folders.className = "mail-folder-nav";
         folders.setAttribute("aria-label", "Папки почты");
-        const inboxButton = document.createElement("button");
-        inboxButton.type = "button";
-        inboxButton.className = "mail-folder-button" + (mailFolderFilter === "all" ? " is-active" : "");
-        inboxButton.innerHTML = '<span><i aria-hidden="true">▣</i> Входящие</span><b>' + emails.length + '</b>';
-        inboxButton.addEventListener("click", () => { mailFolderFilter = "all"; renderMailClient(); });
-        const unreadButton = document.createElement("button");
-        unreadButton.type = "button";
-        unreadButton.className = "mail-folder-button" + (mailFolderFilter === "unread" ? " is-active" : "");
-        unreadButton.innerHTML = '<span><i aria-hidden="true">●</i> Непрочитанные</span><b>' + unreadEmails + '</b>';
-        unreadButton.addEventListener("click", () => { mailFolderFilter = "unread"; renderMailClient(); });
-        folders.append(inboxButton, unreadButton);
+        const folderDefinitions = [
+          ["inbox","▣","Входящие"],
+          ["sent","↗","Отправленные"],
+          ["spam","⚑","Спам"],
+          ["trash","▤","Корзина"]
+        ];
+        const accountKey = "iterum-mail-folders:" + (memberEmail.textContent || "guest") + ":" + caseId;
+        let folderState = {};
+        try { folderState = JSON.parse(localStorage.getItem(accountKey) || "{}") || {}; } catch {}
+        const getIds = key => Array.isArray(folderState[key]) ? folderState[key] : [];
+        const setIds = (key, ids) => { folderState[key] = [...new Set(ids)]; try { localStorage.setItem(accountKey, JSON.stringify(folderState)); } catch {} };
+        let currentFolder = mailFolderFilter === "unread" ? "inbox" : (["inbox","sent","spam","trash"].includes(mailFolderFilter) ? mailFolderFilter : "inbox");
+        let readerMode = false;
+        let activeAttachmentIndex = 0;
+        let activeAttachmentFiles = [];
+        let activeObjectUrl = null;
+
         const content = document.createElement("div");
         content.className = "mail-client-content";
         const list = document.createElement("div");
         list.className = "mail-inbox-list";
         const reader = document.createElement("article");
         reader.className = "mail-reader";
+        const adColumn = document.createElement("aside");
+        adColumn.className = "mail-ad-column";
+        const adLabel = document.createElement("div");
+        adLabel.className = "mail-ad-label";
+        adLabel.textContent = "РЕКЛАМА";
+        const adCard = document.createElement("button");
+        adCard.type = "button";
+        adCard.className = "mail-ad-card";
+        const ordinaryAds = [
+          {brand:"SECURELINE",title:"Защитите свои данные",copy:"Решения для защиты корпоративной информации.",mark:"◇"},
+          {brand:"NORTHBANK",title:"Финансы под контролем",copy:"Современные инструменты для управления средствами.",mark:"N"},
+          {brand:"TECHNOVA",title:"Технологии для работы",copy:"Оборудование и программные решения для бизнеса.",mark:"T"}
+        ];
+        const storyAds = [
+          {brand:"НАУЧНЫЙ ЦЕНТР «КОНТУР»",title:"Исследования нового поколения",copy:"Современные методы анализа и обработки данных.",mark:"К",story:true}
+        ];
+        const availableAds = emails.length >= 2 ? [...ordinaryAds, ...storyAds] : ordinaryAds;
+        let previousAdIndex = -1;
+        let currentAd = ordinaryAds[0];
+        function chooseAd() {
+          let index = Math.floor(Math.random() * availableAds.length);
+          if (availableAds.length > 1 && index === previousAdIndex) index = (index + 1) % availableAds.length;
+          previousAdIndex = index;
+          currentAd = availableAds[index];
+          adCard.innerHTML = '<span class="mail-ad-mark"></span><span class="mail-ad-brand"></span><strong class="mail-ad-title"></strong><span class="mail-ad-copy"></span><span class="mail-ad-more">Подробнее →</span>';
+          adCard.querySelector(".mail-ad-mark").textContent = currentAd.mark;
+          adCard.querySelector(".mail-ad-brand").textContent = currentAd.brand;
+          adCard.querySelector(".mail-ad-title").textContent = currentAd.title;
+          adCard.querySelector(".mail-ad-copy").textContent = currentAd.copy;
+          adCard.classList.toggle("is-story-ad", !!currentAd.story);
+        }
+        chooseAd();
+        adCard.addEventListener("click", () => {
+          const dialog = document.createElement("div");
+          dialog.className = "mail-ad-dialog";
+          dialog.setAttribute("role","dialog");
+          dialog.setAttribute("aria-modal","true");
+          dialog.innerHTML = '<div class="mail-ad-dialog-panel"><button type="button" class="mail-ad-dialog-close" aria-label="Закрыть">×</button><span class="mail-ad-dialog-kicker">ИНФОРМАЦИЯ ОБ ОРГАНИЗАЦИИ</span><h3></h3><strong></strong><p></p><span class="mail-ad-dialog-foot">Рекламное объявление</span></div>';
+          dialog.querySelector("h3").textContent = currentAd.brand;
+          dialog.querySelector("strong").textContent = currentAd.title;
+          dialog.querySelector("p").textContent = currentAd.copy;
+          const close = () => dialog.remove();
+          dialog.querySelector("button").addEventListener("click", close);
+          dialog.addEventListener("click", event => { if (event.target === dialog) close(); });
+          document.addEventListener("keydown", function esc(event) { if (event.key === "Escape") { close(); document.removeEventListener("keydown", esc); } }, {once:true});
+          client.append(dialog);
+        });
+        adColumn.append(adLabel, adCard);
+
+        const menuFor = (item, anchor) => {
+          client.querySelectorAll(".mail-row-menu").forEach(node => node.remove());
+          const menu = document.createElement("div");
+          menu.className = "mail-row-menu";
+          const addAction = (label, action) => {
+            const button = document.createElement("button");
+            button.type = "button"; button.textContent = label;
+            button.addEventListener("click", () => { action(); menu.remove(); renderMailClient(); });
+            menu.append(button);
+          };
+          addAction(item.is_read ? "Пометить непрочитанным" : "Пометить прочитанным", () => {
+            if (item.is_read) item.is_read = 0;
+            else item.is_read = 1;
+            if (item.is_read) markMaterialRead(item.id).catch(()=>{});
+            else { openedMailIds.delete(item.id); }
+          });
+          if (currentFolder !== "spam" && currentFolder !== "trash") {
+            addAction("Переместить в спам", () => setIds("spam", [...getIds("spam"), item.id]));
+          } else if (currentFolder === "spam") {
+            addAction("Вернуть во входящие", () => setIds("spam", getIds("spam").filter(id => id !== item.id)));
+          }
+          if (currentFolder !== "trash") {
+            addAction("Переместить в корзину", () => setIds("trash", [...getIds("trash"), item.id]));
+          } else {
+            addAction("Восстановить", () => setIds("trash", getIds("trash").filter(id => id !== item.id)));
+            addAction("Удалить навсегда", () => {
+              if (window.confirm("Удалить это письмо навсегда? Восстановить его будет невозможно.")) {
+                setIds("trash", getIds("trash").filter(id => id !== item.id));
+                setIds("spam", getIds("spam").filter(id => id !== item.id));
+                setIds("deleted", [...getIds("deleted"), item.id]);
+              }
+            });
+          }
+          anchor.parentElement.append(menu);
+        };
+
+        function showList() { readerMode = false; renderMailClient(); }
+        async function openMessage(item) {
+          selectedMailId = item.id;
+          readerMode = true;
+          if (!item.is_read) {
+            try { await markMaterialRead(item.id); item.is_read = 1; } catch {}
+          }
+          renderMailClient();
+        }
         function renderMailClient() {
+          folders.replaceChildren();
+          folderDefinitions.forEach(([key, symbol, label]) => {
+            const count = key === "inbox" ? emails.filter(item => !getIds("spam").includes(item.id) && !getIds("trash").includes(item.id) && !getIds("deleted").includes(item.id)).length
+              : key === "sent" ? 0 : getIds(key).filter(id => emails.some(item => item.id === id)).length;
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "mail-folder-button" + (currentFolder === key ? " is-active" : "");
+            button.innerHTML = '<span><i aria-hidden="true"></i><span class="mail-folder-label"></span></span><b></b>';
+            button.querySelector("i").textContent = symbol;
+            button.querySelector(".mail-folder-label").textContent = label;
+            button.querySelector("b").textContent = count;
+            button.addEventListener("click", () => { currentFolder = key; mailFolderFilter = key; readerMode = false; renderMailClient(); });
+            folders.append(button);
+          });
           list.replaceChildren();
           reader.replaceChildren();
           const query = mailSearchQuery.trim().toLocaleLowerCase("ru");
-          const visibleEmails = emails.filter(item => {
-            if (mailFolderFilter === "unread" && item.is_read) return false;
-            const haystack = [item.sender_name, item.sender_address, item.title, item.summary, item.content].join(" ").toLocaleLowerCase("ru");
-            return !query || haystack.includes(query);
-          });
-          if (!visibleEmails.some(item => item.id === selectedMailId)) selectedMailId = visibleEmails.length ? visibleEmails[0].id : null;
-          for (const item of visibleEmails) {
-            const entry = document.createElement("button");
-            entry.type = "button";
-            entry.className = "mail-inbox-entry" + (item.id === selectedMailId ? " is-active" : "") + (!item.is_read ? " is-unread" : "");
-            const avatar = document.createElement("span");
-            avatar.className = "mail-entry-avatar";
-            avatar.textContent = (item.sender_name || "?").trim().slice(0,1).toLocaleUpperCase("ru");
-            const details = document.createElement("span");
-            details.className = "mail-entry-details";
+          const spamIds = getIds("spam"), trashIds = getIds("trash"), deletedIds = getIds("deleted");
+          let visibleEmails = emails.filter(item => {
+            if (deletedIds.includes(item.id)) return false;
+            if (currentFolder === "inbox") return !spamIds.includes(item.id) && !trashIds.includes(item.id);
+            if (currentFolder === "sent") return false;
+            if (currentFolder === "spam") return spamIds.includes(item.id) && !trashIds.includes(item.id);
+            if (currentFolder === "trash") return trashIds.includes(item.id);
+            return false;
+          }).filter(item => [item.sender_name,item.sender_address,item.title].join(" ").toLocaleLowerCase("ru").includes(query));
+          visibleEmails.sort((a,b) => new Date(b.sent_at || b.created_at || 0) - new Date(a.sent_at || a.created_at || 0));
+          if (readerMode) {
+            const item = visibleEmails.find(entry => entry.id === selectedMailId);
+            if (!item) { readerMode = false; }
+            else {
+              const back = document.createElement("button");
+              back.type = "button"; back.className = "mail-back-button"; back.textContent = "← Назад к " + folderDefinitions.find(x=>x[0]===currentFolder)[2].toLowerCase();
+              back.addEventListener("click", showList);
+              const top = document.createElement("div"); top.className = "mail-reader-top";
+              const date = document.createElement("time"); date.textContent = item.sent_at || item.created_at || ""; top.append(back,date);
+              const subject = document.createElement("h3"); subject.className = "mail-reader-subject"; subject.textContent = item.title || "Без темы";
+              const senderRow = document.createElement("div"); senderRow.className = "mail-sender-row";
+              const avatar = document.createElement("span"); avatar.className = "mail-reader-avatar"; avatar.textContent = (item.sender_name || "?").trim().slice(0,1).toLocaleUpperCase("ru");
+              const details = document.createElement("div"); details.className = "mail-reader-sender-details";
+              const name = document.createElement("strong"); name.textContent = item.sender_name || "Неизвестный отправитель";
+              const address = document.createElement("span"); address.textContent = item.sender_address || "Адрес отправителя не указан";
+              details.append(name,address); senderRow.append(avatar,details);
+              const body = document.createElement("div"); body.className = "mail-reader-body"; body.textContent = item.content || "Содержание письма не добавлено.";
+              reader.append(top,subject,senderRow,body);
+              const attachmentArea = document.createElement("section"); attachmentArea.className = "mail-attachments";
+              const attachmentTitle = document.createElement("h4"); attachmentTitle.textContent = "ВЛОЖЕНИЯ";
+              attachmentArea.append(attachmentTitle);
+              const filesMessage = document.createElement("p"); filesMessage.className = "mail-attachments-empty"; filesMessage.textContent = "Проверяем вложения…"; attachmentArea.append(filesMessage); reader.append(attachmentArea);
+              fetch("/api/player/materials/" + encodeURIComponent(item.id) + "/files", {credentials:"same-origin"}).then(response => response.ok ? response.json() : {files:[]}).then(data => {
+                if (!readerMode || selectedMailId !== item.id || !attachmentArea.isConnected) return;
+                attachmentArea.replaceChildren(attachmentTitle);
+                const files = data.files || [];
+                if (!files.length) { filesMessage.textContent = "Вложений нет."; attachmentArea.append(filesMessage); return; }
+                files.forEach((file,index) => {
+                  const button = document.createElement("button"); button.type = "button"; button.className = "mail-attachment-entry";
+                  const icon = document.createElement("span"); icon.textContent = (file.content_type || "").includes("pdf") ? "PDF" : (file.content_type || "").startsWith("image/") ? "IMG" : (file.content_type || "").startsWith("audio/") ? "♪" : (file.content_type || "").startsWith("video/") ? "▶" : "FILE";
+                  const name = document.createElement("strong"); name.textContent = file.file_name || "Вложение";
+                  const size = document.createElement("small"); size.textContent = file.content_type || "Файл";
+                  button.append(icon,name,size); button.addEventListener("click", () => openAttachment(files,index,item.id)); attachmentArea.append(button);
+                });
+              }).catch(() => { filesMessage.textContent = "Не удалось загрузить список вложений."; });
+              return;
+            }
+          }
+          const heading = document.createElement("div"); heading.className = "mail-list-heading";
+          heading.innerHTML = '<strong></strong><span></span>';
+          heading.querySelector("strong").textContent = folderDefinitions.find(x=>x[0]===currentFolder)[2];
+          heading.querySelector("span").textContent = visibleEmails.length + " писем";
+          list.append(heading);
+          visibleEmails.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "mail-inbox-entry" + (!item.is_read ? " is-unread" : "");
+            const dot = document.createElement("span"); dot.className = "mail-unread-dot"; dot.setAttribute("aria-hidden","true");
+            const details = document.createElement("div"); details.className = "mail-entry-details";
             const sender = document.createElement("span"); sender.className = "mail-entry-sender"; sender.textContent = item.sender_name || "Неизвестный отправитель";
-            const date = document.createElement("time"); date.textContent = item.sent_at || "";
-            const subject = document.createElement("strong"); subject.textContent = item.title;
-            const preview = document.createElement("small"); preview.textContent = item.summary || (item.content || "Нет краткого описания").slice(0,110);
-            details.append(sender, subject, preview);
-            entry.append(avatar, details, date);
-            entry.addEventListener("click", async () => {
-              selectedMailId = item.id;
-              if (!item.is_read) { try { await markMaterialRead(item.id); } catch { return; } }
-              await loadPlayerArchive();
-              openCase(caseId);
-            });
-            list.append(entry);
-          }
+            const subject = document.createElement("strong"); subject.textContent = item.title || "Без темы";
+            details.append(sender,subject);
+            const date = document.createElement("time"); date.textContent = item.sent_at || item.created_at || "";
+            const actions = document.createElement("div"); actions.className = "mail-row-actions";
+            const attachmentMark = document.createElement("span"); attachmentMark.className = "mail-has-attachment"; attachmentMark.textContent = "⌁"; attachmentMark.title = "Возможны вложения";
+            const open = document.createElement("button"); open.type = "button"; open.className = "mail-open-check"; open.setAttribute("aria-label","Открыть письмо"); open.textContent = "✓";
+            open.addEventListener("click", event => { event.stopPropagation(); openMessage(item); });
+            const more = document.createElement("button"); more.type = "button"; more.className = "mail-more-button"; more.setAttribute("aria-label","Действия с письмом"); more.textContent = "⋮";
+            more.addEventListener("click", event => { event.stopPropagation(); menuFor(item,more); });
+            actions.append(attachmentMark,open,more);
+            row.append(dot,details,date,actions);
+            row.addEventListener("click", () => openMessage(item));
+            list.append(row);
+          });
           if (!visibleEmails.length) {
-            const noResults = document.createElement("div");
-            noResults.className = "mail-list-empty";
-            noResults.textContent = query ? "По вашему запросу ничего не найдено." : "В этой папке пока нет писем.";
-            list.append(noResults);
+            const empty = document.createElement("div"); empty.className = "mail-list-empty";
+            empty.textContent = currentFolder === "sent" ? "Отправленных писем пока нет." : query ? "По вашему запросу ничего не найдено." : "В этой папке пока нет писем.";
+            list.append(empty);
           }
-          const selectedMail = visibleEmails.find(item => item.id === selectedMailId);
-          if (!selectedMail) {
-            const blank = document.createElement("div");
-            blank.className = "mail-reader-placeholder";
-            blank.innerHTML = '<span>✉</span><p>Выберите письмо, чтобы прочитать его</p>';
-            reader.append(blank);
-            return;
+          if (!readerMode) {
+            const hint = document.createElement("div"); hint.className = "mail-reader-placeholder";
+            hint.innerHTML = '<span>✉</span><p>Откройте письмо, нажав на строку или галочку справа.</p>';
+            reader.append(hint);
           }
-          const top = document.createElement("div"); top.className = "mail-reader-top";
-          const kicker = document.createElement("span"); kicker.className = "section-kicker"; kicker.textContent = "ВХОДЯЩЕЕ СООБЩЕНИЕ";
-          const date = document.createElement("time"); date.textContent = selectedMail.sent_at || ""; top.append(kicker, date);
-          const subject = document.createElement("h3"); subject.className = "mail-reader-subject"; subject.textContent = selectedMail.title;
-          const senderRow = document.createElement("div"); senderRow.className = "mail-sender-row";
-          const senderAvatar = document.createElement("span"); senderAvatar.className = "mail-reader-avatar"; senderAvatar.textContent = (selectedMail.sender_name || "?").trim().slice(0,1).toLocaleUpperCase("ru");
-          const senderDetails = document.createElement("div"); senderDetails.className = "mail-reader-sender-details";
-          const senderName = document.createElement("strong"); senderName.textContent = selectedMail.sender_name || "Неизвестный отправитель";
-          const senderAddress = document.createElement("span"); senderAddress.textContent = selectedMail.sender_address || "Адрес отправителя не указан";
-          senderDetails.append(senderName, senderAddress); senderRow.append(senderAvatar, senderDetails);
-          const divider = document.createElement("div"); divider.className = "mail-reader-divider";
-          const body = document.createElement("div"); body.className = "mail-reader-body"; body.textContent = selectedMail.content || "Содержание письма не добавлено.";
-          reader.append(top, subject, senderRow, divider, body);
         }
-        content.append(list, reader);
-        layout.append(folders, content);
-        client.append(toolbar, layout);
+        async function openAttachment(files,index,mailId) {
+          activeAttachmentFiles = files; activeAttachmentIndex = index;
+          const overlay = document.createElement("div"); overlay.className = "mail-attachment-viewer";
+          overlay.setAttribute("role","dialog"); overlay.setAttribute("aria-modal","true");
+          const header = document.createElement("header"); header.className = "mail-viewer-header";
+          const back = document.createElement("button"); back.type="button"; back.textContent="← Вернуться к письму";
+          const fileName = document.createElement("strong");
+          const close = document.createElement("button"); close.type="button"; close.textContent="×"; close.setAttribute("aria-label","Закрыть просмотрщик");
+          const stage = document.createElement("div"); stage.className="mail-viewer-stage";
+          const footer = document.createElement("footer"); footer.className="mail-viewer-footer";
+          const prev = document.createElement("button"); prev.type="button"; prev.textContent="← Предыдущее";
+          const counter = document.createElement("span");
+          const next = document.createElement("button"); next.type="button"; next.textContent="Следующее →";
+          header.append(back,fileName,close); footer.append(prev,counter,next); overlay.append(header,stage,footer); client.append(overlay);
+          const cleanup = () => { if(activeObjectUrl){URL.revokeObjectURL(activeObjectUrl);activeObjectUrl=null;} overlay.remove(); };
+          back.addEventListener("click",cleanup); close.addEventListener("click",cleanup);
+          const renderFile = async () => {
+            if(activeObjectUrl){URL.revokeObjectURL(activeObjectUrl);activeObjectUrl=null;}
+            const file=activeAttachmentFiles[activeAttachmentIndex]; fileName.textContent=file.file_name || "Вложение";
+            counter.textContent=(activeAttachmentIndex+1)+" из "+activeAttachmentFiles.length;
+            prev.disabled=activeAttachmentIndex===0; next.disabled=activeAttachmentIndex===activeAttachmentFiles.length-1;
+            stage.replaceChildren();
+            const loading=document.createElement("p");loading.textContent="Загрузка файла…";stage.append(loading);
+            try {
+              const response=await fetch("/api/material-files/"+encodeURIComponent(file.id),{credentials:"same-origin"});
+              if(!response.ok) throw new Error("file");
+              const blob=await response.blob(); activeObjectUrl=URL.createObjectURL(blob);
+              const type=file.content_type || blob.type || "";
+              let media;
+              if(type.startsWith("image/")){media=document.createElement("img");media.src=activeObjectUrl;media.alt=file.file_name||"Изображение";}
+              else if(type==="application/pdf" || (file.file_name||"").toLowerCase().endsWith(".pdf")){media=document.createElement("iframe");media.src=activeObjectUrl;media.title=file.file_name||"PDF";}
+              else if(type.startsWith("audio/")){media=document.createElement("audio");media.controls=true;media.src=activeObjectUrl;}
+              else if(type.startsWith("video/")){media=document.createElement("video");media.controls=true;media.src=activeObjectUrl;}
+              else if(type.startsWith("text/")){media=document.createElement("pre");media.textContent=await blob.text();}
+              else {stage.replaceChildren();const note=document.createElement("p");note.className="mail-unsupported-file";note.textContent="Предварительный просмотр этого файла недоступен. Скачать файл из почты нельзя.";stage.append(note);return;}
+              stage.replaceChildren(media);
+            } catch { stage.replaceChildren(); const note=document.createElement("p");note.className="mail-unsupported-file";note.textContent="Не удалось открыть вложение.";stage.append(note); }
+          };
+          prev.addEventListener("click",()=>{if(activeAttachmentIndex>0){activeAttachmentIndex--;renderFile();}});
+          next.addEventListener("click",()=>{if(activeAttachmentIndex<activeAttachmentFiles.length-1){activeAttachmentIndex++;renderFile();}});
+          await renderFile();
+        }
+        layout.append(folders,content,adColumn);
+        content.append(list,reader);
+        client.append(toolbar,layout);
         playerMailList.append(client);
         renderMailClient();
       }

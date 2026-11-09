@@ -6340,8 +6340,8 @@ body.is-workstation #mail-window .mail-list-empty { padding:45px 20px; color:#8f
   body.is-workstation #mail-window .mail-ad-card { display:grid; grid-template-columns:32px auto; gap:5px 10px; padding:9px; }
   body.is-workstation #mail-window .mail-ad-mark { grid-row:1/4; }
   body.is-workstation #mail-window .mail-ad-brand, body.is-workstation #mail-window .mail-ad-title, body.is-workstation #mail-window .mail-ad-copy, body.is-workstation #mail-window .mail-ad-more { grid-column:2; }
-  body.is-workstation #mail-window .mail-inbox-entry { grid-template-columns:8px minmax(0,1fr) auto; gap:9px; padding:11px 9px; }
-  body.is-workstation #mail-window .mail-row-actions { grid-column:2/-1; justify-content:flex-end; }
+  body.is-workstation #mail-window .mail-inbox-entry { grid-template-columns:minmax(0,1fr) auto 30px !important; gap:9px; padding:11px 9px; }
+  body.is-workstation #mail-window .mail-row-actions { grid-column:auto !important; justify-content:center; }
 }
 
 body.is-workstation #mail-window .mail-clear-trash { margin-left:auto; padding:6px 9px; border:1px solid rgba(166,91,82,.38); border-radius:3px; background:rgba(88,35,31,.14); color:#d59a91; font:8px var(--mono); cursor:pointer; }
@@ -6515,7 +6515,7 @@ body.is-workstation #mail-window .mail-list-columns {
   top:0;
   z-index:5;
   display:grid !important;
-  grid-template-columns:8px minmax(0,1fr) auto 30px !important;
+  grid-template-columns:minmax(0,1fr) auto 30px !important;
   align-items:center;
   gap:13px;
   width:100%;
@@ -6540,8 +6540,30 @@ body.is-workstation #mail-window .mail-list-columns .mail-column-date {
   white-space:nowrap;
 }
 body.is-workstation #mail-window .mail-inbox-entry {
-  grid-template-columns:8px minmax(0,1fr) auto 30px !important;
+  grid-template-columns:minmax(0,1fr) auto 30px !important;
 }
+body.is-workstation #mail-window .mail-entry-subject {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+body.is-workstation #mail-window .mail-entry-subject strong {
+  min-width:0;
+}
+body.is-workstation #mail-window .mail-unread-dot {
+  flex:0 0 7px;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:transparent;
+}
+body.is-workstation #mail-window .mail-inbox-entry.is-unread .mail-unread-dot {
+  background:#d0a96e;
+  box-shadow:0 0 7px rgba(208,169,110,.45);
+}
+body.is-workstation #mail-window .mail-brand[role="button"] { cursor:pointer; }
+body.is-workstation #mail-window .mail-brand[role="button"]:focus-visible { outline:1px solid #c9b184; outline-offset:5px; }
 body.is-workstation #mail-window .mail-row-actions {
   grid-column:auto !important;
   width:30px;

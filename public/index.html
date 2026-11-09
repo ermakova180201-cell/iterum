@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=system-lock-02">
+  <link rel="stylesheet" href="/styles.css?v=search-terminal-01">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
 </head>
@@ -117,19 +117,25 @@
               <div><span>ТЕКУЩЕЕ ДЕЛО</span><strong id="desktop-case-name">Обстоятельства аварии Ильи</strong><small>ЛИЧНОЕ РАССЛЕДОВАНИЕ</small></div>
             </div>
             <div class="desktop-wallpaper-mark">ITERUM</div>
-        <section id="search-window" class="player-tool-section desktop-window" aria-labelledby="search-heading" hidden>
+        <section id="search-window" class="player-tool-section desktop-window search-terminal" aria-labelledby="search-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 02</span><h2 id="search-heading">Поиск данных</h2></div>
+            <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 02 · DATABASE QUERY</span><h2 id="search-heading">Поиск данных</h2></div>
             <button class="window-close" type="button" data-close-window="search-window" aria-label="Закрыть окно">×</button>
           </div>
+          <div class="search-terminal-status"><span><i></i> БАЗА ДАННЫХ ДОСТУПНА</span><span>УРОВЕНЬ ДОСТУПА: <b>ОГРАНИЧЕННЫЙ</b></span><span>УЗЕЛ: <b>ITERUM-04</b></span></div>
+          <div class="search-terminal-intro"><span class="search-terminal-mark">⌕</span><div><strong>ПОИСК ПО БАЗЕ ДАННЫХ</strong><p>Введите имя, идентификатор или ключевое слово. Результаты ограничены текущим делом.</p></div></div>
           <form id="player-search-form" class="player-search-form">
-            <label for="player-search-query">ИМЯ, ФАМИЛИЯ ИЛИ КЛЮЧЕВОЕ СЛОВО</label>
+            <label for="player-search-query">ПОИСКОВЫЙ ЗАПРОС</label>
             <div class="player-search-row">
-              <input id="player-search-query" type="search" minlength="2" placeholder="Например, Иван Иванов" required>
-              <button type="submit" class="admin-mini-button">НАЙТИ</button>
+              <span class="search-input-prefix">⌕</span>
+              <input id="player-search-query" type="search" minlength="2" placeholder="Имя, фамилия, документ, событие…" required autocomplete="off">
+              <button type="submit" class="admin-mini-button">ВЫПОЛНИТЬ ПОИСК</button>
             </div>
+            <span class="search-query-hint">МИНИМАЛЬНАЯ ДЛИНА ЗАПРОСА — 2 СИМВОЛА</span>
           </form>
-          <div id="player-search-results" class="player-search-results" aria-live="polite"></div>
+          <div class="search-results-toolbar"><span id="player-search-summary">ОЖИДАНИЕ ЗАПРОСА</span><span>ПОИСК В ПРЕДЕЛАХ ДЕЛА</span></div>
+          <div id="player-search-filters" class="player-search-filters" hidden aria-label="Фильтр результатов"></div>
+          <div id="player-search-results" class="player-search-results" aria-live="polite"><div class="search-empty-state"><span>⌕</span><strong>ОЖИДАНИЕ ДАННЫХ</strong><p>Результаты поиска появятся в этом окне.</p></div></div>
         </section>
 
         <section id="mail-window" class="player-tool-section desktop-window" aria-labelledby="mail-heading" hidden>
@@ -785,67 +791,92 @@
       setInterval(updateDesktopClock, 60000);
     }
 
+    const playerSearchFilters = document.getElementById("player-search-filters");
+    const playerSearchSummary = document.getElementById("player-search-summary");
+    let lastPlayerSearchResults = [];
+    let activePlayerSearchFilter = "all";
+    const searchTypeLabels = { email: "СООБЩЕНИЕ", document: "ДОКУМЕНТ", project: "ПРОЕКТ", report: "ОТЧЁТ", image: "ИЗОБРАЖЕНИЕ", audio: "АУДИОЗАПИСЬ", video: "ВИДЕОЗАПИСЬ" };
+    function renderPlayerSearchResults() {
+      playerSearchResults.replaceChildren();
+      const visible = activePlayerSearchFilter === "all" ? lastPlayerSearchResults : lastPlayerSearchResults.filter(item => (item.material_type || "other") === activePlayerSearchFilter);
+      playerSearchSummary.textContent = "НАЙДЕНО: " + visible.length + " / " + lastPlayerSearchResults.length;
+      if (!visible.length) {
+        const empty = document.createElement("div");
+        empty.className = "search-empty-state";
+        const mark = document.createElement("span"); mark.textContent = "⌕";
+        const title = document.createElement("strong"); title.textContent = "НЕТ СОВПАДЕНИЙ";
+        const note = document.createElement("p"); note.textContent = "В выбранной категории нет результатов.";
+        empty.append(mark, title, note); playerSearchResults.append(empty); return;
+      }
+      for (const item of visible) {
+        const card = document.createElement("article");
+        card.className = "player-search-result search-result-card";
+        const type = item.material_type || "other";
+        const typeLabel = searchTypeLabels[type] || (type === "other" ? "МАТЕРИАЛ" : String(type).replace(/[_-]/g, " ").toUpperCase());
+        const top = document.createElement("div"); top.className = "search-result-top";
+        const tag = document.createElement("span"); tag.className = "search-result-type"; tag.textContent = typeLabel;
+        const access = document.createElement("span"); access.className = "search-result-access"; access.textContent = item.is_read ? "ДОСТУПНО" : "НЕ ПРОСМОТРЕНО";
+        top.append(tag, access);
+        const title = document.createElement("h3"); title.textContent = item.title;
+        const meta = document.createElement("p"); meta.className = "search-result-meta";
+        meta.textContent = (item.case_title || "ТЕКУЩЕЕ ДЕЛО") + (item.summary ? " · " + item.summary : "");
+        const content = document.createElement("div"); content.className = "player-material-content search-result-content"; content.hidden = true; content.textContent = item.content || "Содержание досье не добавлено.";
+        const open = document.createElement("button"); open.type = "button"; open.className = "admin-mini-button"; open.textContent = "ОТКРЫТЬ ДОСЬЕ";
+        open.addEventListener("click", async () => {
+          if (content.hidden) {
+            try { await markMaterialRead(item.id); content.hidden = false; open.textContent = "ДОСЬЕ ОТКРЫТО"; access.textContent = "ПРОСМОТРЕНО"; await loadPlayerArchive(); }
+            catch { open.textContent = "НЕ УДАЛОСЬ ОТКРЫТЬ"; }
+          } else { content.hidden = true; open.textContent = "ОТКРЫТЬ ДОСЬЕ"; }
+        });
+        card.append(top, title, meta, open, content); playerSearchResults.append(card);
+      }
+    }
     playerSearchForm.addEventListener("submit", async event => {
       event.preventDefault();
       const query = document.getElementById("player-search-query").value.trim();
       playerSearchResults.replaceChildren();
+      playerSearchFilters.hidden = true;
       if (query.length < 2) return;
-      const loading = document.createElement("p");
-      loading.className = "player-empty";
-      loading.textContent = "Выполняется поиск…";
-      playerSearchResults.append(loading);
+      playerSearchSummary.textContent = "ВЫПОЛНЯЕТСЯ ПОИСК…";
+      const loading = document.createElement("div"); loading.className = "search-empty-state";
+      const loadingTitle = document.createElement("strong"); loadingTitle.textContent = "АНАЛИЗ ЗАПРОСА";
+      const loadingText = document.createElement("p"); loadingText.textContent = "Обращение к архиву текущего дела…";
+      loading.append(loadingTitle, loadingText); playerSearchResults.append(loading);
       try {
         const response = await fetch("/api/player/search?q=" + encodeURIComponent(query) + "&caseId=" + encodeURIComponent(currentCaseId || ""), { credentials: "same-origin" });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Поиск не выполнен.");
-        playerSearchResults.replaceChildren();
-        const scopedResults = data.results.filter(item => item.case_id === currentCaseId);
-        if (!scopedResults.length) {
-          const empty = document.createElement("p");
-          empty.className = "player-empty";
-          empty.textContent = "По вашему запросу ничего не найдено.";
-          playerSearchResults.append(empty);
-          return;
+        lastPlayerSearchResults = (data.results || []).filter(item => item.case_id === currentCaseId);
+        activePlayerSearchFilter = "all";
+        playerSearchFilters.replaceChildren();
+        const types = [...new Set(lastPlayerSearchResults.map(item => item.material_type || "other"))];
+        if (types.length) {
+          const makeFilter = (value, label, count) => {
+            const button = document.createElement("button"); button.type = "button"; button.className = "search-filter" + (activePlayerSearchFilter === value ? " is-active" : ""); button.textContent = label + " · " + count;
+            button.addEventListener("click", () => { activePlayerSearchFilter = value; playerSearchFilters.querySelectorAll("button").forEach(el => el.classList.toggle("is-active", el.dataset.filter === value)); renderPlayerSearchResults(); });
+            button.dataset.filter = value; return button;
+          };
+          playerSearchFilters.append(makeFilter("all", "ВСЕ", lastPlayerSearchResults.length));
+          for (const type of types) playerSearchFilters.append(makeFilter(type, searchTypeLabels[type] || (type === "other" ? "МАТЕРИАЛЫ" : String(type).replace(/[_-]/g, " ").toUpperCase()), lastPlayerSearchResults.filter(item => (item.material_type || "other") === type).length));
+          playerSearchFilters.hidden = types.length < 2;
         }
-        for (const item of scopedResults) {
-          const card = document.createElement("article");
-          card.className = "player-search-result";
-          const title = document.createElement("h3");
-          title.textContent = item.title;
-          const meta = document.createElement("p");
-          meta.textContent = item.case_title + (item.summary ? " · " + item.summary : "");
-          const content = document.createElement("div");
-          content.className = "player-material-content";
-          content.hidden = true;
-          content.textContent = item.content || "Содержание досье не добавлено.";
-          const open = document.createElement("button");
-          open.type = "button";
-          open.className = "admin-mini-button";
-          open.textContent = item.is_read ? "ОТКРЫТЬ ДОСЬЕ" : "ОТКРЫТЬ ДОСЬЕ";
-          open.addEventListener("click", async () => {
-            if (content.hidden) {
-              try {
-                await markMaterialRead(item.id);
-                content.hidden = false;
-                open.textContent = "ДОСЬЕ ОТКРЫТО";
-                await loadPlayerArchive();
-              } catch {
-                open.textContent = "НЕ УДАЛОСЬ ОТКРЫТЬ";
-              }
-            } else {
-              content.hidden = true;
-              open.textContent = "ОТКРЫТЬ ДОСЬЕ";
-            }
-          });
-          card.append(title, meta, open, content);
-          playerSearchResults.append(card);
+        renderPlayerSearchResults();
+        if (!lastPlayerSearchResults.length) {
+          playerSearchSummary.textContent = "СОВПАДЕНИЙ НЕ ОБНАРУЖЕНО";
+          playerSearchResults.replaceChildren();
+          const empty = document.createElement("div"); empty.className = "search-empty-state";
+          const mark = document.createElement("span"); mark.textContent = "⌕";
+          const title = document.createElement("strong"); title.textContent = "ЗАПИСИ НЕ НАЙДЕНЫ";
+          const note = document.createElement("p"); note.textContent = "Попробуйте изменить запрос или проверить написание.";
+          empty.append(mark, title, note); playerSearchResults.append(empty);
         }
       } catch (error) {
+        lastPlayerSearchResults = []; playerSearchSummary.textContent = "ОШИБКА ПОИСКА";
         playerSearchResults.replaceChildren();
-        const message = document.createElement("p");
-        message.className = "player-empty";
-        message.textContent = error.message;
-        playerSearchResults.append(message);
+        const message = document.createElement("div"); message.className = "search-empty-state";
+        const title = document.createElement("strong"); title.textContent = "ЗАПРОС НЕ ВЫПОЛНЕН";
+        const note = document.createElement("p"); note.textContent = error.message;
+        message.append(title, note); playerSearchResults.append(message);
       }
     });
     async function setCaseStatus(id, status) {

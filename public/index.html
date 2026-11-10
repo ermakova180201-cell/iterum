@@ -349,8 +349,14 @@
           <h3>Дела</h3>
           <div id="admin-case-list" class="admin-case-list"><p class="admin-empty">Загружаем дела…</p></div>
         </div>
-        <div class="admin-inventory">
-          <h3>Созданные материалы</h3>
+        <div class="admin-inventory admin-release-planner">
+          <div class="admin-release-heading">
+            <div>
+              <span class="section-kicker">УПРАВЛЕНИЕ ПУБЛИКАЦИЕЙ</span>
+              <h3>План выдачи материалов</h3>
+              <p class="admin-help">Все материалы всех дел в одном списке. Порядок определяет последовательность в архиве; условие задаёт, когда материал станет доступен игроку. Через «Настроить выдачу» можно изменить дело, порядок, условие и публикацию.</p>
+            </div>
+          </div>
           <div id="admin-material-list" class="admin-material-list"><p class="admin-empty">Пока материалов нет.</p></div>
         </div>
       </section>
@@ -935,7 +941,6 @@
         function renderMailClient() {
           folders.replaceChildren();
           folderDefinitions.forEach(([key, symbol, label]) => {
-            if (key === "inbox") return; // Keep inbox metadata for the list and reader, but do not show a folder button.
             const count = key === "inbox" ? emails.filter(item => !getIds("spam").includes(item.id) && !getIds("trash").includes(item.id) && !getIds("deleted").includes(item.id)).length
               : key === "sent" ? 0 : getIds(key).filter(id => emails.some(item => item.id === id)).length;
             const button = document.createElement("button");
@@ -1890,16 +1895,27 @@
           empty.textContent = "Пока материалов нет.";
           adminMaterialList.append(empty);
         } else {
-          for (const item of data.materials) {
+          const materialTitles = new Map(data.materials.map(material => [material.id, material.title]));
+          const orderedMaterials = [...data.materials].sort((a, b) =>
+            a.case_title.localeCompare(b.case_title, "ru") ||
+            Number(a.release_order || 0) - Number(b.release_order || 0) ||
+            String(a.created_at || "").localeCompare(String(b.created_at || ""))
+          );
+          for (const item of orderedMaterials) {
             const card = document.createElement("article");
             card.className = "admin-material";
             const info = document.createElement("div");
             const heading = document.createElement("strong");
             heading.textContent = item.title;
             const details = document.createElement("span");
-            details.textContent = item.case_title + " · " + item.material_type + " · порядок " + item.release_order + (item.delivery_mode === "triggered" ? " · после прочтения другого материала" : " · автоматически");
+            const condition = item.delivery_mode === "triggered"
+              ? "После прочтения: " + (materialTitles.get(item.trigger_material_id) || "условие не выбрано")
+              : "Сразу после публикации";
+            details.textContent = item.case_title + " · " + item.material_type + " · позиция " + item.release_order + " · " + condition;
             const status = document.createElement("small");
-            status.textContent = item.is_published ? "ОПУБЛИКОВАНО" : "ЧЕРНОВИК";
+            status.textContent = item.is_published
+              ? (item.delivery_mode === "triggered" ? "ОПУБЛИКОВАНО · ОЖИДАЕТ УСЛОВИЯ" : "ОПУБЛИКОВАНО · ДОСТУПНО ПОСЛЕ ПУБЛИКАЦИИ")
+              : "ЧЕРНОВИК · ИГРОКАМ НЕ ВИДНО";
             info.append(heading, details, status);
             const actions = document.createElement("div");
             actions.className = "admin-material-actions";

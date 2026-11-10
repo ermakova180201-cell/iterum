@@ -429,6 +429,7 @@
     const materialCase = document.getElementById("material-case");
     const deliveryMode = document.getElementById("delivery-mode");
     const materialTrigger = document.getElementById("material-trigger");
+    let triggerMaterials = [];
     const materialType = document.getElementById("material-type");
     const emailFields = document.getElementById("material-email-fields");
     const searchableWrap = document.getElementById("material-searchable-wrap");
@@ -1740,11 +1741,18 @@
 
     function refreshTriggerOptions(selectedId = "") {
       const caseId = materialCase.value;
-      const available = Array.from(materialTrigger.options).filter(option => option.value && option.dataset.caseId === caseId);
-      const placeholder = materialTrigger.options[0];
+      const available = triggerMaterials.filter(material => material.case_id === caseId);
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = available.length ? "Выберите материал-предусловие" : "В этом деле пока нет других материалов";
       materialTrigger.replaceChildren(placeholder);
-      for (const option of available) materialTrigger.append(option);
-      if (available.some(option => option.value === selectedId)) materialTrigger.value = selectedId;
+      for (const material of available) {
+        const option = document.createElement("option");
+        option.value = material.id;
+        option.textContent = material.title + " · " + material.case_title;
+        materialTrigger.append(option);
+      }
+      if (available.some(material => material.id === selectedId)) materialTrigger.value = selectedId;
       materialTrigger.disabled = deliveryMode.value !== "triggered" || available.length === 0;
     }
 
@@ -1782,18 +1790,7 @@
         }
 
 
-        materialTrigger.replaceChildren();
-        const triggerPlaceholder = document.createElement("option");
-        triggerPlaceholder.value = "";
-        triggerPlaceholder.textContent = data.materials.length ? "Выберите материал-предусловие" : "Сначала создайте материал";
-        materialTrigger.append(triggerPlaceholder);
-        for (const material of data.materials) {
-          const option = document.createElement("option");
-          option.value = material.id;
-          option.dataset.caseId = material.case_id;
-          option.textContent = material.title + " · " + material.case_title;
-          materialTrigger.append(option);
-        }
+        triggerMaterials = data.materials || [];
         refreshTriggerOptions();
 
         adminCaseList.replaceChildren();

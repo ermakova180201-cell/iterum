@@ -1916,9 +1916,13 @@
         info.className = "admin-material-info";
         const heading = document.createElement("strong");
         heading.textContent = item.title;
+        const hasEarlierEmail = item.material_type === "email" &&
+          siblings.slice(0, position).some(previous => previous.material_type === "email");
         const condition = item.delivery_mode === "triggered"
           ? "После прочтения «" + (materialTitles.get(item.trigger_material_id) || "условие не выбрано") + "» · задержка " + formatDeliveryDelay(item.delivery_delay_seconds, item.material_type)
-          : "Сразу после публикации";
+          : hasEarlierEmail
+            ? "ВНИМАНИЕ: письмо придёт сразу после публикации, без ожидания предыдущего"
+            : "Сразу после публикации";
         const details = document.createElement("span");
         details.textContent = item.case_title + " · " + item.material_type + " · " + condition;
         const status = document.createElement("small");
@@ -2193,10 +2197,31 @@
       searchableWrap.hidden = materialType.value !== "document";
     }
 
+    function configureDefaultEmailDelivery() {
+      if (document.getElementById("material-id").value || materialType.value !== "email") {
+        refreshTriggerOptions(materialTrigger.value);
+        syncDeliveryFields();
+        return;
+      }
+      const previousEmails = triggerMaterials
+        .filter(material => material.case_id === materialCase.value && material.material_type === "email")
+        .sort((a, b) => Number(a.release_order || 0) - Number(b.release_order || 0));
+      if (previousEmails.length) {
+        deliveryMode.value = "triggered";
+        refreshTriggerOptions(previousEmails[0].id);
+      } else {
+        deliveryMode.value = "automatic";
+        refreshTriggerOptions();
+      }
+      setMaterialDelayControls(60);
+      syncDeliveryFields();
+    }
+
     materialType.addEventListener("change", () => {
       syncMaterialTypeFields();
       if (!document.getElementById("material-id").value) {
-        setMaterialDelayControls(materialType.value === "email" ? 60 : 0);
+        if (materialType.value === "email") configureDefaultEmailDelivery();
+        else setMaterialDelayControls(0);
       }
     });
     syncMaterialTypeFields();
@@ -2235,7 +2260,11 @@
     syncDeliveryFields();
 
     materialCase.addEventListener("change", () => {
-      refreshTriggerOptions();
+      if (!document.getElementById("material-id").value && materialType.value === "email") {
+        configureDefaultEmailDelivery();
+      } else {
+        refreshTriggerOptions();
+      }
     });
 
     function resetMaterialEditor() {

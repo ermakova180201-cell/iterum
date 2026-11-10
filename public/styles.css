@@ -7115,9 +7115,9 @@ body.is-workstation .desktop-shell .iterum-ghost-face {
   position:absolute;
   z-index:3;
   left:50%;
-  top:36%;
-  width:47%;
-  height:27%;
+  top:42%;
+  width:30%;
+  height:48%;
   transform:translate(-50%,-50%);
   border-radius:50%;
   background:radial-gradient(ellipse at 50% 38%,rgba(4,16,29,.98),rgba(1,8,17,.96) 72%);

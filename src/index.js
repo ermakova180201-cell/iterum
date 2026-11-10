@@ -375,7 +375,7 @@ async function handleApi(request, env) {
         await env.DB.prepare("UPDATE materials SET is_published = ? WHERE id = ?")
           .bind(body.published ? 1 : 0, materialId).run();
         if (body.published) {
-          await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id) SELECT user_id, ? FROM player_material_reads WHERE material_id = (SELECT trigger_material_id FROM materials WHERE id = ?) AND (SELECT delivery_mode FROM materials WHERE id = ?) = 'triggered'").bind(materialId, materialId, materialId).run();
+          await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id, unlocked_at) SELECT r.user_id, m.id, CASE WHEN m.material_type = 'email' THEN strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+1 minute') ELSE strftime('%Y-%m-%dT%H:%M:%fZ', 'now') END FROM player_material_reads r JOIN materials m ON m.id = ? WHERE r.material_id = m.trigger_material_id AND m.delivery_mode = 'triggered'").bind(materialId).run();
         }
         return json({ ok: true, published: body.published });
       }

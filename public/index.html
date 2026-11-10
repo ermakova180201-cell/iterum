@@ -1814,7 +1814,34 @@
             toggle.className = "admin-mini-button";
             toggle.textContent = item.status === "active" ? "ДЕАКТИВИРОВАТЬ" : "АКТИВИРОВАТЬ";
             toggle.addEventListener("click", () => setCaseStatus(item.id, item.status === "active" ? "draft" : "active"));
-            card.append(info, toggle);
+
+            const resetProgress = document.createElement("button");
+            resetProgress.type = "button";
+            resetProgress.className = "admin-mini-button";
+            resetProgress.textContent = "СБРОСИТЬ ПРОГРЕСС ИГРОКОВ";
+            resetProgress.title = "Удалить прогресс всех игроков в этом деле, не затрагивая материалы";
+            resetProgress.addEventListener("click", async () => {
+              const confirmed = window.confirm(
+                "Сбросить прогресс всех игроков по делу «" + item.title + "»?\n\n" +
+                "Будут удалены отметки о прочтении, открытые по условиям материалы, заметки, найденные улики и сохранённый этап расследования.\n\n" +
+                "Само дело, документы, вложения и доступ игроков останутся. Это действие нельзя отменить."
+              );
+              if (!confirmed) return;
+              resetProgress.disabled = true;
+              resetProgress.textContent = "СБРОС…";
+              try {
+                const result = await adminRequest("/api/admin/cases/" + encodeURIComponent(item.id) + "/reset-progress", { method: "POST" });
+                showAdminMessage(caseMessage, "Прогресс игроков по делу «" + item.title + "» сброшен. Удалено записей: " + result.removedRecords + ".");
+                await loadPlayerArchive();
+              } catch (error) {
+                showAdminMessage(caseMessage, error.message, true);
+              } finally {
+                resetProgress.disabled = false;
+                resetProgress.textContent = "СБРОСИТЬ ПРОГРЕСС ИГРОКОВ";
+              }
+            });
+
+            card.append(info, toggle, resetProgress);
             adminCaseList.append(card);
           }
         }

@@ -153,16 +153,19 @@ async function handleApi(request, env) {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
     const materialId = playerReadRoute[1];
-    const material = await env.DB.prepare("SELECT id, case_id, delivery_mode FROM materials WHERE id = ? AND is_published = 1").bind(materialId).first();
-    if (!material) return json({ error: "Материал не найден или ещё не опубликован." }, 404);
-    const activeCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ? AND status = 'active'").bind(material.case_id).first();
-    if (!activeCase) return json({ error: "Дело сейчас недоступно." }, 403);
-    if (material.delivery_mode === "triggered") {
+    const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
+    const material = await env.DB.prepare("SELECT m.id, m.case_id, m.delivery_mode, m.is_published, c.status AS case_status FROM materials m JOIN cases c ON c.id = m.case_id WHERE m.id = ?").bind(materialId).first();
+    if (!material) return json({ error: "Материал не найден." }, 404);
+    const isLiveMaterial = material.is_published === 1 && material.case_status === "active";
+    if (!isAdmin && !isLiveMaterial) return json({ error: "Материал недоступен." }, 403);
+    if (!isAdmin && material.delivery_mode === "triggered") {
       const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ? AND unlocked_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now')").bind(user.id, materialId).first();
       if (!unlocked) return json({ error: "Этот материал ещё не открыт." }, 403);
     }
     await env.DB.prepare("INSERT OR IGNORE INTO player_material_reads (user_id, material_id) VALUES (?, ?)").bind(user.id, materialId).run();
-    await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id, unlocked_at) SELECT ?, id, CASE WHEN material_type = 'email' THEN strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+1 minute') ELSE strftime('%Y-%m-%dT%H:%M:%fZ', 'now') END FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1").bind(user.id, materialId).run();
+    if (isLiveMaterial) {
+      await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id, unlocked_at) SELECT ?, id, CASE WHEN material_type = 'email' THEN strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+1 minute') ELSE strftime('%Y-%m-%dT%H:%M:%fZ', 'now') END FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1").bind(user.id, materialId).run();
+    }
     return json({ ok: true });
   }
 

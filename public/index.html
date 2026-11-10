@@ -1372,7 +1372,7 @@
       recordAssistantAction("выполнил поиск");
     });
     document.getElementById("player-archive").addEventListener("click", event => {
-      if (event.target.closest(".desktop-window") && !event.target.closest("button, input, form, a")) {
+      if (event.target.closest(".desktop-window") && !event.target.closest(".player-tool-heading, .window-close")) {
         assistantMemory.inspectedItems++;
         recordAssistantAction("изучил материал");
       }

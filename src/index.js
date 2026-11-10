@@ -165,7 +165,7 @@ async function handleApi(request, env) {
     const wasAlreadyRead = await env.DB.prepare("SELECT 1 FROM player_material_reads WHERE user_id = ? AND material_id = ?").bind(user.id, materialId).first();
     await env.DB.prepare("INSERT OR IGNORE INTO player_material_reads (user_id, material_id) VALUES (?, ?)").bind(user.id, materialId).run();
     if (isLiveMaterial && !wasAlreadyRead) {
-      await env.DB.prepare("INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT ?, id, CASE WHEN material_type = 'email' THEN strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+1 minute') ELSE strftime('%Y-%m-%dT%H:%M:%fZ', 'now') END FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1 ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at").bind(user.id, materialId).run();
+      await env.DB.prepare("INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT ?, id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+' || COALESCE(delivery_delay_seconds, CASE WHEN material_type = 'email' THEN 60 ELSE 0 END) || ' seconds') FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1 ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at").bind(user.id, materialId).run();
     }
     return json({ ok: true });
   }
@@ -333,12 +333,15 @@ async function handleApi(request, env) {
         const senderName = String(body.senderName || "").trim();
         const senderAddress = String(body.senderAddress || "").trim();
         const sentAt = String(body.sentAt || "").trim();
+        const deliveryDelaySeconds = body.deliveryDelaySeconds === null || body.deliveryDelaySeconds === undefined
+          ? null : Number(body.deliveryDelaySeconds);
         const allowedTypes = ["email", "publication", "document", "photo", "audio", "map", "other"];
         if (!caseId || !allowedTypes.includes(type) || !title || title.length > 200 ||
             summary.length > 1000 || content.length > 50000 ||
             !["automatic", "triggered"].includes(deliveryMode) || (deliveryMode === "triggered" && (!triggerMaterialId || triggerMaterialId === materialId)) ||
             (type === "email" && (senderName.length > 120 || senderAddress.length > 200 || sentAt.length > 40)) ||
-            !Number.isInteger(releaseOrder) || releaseOrder < 0 || releaseOrder > 100000) {
+            !Number.isInteger(releaseOrder) || releaseOrder < 0 || releaseOrder > 100000 ||
+            (deliveryDelaySeconds !== null && (!Number.isInteger(deliveryDelaySeconds) || deliveryDelaySeconds < 0 || deliveryDelaySeconds > 2592000))) {
           return json({ error: "Проверьте тип, название, текст и порядок открытия материала." }, 400);
         }
         const targetCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseId).first();
@@ -350,8 +353,14 @@ async function handleApi(request, env) {
           if (!prerequisite) return json({ error: "Выберите существующий материал из этого дела как условие открытия." }, 400);
         }
         await env.DB.prepare(
-          "UPDATE materials SET case_id = ?, material_type = ?, title = ?, summary = ?, content = ?, release_order = ?, delivery_mode = ?, trigger_material_id = ?, is_searchable = ?, sender_name = ?, sender_address = ?, sent_at = ? WHERE id = ?"
-        ).bind(caseId, type, title, summary, content, releaseOrder, deliveryMode, deliveryMode === "triggered" ? triggerMaterialId : null, type === "document" ? isSearchable : 0, type === "email" ? senderName : "", type === "email" ? senderAddress : "", type === "email" ? sentAt : "", materialId).run();
+          "UPDATE materials SET case_id = ?, material_type = ?, title = ?, summary = ?, content = ?, release_order = ?, delivery_mode = ?, trigger_material_id = ?, delivery_delay_seconds = ?, is_searchable = ?, sender_name = ?, sender_address = ?, sent_at = ? WHERE id = ?"
+        ).bind(caseId, type, title, summary, content, releaseOrder, deliveryMode, deliveryMode === "triggered" ? triggerMaterialId : null, deliveryMode === "triggered" ? deliveryDelaySeconds : null, type === "document" ? isSearchable : 0, type === "email" ? senderName : "", type === "email" ? senderAddress : "", type === "email" ? sentAt : "", materialId).run();
+        await env.DB.prepare("DELETE FROM material_unlocks WHERE material_id = ?").bind(materialId).run();
+        if (deliveryMode === "triggered") {
+          await env.DB.prepare(
+            "INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT r.user_id, m.id, strftime('%Y-%m-%dT%H:%M:%fZ', r.read_at, '+' || COALESCE(m.delivery_delay_seconds, CASE WHEN m.material_type = 'email' THEN 60 ELSE 0 END) || ' seconds') FROM player_material_reads r JOIN materials m ON m.id = ? WHERE r.material_id = m.trigger_material_id AND m.is_published = 1 ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at"
+          ).bind(materialId).run();
+        }
         return json({ ok: true });
       }
 
@@ -400,7 +409,7 @@ async function handleApi(request, env) {
         await env.DB.prepare("UPDATE materials SET is_published = ? WHERE id = ?")
           .bind(body.published ? 1 : 0, materialId).run();
         if (body.published) {
-          await env.DB.prepare("INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT r.user_id, m.id, CASE WHEN m.material_type = 'email' THEN strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+1 minute') ELSE strftime('%Y-%m-%dT%H:%M:%fZ', 'now') END FROM player_material_reads r JOIN materials m ON m.id = ? WHERE r.material_id = m.trigger_material_id AND m.delivery_mode = 'triggered' ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at").bind(materialId).run();
+          await env.DB.prepare("INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT r.user_id, m.id, strftime('%Y-%m-%dT%H:%M:%fZ', r.read_at, '+' || COALESCE(m.delivery_delay_seconds, CASE WHEN m.material_type = 'email' THEN 60 ELSE 0 END) || ' seconds') FROM player_material_reads r JOIN materials m ON m.id = ? WHERE r.material_id = m.trigger_material_id AND m.delivery_mode = 'triggered' ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at").bind(materialId).run();
         }
         return json({ ok: true, published: body.published });
       }

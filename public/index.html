@@ -1834,6 +1834,8 @@
               resetProgress.textContent = "СБРОС…";
               try {
                 const result = await adminRequest("/api/admin/cases/" + encodeURIComponent(item.id) + "/reset-progress", { method: "POST" });
+                archiveMaterials.filter(material => material.case_id === item.id && material.material_type === "email").forEach(material => knownMailIds.delete(material.id));
+                initialMailNotifiedCases.delete(item.id);
                 showAdminMessage(caseMessage, "Ваш прогресс по делу «" + item.title + "» сброшен. Удалено ваших записей: " + result.removedRecords + ".");
                 await loadPlayerArchive();
               } catch (error) {

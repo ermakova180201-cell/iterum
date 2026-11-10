@@ -230,6 +230,23 @@ async function handleApi(request, env) {
     }
 
 
+    const resetProgressRoute = url.pathname.match(/^\/api\/admin\/cases\/([a-f0-9]+)\/reset-progress$/);
+    if (request.method === "POST" && resetProgressRoute) {
+      const caseId = resetProgressRoute[1];
+      const existing = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseId).first();
+      if (!existing) return json({ error: "Дело не найдено." }, 404);
+
+      const results = await env.DB.batch([
+        env.DB.prepare("DELETE FROM player_material_reads WHERE material_id IN (SELECT id FROM materials WHERE case_id = ?)").bind(caseId),
+        env.DB.prepare("DELETE FROM material_unlocks WHERE material_id IN (SELECT id FROM materials WHERE case_id = ?)").bind(caseId),
+        env.DB.prepare("DELETE FROM player_progress WHERE case_id = ?").bind(caseId),
+        env.DB.prepare("DELETE FROM player_notes WHERE case_id = ?").bind(caseId),
+        env.DB.prepare("DELETE FROM player_clues WHERE case_id = ?").bind(caseId)
+      ]);
+      const removed = (results || []).reduce((sum, item) => sum + Number(item.meta?.changes || 0), 0);
+      return json({ ok: true, removedRecords: removed });
+    }
+
     const caseStatusRoute = url.pathname.match(/^\/api\/admin\/cases\/([a-f0-9]+)\/status$/);
     if (request.method === "POST" && caseStatusRoute) {
       let body;

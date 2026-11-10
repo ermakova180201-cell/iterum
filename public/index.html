@@ -1861,14 +1861,15 @@
       adminMaterialList.replaceChildren();
       const query = adminMaterialFilterQuery.trim().toLocaleLowerCase("ru-RU");
       const materialTitles = new Map(data.materials.map(material => [material.id, material.title]));
-      const orderedMaterials = [...data.materials]
-        .filter(item => (adminMaterialFilterCase === "all" || item.case_id === adminMaterialFilterCase) &&
-          (!query || [item.title, item.case_title, item.material_type].some(value => String(value || "").toLocaleLowerCase("ru-RU").includes(query))))
-        .sort((a, b) =>
-          a.case_title.localeCompare(b.case_title, "ru") ||
-          Number(a.release_order || 0) - Number(b.release_order || 0) ||
-          String(a.created_at || "").localeCompare(String(b.created_at || ""))
-        );
+      const allOrderedMaterials = [...data.materials].sort((a, b) =>
+        a.case_title.localeCompare(b.case_title, "ru") ||
+        Number(a.release_order || 0) - Number(b.release_order || 0) ||
+        String(a.created_at || "").localeCompare(String(b.created_at || ""))
+      );
+      const orderedMaterials = allOrderedMaterials.filter(item =>
+        (adminMaterialFilterCase === "all" || item.case_id === adminMaterialFilterCase) &&
+        (!query || [item.title, item.case_title, item.material_type].some(value => String(value || "").toLocaleLowerCase("ru-RU").includes(query)))
+      );
       adminMaterialTotal.textContent = orderedMaterials.length + " из " + data.materials.length + " материалов";
       if (!orderedMaterials.length) {
         const empty = document.createElement("p");
@@ -1878,7 +1879,7 @@
         return;
       }
       const positions = new Map();
-      for (const item of orderedMaterials) {
+      for (const item of allOrderedMaterials) {
         if (!positions.has(item.case_id)) positions.set(item.case_id, []);
         positions.get(item.case_id).push(item);
       }
@@ -2219,6 +2220,7 @@
       refreshTriggerOptions(materialTrigger.value);
       syncDeliveryFields();
     });
+    syncDeliveryFields();
 
     materialCase.addEventListener("change", () => {
       refreshTriggerOptions();

@@ -1866,7 +1866,8 @@
       const allOrderedMaterials = [...data.materials].sort((a, b) =>
         a.case_title.localeCompare(b.case_title, "ru") ||
         Number(a.release_order || 0) - Number(b.release_order || 0) ||
-        String(a.created_at || "").localeCompare(String(b.created_at || ""))
+        String(a.created_at || "").localeCompare(String(b.created_at || "")) ||
+        String(a.id || "").localeCompare(String(b.id || ""))
       );
       const orderedMaterials = allOrderedMaterials.filter(item =>
         (adminMaterialFilterCase === "all" || item.case_id === adminMaterialFilterCase) &&

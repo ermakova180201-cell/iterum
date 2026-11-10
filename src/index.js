@@ -305,11 +305,12 @@ async function handleApi(request, env) {
       return json({ ok: true });
     }
 
-    const materialRoute = url.pathname.match(/^\/api\/admin\/materials\/([a-f0-9]+)(?:\/(publish))?$/);
+    const materialRoute = url.pathname.match(/^\/api\/admin\/materials\/([a-f0-9]+)(?:\/(publish|order))?$/);
     if (materialRoute) {
       const materialId = materialRoute[1];
       const isPublishRoute = materialRoute[2] === "publish";
-      if (request.method === "GET" && !isPublishRoute) {
+      const isOrderRoute = materialRoute[2] === "order";
+      if (request.method === "GET" && !isPublishRoute && !isOrderRoute) {
         const material = await env.DB.prepare(
           "SELECT id, case_id, material_type, title, summary, content, release_order, is_published, delivery_mode, trigger_material_id, is_searchable, sender_name, sender_address, sent_at FROM materials WHERE id = ?"
         ).bind(materialId).first();
@@ -317,7 +318,7 @@ async function handleApi(request, env) {
         return json({ material });
       }
 
-      if (request.method === "PUT" && !isPublishRoute) {
+      if (request.method === "PUT" && !isPublishRoute && !isOrderRoute) {
         let body;
         try { body = await request.json(); } catch { return json({ error: "Проверьте введённые данные." }, 400); }
         const caseId = String(body.caseId || "");
@@ -354,7 +355,7 @@ async function handleApi(request, env) {
         return json({ ok: true });
       }
 
-      if (request.method === "DELETE" && !isPublishRoute) {
+      if (request.method === "DELETE" && !isPublishRoute && !isOrderRoute) {
         const existing = await env.DB.prepare(
           "SELECT id, is_published FROM materials WHERE id = ?"
         ).bind(materialId).first();
@@ -368,6 +369,26 @@ async function handleApi(request, env) {
         await env.DB.prepare("UPDATE materials SET trigger_material_id = NULL WHERE trigger_material_id = ?").bind(materialId).run();
         await env.DB.prepare("DELETE FROM materials WHERE id = ? AND is_published = 0").bind(materialId).run();
         return json({ ok: true });
+      }
+
+      if (request.method === "POST" && isOrderRoute) {
+        let body;
+        try { body = await request.json(); } catch { return json({ error: "Не удалось прочитать направление перемещения." }, 400); }
+        if (!["up", "down"].includes(body.direction)) return json({ error: "Выберите перемещение вверх или вниз." }, 400);
+        const current = await env.DB.prepare("SELECT id, case_id, release_order FROM materials WHERE id = ?").bind(materialId).first();
+        if (!current) return json({ error: "Материал не найден." }, 404);
+        const neighbor = await env.DB.prepare(
+          body.direction === "up"
+            ? "SELECT id, release_order FROM materials WHERE case_id = ? AND (release_order < ? OR (release_order = ? AND created_at < (SELECT created_at FROM materials WHERE id = ?))) ORDER BY release_order DESC, created_at DESC LIMIT 1"
+            : "SELECT id, release_order FROM materials WHERE case_id = ? AND (release_order > ? OR (release_order = ? AND created_at > (SELECT created_at FROM materials WHERE id = ?))) ORDER BY release_order ASC, created_at ASC LIMIT 1"
+        ).bind(current.case_id, current.release_order, current.release_order, materialId).first();
+        if (!neighbor) return json({ ok: true, moved: false });
+        await env.DB.batch([
+          env.DB.prepare("UPDATE materials SET release_order = 100001 WHERE id = ?").bind(materialId),
+          env.DB.prepare("UPDATE materials SET release_order = ? WHERE id = ?").bind(current.release_order, neighbor.id),
+          env.DB.prepare("UPDATE materials SET release_order = ? WHERE id = ?").bind(neighbor.release_order, materialId)
+        ]);
+        return json({ ok: true, moved: true });
       }
 
       if (request.method === "POST" && isPublishRoute) {

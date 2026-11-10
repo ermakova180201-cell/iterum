@@ -1846,6 +1846,15 @@
       return (value / unit[0]) + " " + unit[1];
     }
 
+    async function prepareEmailSequence(materialId, prerequisiteId) {
+      await editMaterial(materialId);
+      deliveryMode.value = "triggered";
+      refreshTriggerOptions(prerequisiteId);
+      setMaterialDelayControls(60);
+      syncDeliveryFields();
+      showAdminMessage(materialMessage, "Выбрано открытие после предыдущего письма с задержкой 1 минута. Нажмите «СОХРАНИТЬ ИЗМЕНЕНИЯ», чтобы применить настройку.");
+    }
+
     async function moveMaterial(id, direction) {
       try {
         await adminRequest("/api/admin/materials/" + encodeURIComponent(id) + "/order", {
@@ -1948,7 +1957,17 @@
         publish.className = "admin-mini-button";
         publish.textContent = item.is_published ? "СНЯТЬ С ПУБЛИКАЦИИ" : "ОПУБЛИКОВАТЬ";
         publish.addEventListener("click", () => setMaterialPublished(item.id, !item.is_published));
-        actions.append(edit, publish);
+        actions.append(edit);
+        if (hasEarlierEmail && item.delivery_mode !== "triggered") {
+          const previousEmail = siblings.slice(0, position).filter(previous => previous.material_type === "email").slice(-1)[0];
+          const sequence = document.createElement("button");
+          sequence.type = "button";
+          sequence.className = "admin-mini-button";
+          sequence.textContent = "ПОСЛЕ ПРЕДЫДУЩЕГО ПИСЬМА";
+          sequence.addEventListener("click", () => prepareEmailSequence(item.id, previousEmail.id));
+          actions.append(sequence);
+        }
+        actions.append(publish);
         if (!item.is_published) {
           const remove = document.createElement("button");
           remove.type = "button";

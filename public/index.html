@@ -1298,6 +1298,76 @@
       setAssistantMood("sleepy", "Я здесь.");
       recordAssistantAction("закрыл диалог");
     });
+
+    // Перетаскивание окна помощника за верхнюю панель.
+    const assistantChatHead = assistantChat.querySelector(".iterum-assistant-chat-head");
+    const assistantDesktopArea = document.querySelector(".desktop-area");
+    const assistantChatPositionKey = "iterum-assistant-chat-position";
+    let assistantDrag = null;
+    function clampAssistantChatPosition(left, top) {
+      const maxLeft = Math.max(8, assistantDesktopArea.clientWidth - assistantChat.offsetWidth - 8);
+      const maxTop = Math.max(8, assistantDesktopArea.clientHeight - assistantChat.offsetHeight - 8);
+      return {
+        left:Math.max(8,Math.min(maxLeft,left)),
+        top:Math.max(8,Math.min(maxTop,top))
+      };
+    }
+    function placeAssistantChat(left, top, save=true) {
+      const pos = clampAssistantChatPosition(left,top);
+      assistantChat.style.left = pos.left + "px";
+      assistantChat.style.top = pos.top + "px";
+      assistantChat.style.right = "auto";
+      assistantChat.style.bottom = "auto";
+      assistantChat.style.transform = "none";
+      if (save) {
+        try { localStorage.setItem(assistantChatPositionKey,JSON.stringify(pos)); } catch(error) {}
+      }
+    }
+    try {
+      const savedPosition = JSON.parse(localStorage.getItem(assistantChatPositionKey) || "null");
+      if (savedPosition && Number.isFinite(savedPosition.left) && Number.isFinite(savedPosition.top)) {
+        assistantChat.style.left = savedPosition.left + "px";
+        assistantChat.style.top = savedPosition.top + "px";
+        assistantChat.style.right = "auto";
+        assistantChat.style.bottom = "auto";
+        assistantChat.style.transform = "none";
+      }
+    } catch(error) {}
+    assistantChatHead.addEventListener("pointerdown", event => {
+      if (event.target.closest("button")) return;
+      const areaRect = assistantDesktopArea.getBoundingClientRect();
+      const chatRect = assistantChat.getBoundingClientRect();
+      assistantDrag = {
+        pointerId:event.pointerId,
+        grabX:event.clientX-chatRect.left,
+        grabY:event.clientY-chatRect.top,
+        areaLeft:areaRect.left,
+        areaTop:areaRect.top
+      };
+      assistantChatHead.setPointerCapture(event.pointerId);
+      assistantChatHead.classList.add("is-dragging");
+      event.preventDefault();
+    });
+    assistantChatHead.addEventListener("pointermove", event => {
+      if (!assistantDrag || event.pointerId !== assistantDrag.pointerId) return;
+      placeAssistantChat(
+        event.clientX-assistantDrag.areaLeft-assistantDrag.grabX,
+        event.clientY-assistantDrag.areaTop-assistantDrag.grabY
+      );
+    });
+    function finishAssistantChatDrag(event) {
+      if (!assistantDrag || (event && event.pointerId !== assistantDrag.pointerId)) return;
+      assistantDrag = null;
+      assistantChatHead.classList.remove("is-dragging");
+    }
+    assistantChatHead.addEventListener("pointerup", finishAssistantChatDrag);
+    assistantChatHead.addEventListener("pointercancel", finishAssistantChatDrag);
+    window.addEventListener("resize", () => {
+      if (!assistantChat.hidden && assistantChat.style.left && assistantChat.style.top) {
+        placeAssistantChat(parseFloat(assistantChat.style.left),parseFloat(assistantChat.style.top));
+      }
+    });
+
     const assistantHelp = {
       mail: "Почта — здесь появляются сообщения по делу. Открой приложение «Почта», чтобы читать письма и просматривать вложения. Иногда полезно перечитать письмо: люди не всегда говорят прямо.",
       search: "Поиск данных помогает искать сведения в базе текущего дела. Введи имя, идентификатор или ключевое слово. Поиск работает только в пределах доступных материалов.",

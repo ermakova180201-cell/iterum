@@ -391,7 +391,7 @@ async function handleApi(request, env) {
         const current = await env.DB.prepare("SELECT id, case_id FROM materials WHERE id = ?").bind(materialId).first();
         if (!current) return json({ error: "Материал не найден." }, 404);
         const result = await env.DB.prepare(
-          "SELECT id FROM materials WHERE case_id = ? ORDER BY release_order ASC, created_at ASC"
+          "SELECT id FROM materials WHERE case_id = ? ORDER BY release_order ASC, created_at ASC, id ASC"
         ).bind(current.case_id).all();
         const orderedIds = (result.results || []).map(item => item.id);
         const currentIndex = orderedIds.indexOf(materialId);

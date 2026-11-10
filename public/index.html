@@ -2187,7 +2187,12 @@
       searchableWrap.hidden = materialType.value !== "document";
     }
 
-    materialType.addEventListener("change", syncMaterialTypeFields);
+    materialType.addEventListener("change", () => {
+      syncMaterialTypeFields();
+      if (!document.getElementById("material-id").value) {
+        setMaterialDelayControls(materialType.value === "email" ? 60 : 0);
+      }
+    });
     syncMaterialTypeFields();
 
     const materialDelayFields = document.getElementById("material-delay-fields");

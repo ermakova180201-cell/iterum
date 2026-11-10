@@ -733,7 +733,7 @@
       playerMaterialList.replaceChildren();
       playerMailList.replaceChildren();
       playerSearchResults.replaceChildren();
-      const emails = caseMaterials.filter(item => item.material_type === "email");
+      const emails = caseMaterials.filter(item => item.material_type === "email" && !item.is_preview);
       const unreadEmails = emails.filter(item => !item.is_read).length;
       playerMailCount.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
       updateMailBadge();

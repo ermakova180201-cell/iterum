@@ -7345,3 +7345,18 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghos
   filter:brightness(.72) saturate(.65) drop-shadow(0 0 8px rgba(105,222,255,.25));
 }
 
+
+
+/* Keep the legacy CSS ghost hidden while the Meshy model is loading.
+   Show it only if the 3D asset actually fails to load. */
+body.is-workstation .desktop-shell .iterum-ghost-helper:has(.iterum-ghost-model):not(.model-load-failed) .iterum-ghost-body {
+  opacity:0 !important;
+  visibility:hidden !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iterum-ghost-body {
+  opacity:1 !important;
+  visibility:visible !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iterum-ghost-model-wrap {
+  opacity:0 !important;
+}

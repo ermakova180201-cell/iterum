@@ -312,7 +312,7 @@ async function handleApi(request, env) {
       const isOrderRoute = materialRoute[2] === "order";
       if (request.method === "GET" && !isPublishRoute && !isOrderRoute) {
         const material = await env.DB.prepare(
-          "SELECT id, case_id, material_type, title, summary, content, release_order, is_published, delivery_mode, trigger_material_id, is_searchable, sender_name, sender_address, sent_at FROM materials WHERE id = ?"
+          "SELECT id, case_id, material_type, title, summary, content, release_order, is_published, delivery_mode, trigger_material_id, delivery_delay_seconds, is_searchable, sender_name, sender_address, sent_at FROM materials WHERE id = ?"
         ).bind(materialId).first();
         if (!material) return json({ error: "Материал не найден." }, 404);
         return json({ material });

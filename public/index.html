@@ -586,6 +586,11 @@
       if (!response.ok) throw new Error("Не удалось открыть материал.");
     }
 
+    function isVisibleMail(item) {
+      return item.material_type === "email" &&
+        (!item.is_preview || (isAdminSession && (item.is_published === 1 || item.is_published === true)));
+    }
+
     function updateMailBadge() {
       const badge = document.getElementById("desktop-mail-badge");
       const shortcut = badge?.closest("[data-open-window='mail-window']");
@@ -595,9 +600,8 @@
       }
       const unread = archiveMaterials.filter(item =>
         item.case_id === currentCaseId &&
-        item.material_type === "email" &&
-        !item.is_read &&
-        !item.is_preview
+        isVisibleMail(item) &&
+        !item.is_read
       ).length;
       badge.textContent = unread > 99 ? "99+" : String(unread);
       badge.hidden = unread === 0;
@@ -632,9 +636,7 @@
     }
 
     function rememberIncomingEmails(materials) {
-      const emails = (materials || []).filter(item =>
-        item.material_type === "email" && !item.is_preview
-      );
+      const emails = (materials || []).filter(isVisibleMail);
       if (!mailBaselineReady) {
         emails.forEach(item => knownMailIds.add(item.id));
         mailBaselineReady = true;
@@ -733,7 +735,7 @@
       playerMaterialList.replaceChildren();
       playerMailList.replaceChildren();
       playerSearchResults.replaceChildren();
-      const emails = caseMaterials.filter(item => item.material_type === "email" && !item.is_preview);
+      const emails = caseMaterials.filter(isVisibleMail);
       const unreadEmails = emails.filter(item => !item.is_read).length;
       playerMailCount.textContent = unreadEmails ? unreadEmails + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
       updateMailBadge();

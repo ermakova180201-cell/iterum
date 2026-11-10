@@ -6843,17 +6843,16 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghos
   transform:scaleX(.7);
 }
 body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-sleep-z {
-  opacity:1;
-  animation:ghostSleepZ 1.8s ease-in-out infinite;
+  opacity:1 !important;
+  animation:ghostSleepZ 2.2s ease-in-out infinite;
 }
 body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-message {
   opacity:1;
   transform:translate(-50%,-5px);
 }
 @keyframes ghostSleepZ {
-  0% {opacity:0;transform:translate(0,7px) scale(.75);}
-  25% {opacity:1;}
-  100% {opacity:0;transform:translate(9px,-13px) scale(1.12);}
+  0%,100% {opacity:1;transform:translate(0,1px) scale(1);}
+  50% {opacity:1;transform:translate(5px,-8px) scale(1.08);}
 }
 @media(prefers-reduced-motion:reduce) {
   body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-app,

@@ -467,6 +467,11 @@
     let mailAudioContext = null;
 
     const adminMaterialList = document.getElementById("admin-material-list");
+    const adminMaterialCaseFilter = document.getElementById("admin-material-case-filter");
+    const adminMaterialSearch = document.getElementById("admin-material-search");
+    const adminMaterialTotal = document.getElementById("admin-material-total");
+    let adminMaterialFilterCase = "all";
+    let adminMaterialFilterQuery = "";
     const adminCaseList = document.getElementById("admin-case-list");
     const playerArchive = document.getElementById("player-archive");
     const availableCases = document.getElementById("available-cases");
@@ -2049,7 +2054,12 @@
         document.getElementById("material-title").value = item.title;
         document.getElementById("material-summary").value = item.summary;
         document.getElementById("material-content").value = item.content;
-        document.getElementById("material-order").value = item.release_order;        deliveryMode.value = item.delivery_mode || "automatic";
+        document.getElementById("material-order").value = item.release_order;
+        deliveryMode.value = item.delivery_mode || "automatic";
+        const delaySeconds = item.delivery_delay_seconds === null || item.delivery_delay_seconds === undefined
+          ? (item.material_type === "email" ? 60 : 0) : Number(item.delivery_delay_seconds);
+        setMaterialDelayControls(delaySeconds);
+        syncDeliveryFields();
         refreshTriggerOptions(item.trigger_material_id || "");
         document.getElementById("material-searchable").checked = Boolean(item.is_searchable);
         document.getElementById("material-sender-name").value = item.sender_name || "";
@@ -2089,8 +2099,36 @@
     materialType.addEventListener("change", syncMaterialTypeFields);
     syncMaterialTypeFields();
 
+    const materialDelayFields = document.getElementById("material-delay-fields");
+    const materialDelayValue = document.getElementById("material-delay-value");
+    const materialDelayUnit = document.getElementById("material-delay-unit");
+
+    function setMaterialDelayControls(seconds) {
+      const value = Math.max(0, Number(seconds) || 0);
+      const units = [86400, 3600, 60, 1];
+      const unit = units.find(candidate => value === 0 || value % candidate === 0) || 1;
+      materialDelayUnit.value = String(unit);
+      materialDelayValue.value = String(value === 0 ? 0 : value / unit);
+    }
+
+    function getMaterialDelaySeconds() {
+      const amount = Number(materialDelayValue.value);
+      const unit = Number(materialDelayUnit.value);
+      if (!Number.isInteger(amount) || amount < 0 || !Number.isInteger(unit) || amount * unit > 2592000) {
+        throw new Error("Задержка должна быть целым числом от 0 до 30 дней.");
+      }
+      return amount * unit;
+    }
+
+    function syncDeliveryFields() {
+      const triggered = deliveryMode.value === "triggered";
+      materialTrigger.disabled = !triggered || materialTrigger.options.length <= 1;
+      materialDelayFields.hidden = !triggered;
+    }
+
     deliveryMode.addEventListener("change", () => {
       refreshTriggerOptions(materialTrigger.value);
+      syncDeliveryFields();
     });
 
     materialCase.addEventListener("change", () => {
@@ -2100,6 +2138,8 @@
     function resetMaterialEditor() {
       materialForm.reset();
       materialTrigger.disabled = true;
+      setMaterialDelayControls(60);
+      syncDeliveryFields();
       syncMaterialTypeFields();
       document.getElementById("material-id").value = "";
       document.getElementById("material-files").value = "";
@@ -2129,6 +2169,7 @@
             releaseOrder: Number(form.get("releaseOrder")),
             deliveryMode: form.get("deliveryMode"),
             triggerMaterialId: form.get("triggerMaterialId"),
+            deliveryDelaySeconds: form.get("deliveryMode") === "triggered" ? getMaterialDelaySeconds() : null,
             isSearchable: form.get("isSearchable") === "on",
             senderName: form.get("senderName"),
             senderAddress: form.get("senderAddress"),

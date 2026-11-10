@@ -118,7 +118,7 @@
             </section>
 <button class="iterum-ghost-helper" type="button" aria-label="Системный помощник ITERUM" title="Системный помощник">
   <span class="iterum-ghost-aura" aria-hidden="true"></span>
-  <span class="iterum-ghost-model-wrap" aria-hidden="true"><model-viewer class="iterum-ghost-model" src="/Meshy_AI_Spectral_Coder_1110174338_generate.glb" alt="" autoplay interaction-prompt="none" disable-zoom disable-pan environment-image="neutral" exposure="1.15" shadow-intensity="0"></model-viewer></span>
+  <span class="iterum-ghost-model-wrap" aria-hidden="true"><model-viewer class="iterum-ghost-model" src="/Meshy_AI_Spectral_Coder_1110174338_generate.glb" alt="" autoplay interaction-prompt="none" disable-zoom disable-pan environment-image="neutral" exposure="1.15" shadow-intensity="0"></model-viewer><span class="iterum-ghost-face" aria-hidden="true"><i></i><i></i></span></span>
   <span class="iterum-ghost-body" aria-hidden="true">
     <span class="iterum-ghost-halo"></span>
     <span class="iterum-ghost-forehead-mark"></span>
@@ -2547,7 +2547,18 @@
     const ghostModel = document.querySelector(".iterum-ghost-model");
     const ghostButton = document.querySelector(".iterum-ghost-helper");
     if (ghostModel && ghostButton) {
-      ghostModel.addEventListener("load", () => ghostButton.classList.add("has-3d-model"), { once:true });
+      ghostModel.addEventListener("load", () => {
+        // Перекрашиваем материалы самой 3D-модели, а не только HTML-обёртку.
+        try {
+          for (const material of ghostModel.model.materials) {
+            material.pbrMetallicRoughness.setBaseColorFactor("#65dfff");
+            material.setEmissiveFactor("#123e58");
+          }
+        } catch (error) {
+          console.warn("ITERUM ghost material tint unavailable", error);
+        }
+        ghostButton.classList.add("has-3d-model");
+      }, { once:true });
       ghostModel.addEventListener("error", () => ghostButton.classList.remove("has-3d-model"));
     }
   </script>

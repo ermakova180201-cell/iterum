@@ -370,6 +370,15 @@
               <p class="admin-help">Все материалы всех дел в одном списке. Порядок определяет последовательность в архиве; условие задаёт, когда материал станет доступен игроку. Через «Настроить выдачу» можно изменить дело, порядок, условие и публикацию.</p>
             </div>
           </div>
+          <div class="admin-planner-toolbar">
+            <label>ДЕЛО
+              <select id="admin-material-case-filter"><option value="all">Все дела</option></select>
+            </label>
+            <label>ПОИСК
+              <input id="admin-material-search" type="search" placeholder="Название материала…">
+            </label>
+            <span id="admin-material-total" class="admin-planner-total"></span>
+          </div>
           <div id="admin-material-list" class="admin-material-list"><p class="admin-empty">Пока материалов нет.</p></div>
         </div>
       </section>

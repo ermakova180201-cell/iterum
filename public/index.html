@@ -867,7 +867,11 @@
           const addAction = (label, action) => {
             const button = document.createElement("button");
             button.type = "button"; button.textContent = label;
-            button.addEventListener("click", () => { action(); menu.remove(); renderMailClient(); });
+            button.addEventListener("click", async () => {
+              await action();
+              menu.remove();
+              renderMailClient();
+            });
             menu.append(button);
           };
           addAction(item.is_read ? "Пометить непрочитанным" : "Пометить прочитанным", async () => {

@@ -78,7 +78,7 @@ async function handleApi(request, env) {
     if (!material) return json({ error: "Материал не найден." }, 404);
     if (!isAdmin && (material.is_published !== 1 || material.case_status !== "active")) return json({ error: "Материал недоступен." }, 403);
     if (!isAdmin && material.delivery_mode === "triggered") {
-      const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ?").bind(user.id, materialId).first();
+      const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ? AND unlocked_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now')").bind(user.id, materialId).first();
       if (!unlocked) return json({ error: "Материал ещё не открыт." }, 403);
     }
     const files = await env.DB.prepare("SELECT id, file_name, content_type, file_size, created_at FROM material_files WHERE material_id = ? ORDER BY created_at").bind(materialId).all();
@@ -98,7 +98,7 @@ async function handleApi(request, env) {
     const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
     if (!isAdmin && (file.is_published !== 1 || file.case_status !== "active")) return json({ error: "Файл недоступен." }, 403);
     if (!isAdmin && file.delivery_mode === "triggered") {
-      const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ?").bind(user.id, file.material_id).first();
+      const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ? AND unlocked_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now')").bind(user.id, file.material_id).first();
       if (!unlocked) return json({ error: "Файл ещё не открыт." }, 403);
     }
     const safeName = String(file.file_name || "attachment").replace(/[\\r\\n"]/g, "_");
@@ -162,7 +162,7 @@ async function handleApi(request, env) {
       if (!unlocked) return json({ error: "Этот материал ещё не открыт." }, 403);
     }
     await env.DB.prepare("INSERT OR IGNORE INTO player_material_reads (user_id, material_id) VALUES (?, ?)").bind(user.id, materialId).run();
-    await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id) SELECT ?, id FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1").bind(user.id, materialId).run();
+    await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id, unlocked_at) SELECT ?, id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+1 minute') FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1").bind(user.id, materialId).run();
     return json({ ok: true });
   }
 
@@ -174,7 +174,7 @@ async function handleApi(request, env) {
     const needle = query.toLocaleLowerCase("ru-RU");
     const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
     const candidates = await env.DB.prepare(
-      "SELECT m.id, m.case_id, c.title AS case_title, m.title, m.summary, m.content, EXISTS(SELECT 1 FROM player_material_reads r WHERE r.user_id = ? AND r.material_id = m.id) AS is_read, 0 AS is_preview FROM materials m JOIN cases c ON c.id = m.case_id WHERE c.status = 'active' AND m.is_published = 1 AND m.is_searchable = 1 AND (m.delivery_mode = 'automatic' OR EXISTS(SELECT 1 FROM material_unlocks u WHERE u.user_id = ? AND u.material_id = m.id)) ORDER BY m.release_order, m.created_at LIMIT 200"
+      "SELECT m.id, m.case_id, c.title AS case_title, m.title, m.summary, m.content, EXISTS(SELECT 1 FROM player_material_reads r WHERE r.user_id = ? AND r.material_id = m.id) AS is_read, 0 AS is_preview FROM materials m JOIN cases c ON c.id = m.case_id WHERE c.status = 'active' AND m.is_published = 1 AND m.is_searchable = 1 AND (m.delivery_mode = 'automatic' OR EXISTS(SELECT 1 FROM material_unlocks u WHERE u.user_id = ? AND u.material_id = m.id AND u.unlocked_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))) ORDER BY m.release_order, m.created_at LIMIT 200"
     ).bind(user.id, user.id).all();
     let searchableMaterials = candidates.results || [];
     if (isAdmin) {
@@ -197,7 +197,7 @@ async function handleApi(request, env) {
       "SELECT id, title, case_code, description, status FROM cases WHERE status = 'active' ORDER BY created_at"
     ).all();
     let materials = await env.DB.prepare(
-      "SELECT materials.id, materials.case_id, cases.title AS case_title, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at, materials.sender_name, materials.sender_address, materials.sent_at, materials.is_published, 0 AS is_preview, EXISTS(SELECT 1 FROM player_material_reads r WHERE r.user_id = ? AND r.material_id = materials.id) AS is_read FROM materials JOIN cases ON cases.id = materials.case_id WHERE cases.status = 'active' AND materials.is_published = 1 AND (materials.delivery_mode = 'automatic' OR EXISTS(SELECT 1 FROM material_unlocks u WHERE u.user_id = ? AND u.material_id = materials.id)) ORDER BY cases.created_at, materials.release_order, materials.created_at"
+      "SELECT materials.id, materials.case_id, cases.title AS case_title, materials.material_type, materials.title, materials.summary, materials.content, materials.release_order, materials.created_at, materials.sender_name, materials.sender_address, materials.sent_at, materials.is_published, 0 AS is_preview, EXISTS(SELECT 1 FROM player_material_reads r WHERE r.user_id = ? AND r.material_id = materials.id) AS is_read FROM materials JOIN cases ON cases.id = materials.case_id WHERE cases.status = 'active' AND materials.is_published = 1 AND (materials.delivery_mode = 'automatic' OR EXISTS(SELECT 1 FROM material_unlocks u WHERE u.user_id = ? AND u.material_id = materials.id AND u.unlocked_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))) ORDER BY cases.created_at, materials.release_order, materials.created_at"
     ).bind(user.id, user.id).all();
     if (isAdmin) {
       const draftCases = await env.DB.prepare(

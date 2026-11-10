@@ -162,7 +162,7 @@ async function handleApi(request, env) {
       if (!unlocked) return json({ error: "Этот материал ещё не открыт." }, 403);
     }
     await env.DB.prepare("INSERT OR IGNORE INTO player_material_reads (user_id, material_id) VALUES (?, ?)").bind(user.id, materialId).run();
-    await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id, unlocked_at) SELECT ?, id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+1 minute') FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1").bind(user.id, materialId).run();
+    await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id, unlocked_at) SELECT ?, id, CASE WHEN material_type = 'email' THEN strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+1 minute') ELSE strftime('%Y-%m-%dT%H:%M:%fZ', 'now') END FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1").bind(user.id, materialId).run();
     return json({ ok: true });
   }
 

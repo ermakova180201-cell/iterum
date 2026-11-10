@@ -162,9 +162,10 @@ async function handleApi(request, env) {
       const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ? AND unlocked_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now')").bind(user.id, materialId).first();
       if (!unlocked) return json({ error: "Этот материал ещё не открыт." }, 403);
     }
+    const wasAlreadyRead = await env.DB.prepare("SELECT 1 FROM player_material_reads WHERE user_id = ? AND material_id = ?").bind(user.id, materialId).first();
     await env.DB.prepare("INSERT OR IGNORE INTO player_material_reads (user_id, material_id) VALUES (?, ?)").bind(user.id, materialId).run();
-    if (isLiveMaterial) {
-      await env.DB.prepare("INSERT OR IGNORE INTO material_unlocks (user_id, material_id, unlocked_at) SELECT ?, id, CASE WHEN material_type = 'email' THEN strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+1 minute') ELSE strftime('%Y-%m-%dT%H:%M:%fZ', 'now') END FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1").bind(user.id, materialId).run();
+    if (isLiveMaterial && !wasAlreadyRead) {
+      await env.DB.prepare("INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT ?, id, CASE WHEN material_type = 'email' THEN strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+1 minute') ELSE strftime('%Y-%m-%dT%H:%M:%fZ', 'now') END FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1 ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at").bind(user.id, materialId).run();
     }
     return json({ ok: true });
   }

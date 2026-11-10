@@ -7104,3 +7104,16 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-grumpy .
     transition:none !important;
   }
 }
+
+
+/* ITERUM ghost hologram tint */
+body.is-workstation .desktop-shell .iterum-ghost-model {
+  filter:sepia(.42) saturate(3.1) hue-rotate(145deg) brightness(1.12) contrast(1.08);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model {
+  filter:drop-shadow(0 0 9px rgba(105,222,255,.48))
+         drop-shadow(0 0 22px rgba(54,171,225,.34));
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-sleeping .iterum-ghost-model {
+  filter:sepia(.42) saturate(2.4) hue-rotate(145deg) brightness(.78) contrast(1.02);
+}

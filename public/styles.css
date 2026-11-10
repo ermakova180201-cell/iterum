@@ -7159,6 +7159,32 @@ body.is-workstation .desktop-shell .iterum-ghost-model-wrap::after {
   filter:drop-shadow(0 0 5px rgba(91,220,255,.7));
   animation:iterumGhostCloakSparkle 5s ease-in-out infinite;
 }
+
+/* Во время перелёта плащ и световой шлейф становятся заметнее */
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-visiting-app .iterum-ghost-model-wrap::before {
+  animation:iterumGhostCloakTrail 1.05s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-visiting-app .iterum-ghost-model-wrap::after {
+  opacity:.95;
+  inset:7% 0 -2%;
+  animation:iterumGhostCloakFlight 1.15s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-visiting-app .iterum-ghost-model {
+  transform-origin:50% 18%;
+  animation:iterumGhostBodyInFlight 1.05s ease-in-out infinite;
+}
+@keyframes iterumGhostCloakTrail {
+  0%,100% {transform:scaleX(.94) skewX(-2deg);opacity:.42;}
+  50% {transform:scaleX(1.08) skewX(3deg);opacity:.78;}
+}
+@keyframes iterumGhostCloakFlight {
+  0%,100% {transform:translate(-2px,2px) scaleX(.92);opacity:.62;}
+  50% {transform:translate(3px,-2px) scaleX(1.08);opacity:1;}
+}
+@keyframes iterumGhostBodyInFlight {
+  0%,100% {transform:rotate(-2deg) translateY(-1px);}
+  50% {transform:rotate(2deg) translateY(-4px);}
+}
 body.is-workstation .desktop-shell .iterum-ghost-face {
   position:absolute;
   z-index:3;

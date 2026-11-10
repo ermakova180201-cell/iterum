@@ -1892,7 +1892,7 @@
         const order = document.createElement("div");
         order.className = "admin-material-order";
         const number = document.createElement("strong");
-        number.textContent = String(item.release_order).padStart(2, "0");
+        number.textContent = String(position + 1).padStart(2, "0");
         number.title = "Порядок материала в этом деле";
         const up = document.createElement("button");
         up.type = "button";

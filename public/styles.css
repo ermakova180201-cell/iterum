@@ -7108,25 +7108,70 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-grumpy .
 
 /* ITERUM holographic face and glow for the 3D assistant */
 body.is-workstation .desktop-shell .iterum-ghost-model-wrap {
-  filter:drop-shadow(0 0 8px rgba(105,222,255,.55))
-         drop-shadow(0 0 19px rgba(54,171,225,.42));
+  filter:drop-shadow(0 0 10px rgba(105,222,255,.62))
+         drop-shadow(0 0 23px rgba(54,171,225,.48));
+}
+body.is-workstation .desktop-shell .iterum-ghost-model-wrap::before,
+body.is-workstation .desktop-shell .iterum-ghost-model-wrap::after {
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  border-radius:50%;
+}
+body.is-workstation .desktop-shell .iterum-ghost-model-wrap::before {
+  z-index:0;
+  left:5%;
+  right:5%;
+  top:13%;
+  bottom:0;
+  background:
+    radial-gradient(ellipse at 50% 82%,rgba(91,224,255,.34),transparent 48%),
+    radial-gradient(ellipse at 22% 64%,rgba(93,193,255,.2),transparent 35%),
+    radial-gradient(ellipse at 78% 62%,rgba(93,193,255,.2),transparent 35%);
+  filter:blur(10px);
+  animation:iterumGhostCloakGlow 4.6s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-model {
+  position:relative;
+  z-index:1;
+}
+body.is-workstation .desktop-shell .iterum-ghost-model-wrap::after {
+  z-index:2;
+  inset:10% 5% 3%;
+  background:
+    radial-gradient(circle at 16% 69%,rgba(173,246,255,.95) 0 1px,transparent 2px),
+    radial-gradient(circle at 83% 57%,rgba(173,246,255,.85) 0 1px,transparent 2px),
+    radial-gradient(circle at 24% 35%,rgba(111,224,255,.8) 0 1px,transparent 2px),
+    radial-gradient(circle at 76% 27%,rgba(111,224,255,.8) 0 1px,transparent 2px),
+    radial-gradient(ellipse at 50% 90%,rgba(87,215,255,.16),transparent 56%);
+  opacity:.65;
+  filter:drop-shadow(0 0 5px rgba(91,220,255,.7));
+  animation:iterumGhostCloakSparkle 5s ease-in-out infinite;
 }
 body.is-workstation .desktop-shell .iterum-ghost-face {
   position:absolute;
   z-index:3;
   left:50%;
   top:41%;
-  width:32%;
-  height:41%;
+  width:35%;
+  height:40%;
   transform:translate(-50%,-50%);
-  border-radius:50%;
+  border-radius:48% 48% 50% 50% / 43% 43% 57% 57%;
   background:radial-gradient(ellipse at 50% 38%,rgba(4,16,29,.98),rgba(1,8,17,.96) 72%);
-  box-shadow:0 0 7px rgba(0,0,0,.45),inset 0 0 5px rgba(70,194,235,.2);
+  box-shadow:0 0 8px rgba(0,0,0,.48),inset 0 0 7px rgba(70,194,235,.24),0 0 9px rgba(63,199,241,.12);
   display:flex;
   align-items:center;
   justify-content:center;
   gap:27%;
   pointer-events:none;
+}
+@keyframes iterumGhostCloakGlow {
+  0%,100% {opacity:.62;transform:scale(.97);}
+  50% {opacity:1;transform:scale(1.035);}
+}
+@keyframes iterumGhostCloakSparkle {
+  0%,100% {opacity:.35;transform:translateY(2px);}
+  50% {opacity:.78;transform:translateY(-4px);}
 }
 body.is-workstation .desktop-shell .iterum-ghost-face i {
   display:block;

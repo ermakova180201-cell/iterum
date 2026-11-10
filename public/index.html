@@ -1229,7 +1229,7 @@
         }
         visitDesktopApp();
         scheduleGhostAction();
-      }, 90000 + Math.random() * 90000);
+      }, 30000 + Math.random() * 25000);
     }
     function scheduleGhostNap() {
       window.clearTimeout(ghostNapTimer);
@@ -1287,6 +1287,7 @@
         assistantChat.hidden = false;
         assistantSay("О, привет! Я уже заждался. Давай осмотримся. Я помогу разобраться с системой, а улики оставлю тебе — у каждого свои обязанности.", "happy");
       } else { setAssistantMood("sleepy", "Ладно, буду рядом."); }
+      scheduleGhostAction();
     }
     document.getElementById("assistant-launch-yes").addEventListener("click", () => beginSelectedCase(true));
     document.getElementById("assistant-launch-no").addEventListener("click", () => beginSelectedCase(false));
@@ -1305,12 +1306,14 @@
         assistantChatInput.focus();
       } else {
         recordAssistantAction("закрыл диалог");
+        scheduleGhostAction();
       }
     });
     document.getElementById("assistant-chat-close").addEventListener("click", () => {
       assistantChat.hidden = true;
       setAssistantMood("sleepy", "Я здесь.");
       recordAssistantAction("закрыл диалог");
+      scheduleGhostAction();
     });
 
     // Перетаскивание окна помощника за верхнюю панель.
@@ -2590,9 +2593,13 @@
         } catch (error) {
           console.warn("ITERUM ghost material tint unavailable", error);
         }
+        ghostButton.classList.remove("model-load-failed");
         ghostButton.classList.add("has-3d-model");
       }, { once:true });
-      ghostModel.addEventListener("error", () => ghostButton.classList.remove("has-3d-model"));
+      ghostModel.addEventListener("error", () => {
+        ghostButton.classList.remove("has-3d-model");
+        ghostButton.classList.add("model-load-failed");
+      }, { once:true });
     }
   </script>
 </body>

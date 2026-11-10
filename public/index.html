@@ -1862,6 +1862,7 @@
       adminMaterialList.replaceChildren();
       const query = adminMaterialFilterQuery.trim().toLocaleLowerCase("ru-RU");
       const materialTitles = new Map(data.materials.map(material => [material.id, material.title]));
+      const caseStatuses = new Map(data.cases.map(caseItem => [caseItem.id, caseItem.status]));
       const allOrderedMaterials = [...data.materials].sort((a, b) =>
         a.case_title.localeCompare(b.case_title, "ru") ||
         Number(a.release_order || 0) - Number(b.release_order || 0) ||
@@ -1921,9 +1922,13 @@
         details.textContent = item.case_title + " · " + item.material_type + " · " + condition;
         const status = document.createElement("small");
         status.className = item.is_published ? "is-published" : "is-draft";
-        status.textContent = item.is_published
-          ? (item.delivery_mode === "triggered" ? "ОПУБЛИКОВАНО · ЖДЁТ УСЛОВИЯ" : "ОПУБЛИКОВАНО · ДОСТУПНО ИГРОКАМ")
-          : "ЧЕРНОВИК · ИГРОКАМ НЕ ВИДНО";
+        status.textContent = !item.is_published
+          ? "ЧЕРНОВИК · ИГРОКАМ НЕ ВИДНО"
+          : caseStatuses.get(item.case_id) !== "active"
+            ? "ПУБЛИКАЦИЯ ВКЛЮЧЕНА · ДЕЛО НЕ АКТИВНО"
+            : item.delivery_mode === "triggered"
+              ? "ОПУБЛИКОВАНО · ВЫДАЁТСЯ ПО УСЛОВИЮ"
+              : "ОПУБЛИКОВАНО · ДОСТУПНО ИГРОКАМ";
         info.append(heading, details, status);
 
         const actions = document.createElement("div");

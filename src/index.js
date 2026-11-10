@@ -362,7 +362,7 @@ async function handleApi(request, env) {
         await env.DB.prepare("DELETE FROM material_unlocks WHERE material_id = ?").bind(materialId).run();
         if (deliveryMode === "triggered") {
           await env.DB.prepare(
-            "INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT r.user_id, m.id, strftime('%Y-%m-%dT%H:%M:%fZ', r.read_at, '+' || COALESCE(m.delivery_delay_seconds, CASE WHEN m.material_type = 'email' THEN 60 ELSE 0 END) || ' seconds') FROM player_material_reads r JOIN materials m ON m.id = ? WHERE r.material_id = m.trigger_material_id AND m.is_published = 1 ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at"
+            "INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT r.user_id, m.id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+' || COALESCE(m.delivery_delay_seconds, CASE WHEN m.material_type = 'email' THEN 60 ELSE 0 END) || ' seconds') FROM player_material_reads r JOIN materials m ON m.id = ? WHERE r.material_id = m.trigger_material_id AND m.is_published = 1 ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at"
           ).bind(materialId).run();
         }
         return json({ ok: true });
@@ -415,7 +415,7 @@ async function handleApi(request, env) {
         await env.DB.prepare("UPDATE materials SET is_published = ? WHERE id = ?")
           .bind(body.published ? 1 : 0, materialId).run();
         if (body.published) {
-          await env.DB.prepare("INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT r.user_id, m.id, strftime('%Y-%m-%dT%H:%M:%fZ', r.read_at, '+' || COALESCE(m.delivery_delay_seconds, CASE WHEN m.material_type = 'email' THEN 60 ELSE 0 END) || ' seconds') FROM player_material_reads r JOIN materials m ON m.id = ? WHERE r.material_id = m.trigger_material_id AND m.delivery_mode = 'triggered' ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at").bind(materialId).run();
+          await env.DB.prepare("INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT r.user_id, m.id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+' || COALESCE(m.delivery_delay_seconds, CASE WHEN m.material_type = 'email' THEN 60 ELSE 0 END) || ' seconds') FROM player_material_reads r JOIN materials m ON m.id = ? WHERE r.material_id = m.trigger_material_id AND m.delivery_mode = 'triggered' ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at").bind(materialId).run();
         }
         return json({ ok: true, published: body.published });
       }

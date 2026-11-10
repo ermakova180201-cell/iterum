@@ -7106,14 +7106,44 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-grumpy .
 }
 
 
-/* ITERUM ghost hologram tint */
-body.is-workstation .desktop-shell .iterum-ghost-model {
-  filter:sepia(.42) saturate(3.1) hue-rotate(145deg) brightness(1.12) contrast(1.08);
+/* ITERUM holographic face and glow for the 3D assistant */
+body.is-workstation .desktop-shell .iterum-ghost-model-wrap {
+  filter:drop-shadow(0 0 8px rgba(105,222,255,.55))
+         drop-shadow(0 0 19px rgba(54,171,225,.42));
 }
-body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model {
-  filter:drop-shadow(0 0 9px rgba(105,222,255,.48))
-         drop-shadow(0 0 22px rgba(54,171,225,.34));
+body.is-workstation .desktop-shell .iterum-ghost-face {
+  position:absolute;
+  z-index:3;
+  left:50%;
+  top:31%;
+  width:34%;
+  height:18%;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(ellipse at 50% 38%,rgba(4,16,29,.98),rgba(1,8,17,.96) 72%);
+  box-shadow:0 0 7px rgba(0,0,0,.45),inset 0 0 5px rgba(70,194,235,.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:20%;
+  pointer-events:none;
 }
-body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-sleeping .iterum-ghost-model {
-  filter:sepia(.42) saturate(2.4) hue-rotate(145deg) brightness(.78) contrast(1.02);
+body.is-workstation .desktop-shell .iterum-ghost-face i {
+  display:block;
+  width:17%;
+  height:35%;
+  border-radius:50%;
+  background:#8af1ff;
+  box-shadow:0 0 5px #50dfff,0 0 11px rgba(65,207,255,.95);
+  animation:iterumGhostEyeGlow 3.8s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-face i:nth-child(2) {
+  animation-delay:.12s;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-sleeping .iterum-ghost-model-wrap {
+  filter:brightness(.82) drop-shadow(0 0 7px rgba(105,222,255,.32));
+}
+@keyframes iterumGhostEyeGlow {
+  0%,92%,100% {transform:scaleY(1);opacity:1;}
+  95%,97% {transform:scaleY(.12);opacity:.7;}
 }

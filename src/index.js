@@ -388,19 +388,21 @@ async function handleApi(request, env) {
         let body;
         try { body = await request.json(); } catch { return json({ error: "Не удалось прочитать направление перемещения." }, 400); }
         if (!["up", "down"].includes(body.direction)) return json({ error: "Выберите перемещение вверх или вниз." }, 400);
-        const current = await env.DB.prepare("SELECT id, case_id, release_order FROM materials WHERE id = ?").bind(materialId).first();
+        const current = await env.DB.prepare("SELECT id, case_id FROM materials WHERE id = ?").bind(materialId).first();
         if (!current) return json({ error: "Материал не найден." }, 404);
-        const neighbor = await env.DB.prepare(
-          body.direction === "up"
-            ? "SELECT id, release_order FROM materials WHERE case_id = ? AND (release_order < ? OR (release_order = ? AND created_at < (SELECT created_at FROM materials WHERE id = ?))) ORDER BY release_order DESC, created_at DESC LIMIT 1"
-            : "SELECT id, release_order FROM materials WHERE case_id = ? AND (release_order > ? OR (release_order = ? AND created_at > (SELECT created_at FROM materials WHERE id = ?))) ORDER BY release_order ASC, created_at ASC LIMIT 1"
-        ).bind(current.case_id, current.release_order, current.release_order, materialId).first();
-        if (!neighbor) return json({ ok: true, moved: false });
-        await env.DB.batch([
-          env.DB.prepare("UPDATE materials SET release_order = 100001 WHERE id = ?").bind(materialId),
-          env.DB.prepare("UPDATE materials SET release_order = ? WHERE id = ?").bind(current.release_order, neighbor.id),
-          env.DB.prepare("UPDATE materials SET release_order = ? WHERE id = ?").bind(neighbor.release_order, materialId)
-        ]);
+        const result = await env.DB.prepare(
+          "SELECT id FROM materials WHERE case_id = ? ORDER BY release_order ASC, created_at ASC"
+        ).bind(current.case_id).all();
+        const orderedIds = (result.results || []).map(item => item.id);
+        const currentIndex = orderedIds.indexOf(materialId);
+        const targetIndex = currentIndex + (body.direction === "up" ? -1 : 1);
+        if (currentIndex < 0 || targetIndex < 0 || targetIndex >= orderedIds.length) {
+          return json({ ok: true, moved: false });
+        }
+        [orderedIds[currentIndex], orderedIds[targetIndex]] = [orderedIds[targetIndex], orderedIds[currentIndex]];
+        await env.DB.batch(orderedIds.map((id, index) =>
+          env.DB.prepare("UPDATE materials SET release_order = ? WHERE id = ?").bind((index + 1) * 10, id)
+        ));
         return json({ ok: true, moved: true });
       }
 

@@ -1818,8 +1818,8 @@
             const resetProgress = document.createElement("button");
             resetProgress.type = "button";
             resetProgress.className = "admin-mini-button";
-            resetProgress.textContent = "СБРОСИТЬ ПРОГРЕСС ИГРОКОВ";
-            resetProgress.title = "Удалить прогресс всех игроков в этом деле, не затрагивая материалы";
+            resetProgress.textContent = "СБРОСИТЬ МОЙ ПРОГРЕСС";
+            resetProgress.title = "Сбросить только ваш личный прогресс в этом деле";
             resetProgress.addEventListener("click", async () => {
               const confirmed = window.confirm(
                 "Сбросить прогресс всех игроков по делу «" + item.title + "»?\n\n" +
@@ -1837,7 +1837,7 @@
                 showAdminMessage(caseMessage, error.message, true);
               } finally {
                 resetProgress.disabled = false;
-                resetProgress.textContent = "СБРОСИТЬ ПРОГРЕСС ИГРОКОВ";
+                resetProgress.textContent = "СБРОСИТЬ МОЙ ПРОГРЕСС";
               }
             });
 

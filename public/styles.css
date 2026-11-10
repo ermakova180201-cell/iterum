@@ -7272,3 +7272,39 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-sleeping
   0%,92%,100% {transform:scaleY(1);opacity:1;}
   95%,97% {transform:scaleY(.12);opacity:.7;}
 }
+
+/* Natural, staggered blinking and a clear sleeping state */
+body.is-workstation .desktop-shell .iterum-ghost-face i {
+  animation:iterumGhostBlink 4.6s infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-face i:nth-child(2) {
+  animation-delay:.16s;
+}
+@keyframes iterumGhostBlink {
+  0%,42%,45%,100% {transform:scaleY(1);opacity:1;}
+  43.5% {transform:scaleY(.08);opacity:.62;}
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-face i {
+  animation:none !important;
+  height:5% !important;
+  transform:scaleY(.06) !important;
+  opacity:.62;
+  box-shadow:0 0 4px rgba(80,210,255,.55);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-face::after {
+  top:76%;
+  width:12%;
+  height:5%;
+  border-bottom:0;
+  border-top:2px solid rgba(119,231,255,.72);
+  border-radius:50% 50% 0 0;
+  opacity:.55;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-model-wrap::after {
+  opacity:.2;
+  animation-duration:7s;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-model-wrap {
+  filter:brightness(.72) saturate(.65) drop-shadow(0 0 8px rgba(105,222,255,.25));
+}
+

@@ -119,16 +119,6 @@
 <button class="iterum-ghost-helper" type="button" aria-label="Системный помощник ITERUM" title="Системный помощник">
   <span class="iterum-ghost-aura" aria-hidden="true"></span>
   <span class="iterum-ghost-model-wrap" aria-hidden="true"><model-viewer class="iterum-ghost-model" src="/Meshy_AI_Spectral_Coder_1110174338_generate.glb" alt="" autoplay interaction-prompt="none" disable-zoom disable-pan environment-image="neutral" exposure="1.15" shadow-intensity="0"></model-viewer><span class="iterum-ghost-face" aria-hidden="true"><i></i><i></i></span></span>
-  <span class="iterum-ghost-body" aria-hidden="true">
-    <span class="iterum-ghost-halo"></span>
-    <span class="iterum-ghost-forehead-mark"></span>
-    <span class="iterum-ghost-eyes"><i></i><i></i></span>
-    <span class="iterum-ghost-cheeks"></span>
-    <span class="iterum-ghost-mouth"></span>
-    <span class="iterum-ghost-core"></span>
-    <span class="iterum-ghost-wisp iterum-ghost-wisp-left"></span>
-    <span class="iterum-ghost-wisp iterum-ghost-wisp-right"></span>
-  </span>
   <span class="iterum-ghost-particle iterum-ghost-particle-one" aria-hidden="true"></span>
   <span class="iterum-ghost-particle iterum-ghost-particle-two" aria-hidden="true"></span>
   <span class="iterum-ghost-particle iterum-ghost-particle-three" aria-hidden="true"></span>
@@ -2623,27 +2613,44 @@
   </script>
 
   <script type="module">
-    import "https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js";
     const ghostModel = document.querySelector(".iterum-ghost-model");
     const ghostButton = document.querySelector(".iterum-ghost-helper");
+
     if (ghostModel && ghostButton) {
-      ghostModel.addEventListener("load", () => {
-        // Перекрашиваем материалы самой 3D-модели, а не только HTML-обёртку.
-        try {
-          for (const material of ghostModel.model.materials) {
-            material.pbrMetallicRoughness.setBaseColorFactor("#65dfff");
-            material.setEmissiveFactor("#123e58");
-          }
-        } catch (error) {
-          console.warn("ITERUM ghost material tint unavailable", error);
-        }
-        ghostButton.classList.remove("model-load-failed");
-        ghostButton.classList.add("has-3d-model");
-      }, { once:true });
-      ghostModel.addEventListener("error", () => {
+      const showModelFallback = () => {
         ghostButton.classList.remove("has-3d-model");
         ghostButton.classList.add("model-load-failed");
-      }, { once:true });
+      };
+
+      try {
+        await import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js");
+
+        ghostModel.addEventListener("load", () => {
+          try {
+            for (const material of ghostModel.model.materials) {
+              material.pbrMetallicRoughness.setBaseColorFactor("#65dfff");
+              material.setEmissiveFactor("#123e58");
+            }
+          } catch (error) {
+            console.warn("ITERUM ghost material tint unavailable", error);
+          }
+          ghostButton.classList.remove("model-load-failed");
+          ghostButton.classList.add("has-3d-model");
+        }, { once:true });
+
+        ghostModel.addEventListener("error", showModelFallback, { once:true });
+
+        if (ghostModel.loaded) {
+          ghostButton.classList.add("has-3d-model");
+        } else {
+          window.setTimeout(() => {
+            if (!ghostButton.classList.contains("has-3d-model")) showModelFallback();
+          }, 20000);
+        }
+      } catch (error) {
+        console.error("ITERUM ghost 3D viewer failed to initialize", error);
+        showModelFallback();
+      }
     }
   </script>
 </body>

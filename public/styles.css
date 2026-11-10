@@ -7407,3 +7407,20 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iteru
     width:100%;
   }
 }
+
+
+/* Unified release planner in the existing admin panel. */
+.admin-release-planner { margin-top:28px; padding:20px; border:1px solid rgba(190,151,99,.28); background:linear-gradient(145deg,rgba(31,35,34,.7),rgba(20,22,21,.78)); }
+.admin-release-heading { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
+.admin-release-heading h3 { margin:5px 0 8px; color:#e0d6c5; font:500 22px var(--serif); }
+.admin-release-heading .admin-help { max-width:780px; margin:0; line-height:1.7; }
+.admin-release-planner .admin-material-list { margin-top:18px; }
+.admin-release-planner .admin-material { border-color:rgba(174,151,116,.2); background:rgba(7,12,13,.35); }
+.admin-release-planner .admin-material span { line-height:1.6; }
+.admin-release-planner .admin-material small { max-width:260px; text-align:right; line-height:1.5; }
+@media (max-width:760px) {
+ .admin-release-planner { padding:14px; }
+ .admin-release-planner .admin-material { grid-template-columns:minmax(0,1fr); }
+ .admin-release-planner .admin-material small { grid-column:1; grid-row:auto; max-width:none; text-align:left; }
+ .admin-release-planner .admin-material-actions { justify-content:flex-start; }
+}

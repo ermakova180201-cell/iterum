@@ -7078,6 +7078,17 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-sleeping
   animation:iterumGhostModelSleep 4.8s ease-in-out infinite;
   filter:brightness(.78) saturate(.72);
 }
+
+/* Короткое потягивание после пробуждения */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-waking .iterum-ghost-model-wrap {
+  animation:iterumGhostWakeStretch 1.35s ease-out both !important;
+}
+@keyframes iterumGhostWakeStretch {
+  0% {transform:translateY(5px) scale(.96,.94);}
+  38% {transform:translateY(-10px) scale(1.035,1.09);}
+  68% {transform:translateY(-3px) scale(.99,1.025);}
+  100% {transform:translateY(0) scale(1,1);}
+}
 body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model.is-grumpy .iterum-ghost-model-wrap {
   transform:rotate(-4deg);
   filter:hue-rotate(-12deg) brightness(.9);

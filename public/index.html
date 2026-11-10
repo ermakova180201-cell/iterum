@@ -339,6 +339,19 @@
             <p class="admin-help">Выбирать игроков и вводить их личные адреса не нужно. Система сама покажет материал всем участникам активного дела или откроет его каждому отдельно после нужного действия.</p>
             <label for="material-trigger">КАКОЙ МАТЕРИАЛ ДОЛЖЕН ПРОЧИТАТЬ ИГРОК</label>
             <select id="material-trigger" name="triggerMaterialId" disabled><option value="">Сначала выберите дело</option></select>
+            <div id="material-delay-fields" class="admin-delay-fields" hidden>
+              <label for="material-delay-value">ЗАДЕРЖКА ПОСЛЕ ВЫПОЛНЕНИЯ УСЛОВИЯ</label>
+              <div class="admin-delay-controls">
+                <input id="material-delay-value" type="number" min="0" max="2592000" step="1" value="1">
+                <select id="material-delay-unit" aria-label="Единица времени">
+                  <option value="1">секунд</option>
+                  <option value="60" selected>минут</option>
+                  <option value="3600">часов</option>
+                  <option value="86400">дней</option>
+                </select>
+              </div>
+              <p class="admin-help">Отсчёт начинается отдельно для каждого игрока в момент прочтения выбранного материала. Ноль означает немедленную выдачу. Максимум — 30 дней.</p>
+            </div>
             <button class="admin-submit" type="submit">СОХРАНИТЬ ЧЕРНОВИК</button>
             <p class="admin-message" id="material-message" role="status"></p>
           </form>

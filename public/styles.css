@@ -5345,7 +5345,7 @@ body.is-workstation .desktop-shell .desktop-help-shortcut .desktop-icon-art.fold
 body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
   position:absolute;
   z-index:4;
-  left:7%;
+  left:89%;
   top:68%;
   width:66px;
   height:78px;
@@ -5356,7 +5356,7 @@ body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
   box-shadow:none;
   cursor:pointer;
   transform:translate(-50%,-50%);
-  animation:iterumGhostDrift 38s ease-in-out infinite;
+  animation:none;
   -webkit-tap-highlight-color:transparent;
 }
 body.is-workstation .desktop-shell .iterum-ghost-aura {
@@ -5467,7 +5467,7 @@ body.is-workstation .desktop-shell .iterum-ghost-helper:hover .iterum-ghost-body
   body.is-workstation .desktop-shell .iterum-ghost-eyes i {
     animation:none !important;
   }
-  body.is-workstation .desktop-shell .iterum-ghost-helper {left:8%;top:68%;}
+  body.is-workstation .desktop-shell .iterum-ghost-helper {left:89%;top:68%;}
 }
 
 

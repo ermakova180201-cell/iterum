@@ -6960,3 +6960,5 @@ body.is-workstation .desktop-shell .iterum-ghost-eyes i {
     width:min(330px,calc(100% - 16px));
   }
 }
+
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-app { pointer-events:auto !important; }

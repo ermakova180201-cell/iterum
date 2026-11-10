@@ -450,12 +450,15 @@ async function handleApi(request, env) {
       const senderName = String(body.senderName || "").trim();
       const senderAddress = String(body.senderAddress || "").trim();
       const sentAt = String(body.sentAt || "").trim();
+      const deliveryDelaySeconds = body.deliveryDelaySeconds === null || body.deliveryDelaySeconds === undefined
+        ? null : Number(body.deliveryDelaySeconds);
       const allowedTypes = ["email", "publication", "document", "photo", "audio", "map", "other"];
       if (!caseId || !allowedTypes.includes(type) || !title || title.length > 200 ||
           summary.length > 1000 || content.length > 50000 ||
           !["automatic", "triggered"].includes(deliveryMode) || (deliveryMode === "triggered" && !triggerMaterialId) ||
           (type === "email" && (senderName.length > 120 || senderAddress.length > 200 || sentAt.length > 40)) ||
-          !Number.isInteger(releaseOrder) || releaseOrder < 0 || releaseOrder > 100000) {
+          !Number.isInteger(releaseOrder) || releaseOrder < 0 || releaseOrder > 100000 ||
+          (deliveryDelaySeconds !== null && (!Number.isInteger(deliveryDelaySeconds) || deliveryDelaySeconds < 0 || deliveryDelaySeconds > 2592000))) {
         return json({ error: "Проверьте тип, название, текст и порядок открытия материала." }, 400);
       }
       const targetCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseId).first();
@@ -466,8 +469,8 @@ async function handleApi(request, env) {
       }
       const id = randomToken(16);
       await env.DB.prepare(
-        "INSERT INTO materials (id, case_id, material_type, title, summary, content, release_order, is_published, delivery_mode, trigger_material_id, is_searchable, sender_name, sender_address, sent_at) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?)"
-      ).bind(id, caseId, type, title, summary, content, releaseOrder, deliveryMode, deliveryMode === "triggered" ? triggerMaterialId : null, type === "document" ? isSearchable : 0, type === "email" ? senderName : "", type === "email" ? senderAddress : "", type === "email" ? sentAt : "").run();
+        "INSERT INTO materials (id, case_id, material_type, title, summary, content, release_order, is_published, delivery_mode, trigger_material_id, delivery_delay_seconds, is_searchable, sender_name, sender_address, sent_at) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)"
+      ).bind(id, caseId, type, title, summary, content, releaseOrder, deliveryMode, deliveryMode === "triggered" ? triggerMaterialId : null, deliveryMode === "triggered" ? deliveryDelaySeconds : null, type === "document" ? isSearchable : 0, type === "email" ? senderName : "", type === "email" ? senderAddress : "", type === "email" ? sentAt : "").run();
       return json({ ok: true, id });
     }
 

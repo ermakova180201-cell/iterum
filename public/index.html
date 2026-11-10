@@ -1157,8 +1157,17 @@
     let ghostReturnTimer = null;
 
     function setAssistantMood(mood, phrase) {
+      const wasSleeping = assistantGhost.classList.contains("is-sleeping");
       assistantGhost.classList.remove("is-sleeping");
       window.clearTimeout(assistantGhost._napWakeTimer);
+      window.clearTimeout(assistantGhost._wakeStretchTimer);
+      assistantGhost.classList.remove("is-waking");
+      if (wasSleeping) {
+        assistantGhost.classList.add("is-waking");
+        assistantGhost._wakeStretchTimer = window.setTimeout(() => {
+          assistantGhost.classList.remove("is-waking");
+        }, 1450);
+      }
       assistantEmotions.forEach(name => assistantGhost.classList.remove("is-" + name));
       assistantGhost.classList.add("is-" + (assistantEmotions.includes(mood) ? mood : "happy"));
       if (phrase) assistantGhostMessage.textContent = phrase;

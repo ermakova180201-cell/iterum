@@ -228,7 +228,7 @@ async function handleApi(request, env) {
         "SELECT id, title, case_code, description, status, created_at FROM cases ORDER BY created_at DESC"
       ).all();
       const materials = await env.DB.prepare(
-        "SELECT materials.id, materials.case_id, cases.title AS case_title, materials.material_type, materials.title, materials.summary, materials.release_order, materials.is_published, materials.delivery_mode, materials.trigger_material_id, materials.is_searchable, materials.sender_name, materials.sender_address, materials.sent_at, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id ORDER BY materials.created_at DESC"
+        "SELECT materials.id, materials.case_id, cases.title AS case_title, materials.material_type, materials.title, materials.summary, materials.release_order, materials.is_published, materials.delivery_mode, materials.trigger_material_id, materials.delivery_delay_seconds, materials.is_searchable, materials.sender_name, materials.sender_address, materials.sent_at, materials.created_at FROM materials JOIN cases ON cases.id = materials.case_id ORDER BY materials.created_at DESC"
       ).all();
       return json({ cases: cases.results || [], materials: materials.results || [] });
     }

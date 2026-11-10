@@ -7370,3 +7370,40 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iteru
   display:flex;
   background:radial-gradient(ellipse,rgba(2,15,28,.94),rgba(2,15,28,.25) 72%,transparent 100%);
 }
+
+
+/* Restore clear visibility of the administrator's personal progress reset action. */
+#admin-case-list .admin-case {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:10px;
+}
+#admin-case-list .admin-case > .admin-mini-button {
+  display:inline-flex !important;
+  align-items:center;
+  justify-content:center;
+  visibility:visible !important;
+  opacity:1 !important;
+  min-height:34px;
+  flex-shrink:0;
+  white-space:normal;
+}
+#admin-case-list .admin-case > .admin-mini-button:last-child {
+  border-color:#8b6658;
+  color:#e0c4b2;
+  background:rgba(105,63,48,.22);
+}
+#admin-case-list .admin-case > .admin-mini-button:last-child:hover {
+  border-color:#c18b72;
+  background:rgba(130,76,55,.34);
+}
+@media (max-width:760px) {
+  #admin-case-list .admin-case {
+    grid-template-columns:minmax(0,1fr);
+    align-items:stretch;
+  }
+  #admin-case-list .admin-case > .admin-mini-button {
+    width:100%;
+  }
+}

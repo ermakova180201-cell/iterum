@@ -351,6 +351,10 @@ async function handleApi(request, env) {
         if (deliveryMode === "triggered") {
           const prerequisite = await env.DB.prepare("SELECT id FROM materials WHERE id = ? AND case_id = ?").bind(triggerMaterialId, caseId).first();
           if (!prerequisite) return json({ error: "Выберите существующий материал из этого дела как условие открытия." }, 400);
+          const cycle = await env.DB.prepare(
+            "WITH RECURSIVE dependency_chain(id, trigger_material_id) AS (SELECT id, trigger_material_id FROM materials WHERE id = ? UNION ALL SELECT m.id, m.trigger_material_id FROM materials m JOIN dependency_chain d ON m.id = d.trigger_material_id WHERE d.trigger_material_id IS NOT NULL) SELECT 1 AS found FROM dependency_chain WHERE id = ? LIMIT 1"
+          ).bind(triggerMaterialId, materialId).first();
+          if (cycle) return json({ error: "Нельзя создать замкнутую цепочку условий: этот материал уже зависит от выбранного." }, 400);
         }
         await env.DB.prepare(
           "UPDATE materials SET case_id = ?, material_type = ?, title = ?, summary = ?, content = ?, release_order = ?, delivery_mode = ?, trigger_material_id = ?, delivery_delay_seconds = ?, is_searchable = ?, sender_name = ?, sender_address = ?, sent_at = ? WHERE id = ?"

@@ -7347,16 +7347,26 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghos
 
 
 
-/* Keep the legacy CSS ghost hidden while the Meshy model is loading.
-   Show it only if the 3D asset actually fails to load. */
-body.is-workstation .desktop-shell .iterum-ghost-helper:has(.iterum-ghost-model):not(.model-load-failed) .iterum-ghost-body {
-  opacity:0 !important;
-  visibility:hidden !important;
-}
-body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iterum-ghost-body {
-  opacity:1 !important;
-  visibility:visible !important;
-}
+/* The old CSS character is retired. If the 3D asset fails, show a
+   minimal holographic face instead of bringing the old ghost back. */
 body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iterum-ghost-model-wrap {
-  opacity:0 !important;
+  opacity:1 !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iterum-ghost-model {
+  display:none !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iterum-ghost-model-wrap::before {
+  left:8%;
+  right:8%;
+  top:8%;
+  bottom:0;
+  background:
+    radial-gradient(ellipse at 50% 25%,rgba(194,249,255,.72),rgba(103,220,244,.3) 23%,transparent 43%),
+    radial-gradient(ellipse at 50% 72%,rgba(77,203,239,.34),rgba(54,151,206,.12) 42%,transparent 70%);
+  filter:blur(7px);
+  opacity:.9;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iterum-ghost-face {
+  display:flex;
+  background:radial-gradient(ellipse,rgba(2,15,28,.94),rgba(2,15,28,.25) 72%,transparent 100%);
 }

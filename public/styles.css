@@ -6961,3 +6961,69 @@ body.is-workstation .desktop-shell .iterum-ghost-eyes i {
 }
 
 body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-app { pointer-events:auto !important; }
+
+
+/* ITERUM workstation refinement — clearer hierarchy and assistant presence */
+@media (min-width:761px) {
+  body.is-workstation .desktop-shell .desktop-system-panel {
+    bottom:18% !important;
+    right:4% !important;
+  }
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
+  width:100px !important;
+  height:120px !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-body {
+  left:20px;
+  top:9px;
+  width:58px;
+  height:78px;
+}
+body.is-workstation .desktop-shell .iterum-ghost-eyes {
+  top:26px;
+  left:13px;
+  gap:9px;
+}
+body.is-workstation .desktop-shell .iterum-ghost-eyes i {
+  width:6px;
+  height:8px;
+}
+body.is-workstation .desktop-shell .iterum-ghost-sleep-z {
+  right:-7px;
+  top:-5px;
+  font-size:14px;
+  font-weight:700;
+}
+body.is-workstation .desktop-shell .desktop-icon {
+  transition:transform .2s ease,border-color .2s ease,background .2s ease,filter .2s ease;
+}
+body.is-workstation .desktop-shell .desktop-icon:hover,
+body.is-workstation .desktop-shell .desktop-icon:focus-visible {
+  transform:translateY(-3px);
+  border-color:rgba(129,211,224,.32);
+  background:linear-gradient(145deg,rgba(67,112,128,.18),rgba(16,34,47,.22));
+  filter:drop-shadow(0 0 10px rgba(93,195,218,.13));
+}
+@media (max-width:760px) {
+  body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
+    width:82px !important;
+    height:100px !important;
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-body {
+    left:12px;
+    top:6px;
+    width:52px;
+    height:70px;
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-eyes {
+    top:23px;
+    left:11px;
+    gap:8px;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .desktop-icon {
+    transition:none !important;
+  }
+}

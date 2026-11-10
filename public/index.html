@@ -1226,8 +1226,8 @@
       const idleFor = Date.now() - assistantMemory.lastActionAt;
       const napIn = Math.max(15000, 120000 + Math.random() * 60000 - idleFor);
       ghostNapTimer = window.setTimeout(() => {
-        if (assistantChat.hidden && !assistantGhost.classList.contains("is-visiting-app") &&
-            Date.now() - assistantMemory.lastActionAt >= 115000) {
+        if (assistantChat.hidden && Date.now() - assistantMemory.lastActionAt >= 115000) {
+          window.clearTimeout(ghostReturnTimer);
           assistantGhost.classList.remove("is-visiting-app");
           assistantGhost.style.removeProperty("left");
           assistantGhost.style.removeProperty("top");
@@ -1287,6 +1287,9 @@
       }
       assistantChat.hidden = !assistantChat.hidden;
       if (!assistantChat.hidden) {
+        if (assistantChat.style.left && assistantChat.style.top) {
+          requestAnimationFrame(() => placeAssistantChat(parseFloat(assistantChat.style.left),parseFloat(assistantChat.style.top),false));
+        }
         assistantSay(assistantWelcomeLine(), "curious");
         assistantChatInput.focus();
       } else {

@@ -1836,9 +1836,134 @@
       }
     }
 
+    function formatDeliveryDelay(seconds, materialType) {
+      if (seconds === null || seconds === undefined) seconds = materialType === "email" ? 60 : 0;
+      const value = Number(seconds) || 0;
+      if (value === 0) return "без задержки";
+      const units = [[86400, "дн."], [3600, "ч."], [60, "мин."], [1, "сек."]];
+      const unit = units.find(([size]) => value % size === 0) || units[3];
+      return (value / unit[0]) + " " + unit[1];
+    }
+
+    async function moveMaterial(id, direction) {
+      try {
+        await adminRequest("/api/admin/materials/" + encodeURIComponent(id) + "/order", {
+          method: "POST",
+          body: JSON.stringify({ direction })
+        });
+        await loadAdminOverview();
+      } catch (error) {
+        showAdminMessage(materialMessage, error.message, true);
+      }
+    }
+
+    function renderAdminMaterialPlanner(data) {
+      adminMaterialList.replaceChildren();
+      const query = adminMaterialFilterQuery.trim().toLocaleLowerCase("ru-RU");
+      const materialTitles = new Map(data.materials.map(material => [material.id, material.title]));
+      const orderedMaterials = [...data.materials]
+        .filter(item => (adminMaterialFilterCase === "all" || item.case_id === adminMaterialFilterCase) &&
+          (!query || [item.title, item.case_title, item.material_type].some(value => String(value || "").toLocaleLowerCase("ru-RU").includes(query))))
+        .sort((a, b) =>
+          a.case_title.localeCompare(b.case_title, "ru") ||
+          Number(a.release_order || 0) - Number(b.release_order || 0) ||
+          String(a.created_at || "").localeCompare(String(b.created_at || ""))
+        );
+      adminMaterialTotal.textContent = orderedMaterials.length + " из " + data.materials.length + " материалов";
+      if (!orderedMaterials.length) {
+        const empty = document.createElement("p");
+        empty.className = "admin-empty";
+        empty.textContent = data.materials.length ? "По выбранным фильтрам материалы не найдены." : "Пока материалов нет. Создайте первое дело и добавьте материал.";
+        adminMaterialList.append(empty);
+        return;
+      }
+      const positions = new Map();
+      for (const item of orderedMaterials) {
+        if (!positions.has(item.case_id)) positions.set(item.case_id, []);
+        positions.get(item.case_id).push(item);
+      }
+      for (const item of orderedMaterials) {
+        const siblings = positions.get(item.case_id);
+        const position = siblings.findIndex(entry => entry.id === item.id);
+        const card = document.createElement("article");
+        card.className = "admin-material admin-material-planner-card";
+        const order = document.createElement("div");
+        order.className = "admin-material-order";
+        const number = document.createElement("strong");
+        number.textContent = String(item.release_order).padStart(2, "0");
+        number.title = "Порядок материала в этом деле";
+        const up = document.createElement("button");
+        up.type = "button";
+        up.className = "admin-order-button";
+        up.textContent = "↑";
+        up.title = "Переместить выше";
+        up.disabled = position === 0;
+        up.addEventListener("click", () => moveMaterial(item.id, "up"));
+        const down = document.createElement("button");
+        down.type = "button";
+        down.className = "admin-order-button";
+        down.textContent = "↓";
+        down.title = "Переместить ниже";
+        down.disabled = position === siblings.length - 1;
+        down.addEventListener("click", () => moveMaterial(item.id, "down"));
+        order.append(number, up, down);
+
+        const info = document.createElement("div");
+        info.className = "admin-material-info";
+        const heading = document.createElement("strong");
+        heading.textContent = item.title;
+        const condition = item.delivery_mode === "triggered"
+          ? "После прочтения «" + (materialTitles.get(item.trigger_material_id) || "условие не выбрано") + "» · задержка " + formatDeliveryDelay(item.delivery_delay_seconds, item.material_type)
+          : "Сразу после публикации";
+        const details = document.createElement("span");
+        details.textContent = item.case_title + " · " + item.material_type + " · " + condition;
+        const status = document.createElement("small");
+        status.className = item.is_published ? "is-published" : "is-draft";
+        status.textContent = item.is_published
+          ? (item.delivery_mode === "triggered" ? "ОПУБЛИКОВАНО · ЖДЁТ УСЛОВИЯ" : "ОПУБЛИКОВАНО · ДОСТУПНО ИГРОКАМ")
+          : "ЧЕРНОВИК · ИГРОКАМ НЕ ВИДНО";
+        info.append(heading, details, status);
+
+        const actions = document.createElement("div");
+        actions.className = "admin-material-actions";
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "admin-mini-button";
+        edit.textContent = "РЕДАКТИРОВАТЬ / ВЫДАЧА";
+        edit.addEventListener("click", () => editMaterial(item.id));
+        const publish = document.createElement("button");
+        publish.type = "button";
+        publish.className = "admin-mini-button";
+        publish.textContent = item.is_published ? "СНЯТЬ С ПУБЛИКАЦИИ" : "ОПУБЛИКОВАТЬ";
+        publish.addEventListener("click", () => setMaterialPublished(item.id, !item.is_published));
+        actions.append(edit, publish);
+        if (!item.is_published) {
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "admin-mini-button admin-delete-draft";
+          remove.textContent = "УДАЛИТЬ ЧЕРНОВИК";
+          remove.addEventListener("click", () => deleteDraftMaterial(item.id, item.title));
+          actions.append(remove);
+        }
+        card.append(order, info, actions);
+        adminMaterialList.append(card);
+      }
+    }
+
+    let lastAdminOverviewData = null;
+    adminMaterialCaseFilter.addEventListener("change", () => {
+      adminMaterialFilterCase = adminMaterialCaseFilter.value || "all";
+      if (lastAdminOverviewData) renderAdminMaterialPlanner(lastAdminOverviewData);
+    });
+    adminMaterialSearch.addEventListener("input", () => {
+      adminMaterialFilterQuery = adminMaterialSearch.value || "";
+      if (lastAdminOverviewData) renderAdminMaterialPlanner(lastAdminOverviewData);
+    });
+
     async function loadAdminOverview() {
       try {
         const data = await adminRequest("/api/admin/overview");
+        lastAdminOverviewData = data;
         const previous = materialCase.value;
         materialCase.replaceChildren();
         if (!data.cases.length) {
@@ -1915,60 +2040,24 @@
           }
         }
 
-        adminMaterialList.replaceChildren();
-        if (!data.materials.length) {
-          const empty = document.createElement("p");
-          empty.className = "admin-empty";
-          empty.textContent = "Пока материалов нет.";
-          adminMaterialList.append(empty);
-        } else {
-          const materialTitles = new Map(data.materials.map(material => [material.id, material.title]));
-          const orderedMaterials = [...data.materials].sort((a, b) =>
-            a.case_title.localeCompare(b.case_title, "ru") ||
-            Number(a.release_order || 0) - Number(b.release_order || 0) ||
-            String(a.created_at || "").localeCompare(String(b.created_at || ""))
-          );
-          for (const item of orderedMaterials) {
-            const card = document.createElement("article");
-            card.className = "admin-material";
-            const info = document.createElement("div");
-            const heading = document.createElement("strong");
-            heading.textContent = item.title;
-            const details = document.createElement("span");
-            const condition = item.delivery_mode === "triggered"
-              ? "После прочтения: " + (materialTitles.get(item.trigger_material_id) || "условие не выбрано")
-              : "Сразу после публикации";
-            details.textContent = item.case_title + " · " + item.material_type + " · позиция " + item.release_order + " · " + condition;
-            const status = document.createElement("small");
-            status.textContent = item.is_published
-              ? (item.delivery_mode === "triggered" ? "ОПУБЛИКОВАНО · ОЖИДАЕТ УСЛОВИЯ" : "ОПУБЛИКОВАНО · ДОСТУПНО ПОСЛЕ ПУБЛИКАЦИИ")
-              : "ЧЕРНОВИК · ИГРОКАМ НЕ ВИДНО";
-            info.append(heading, details, status);
-            const actions = document.createElement("div");
-            actions.className = "admin-material-actions";
-            const edit = document.createElement("button");
-            edit.type = "button";
-            edit.className = "admin-mini-button";
-            edit.textContent = "НАСТРОИТЬ ВЫДАЧУ";
-            edit.addEventListener("click", () => editMaterial(item.id));
-            const publish = document.createElement("button");
-            publish.type = "button";
-            publish.className = "admin-mini-button";
-            publish.textContent = item.is_published ? "СНЯТЬ С ПУБЛИКАЦИИ" : "ОПУБЛИКОВАТЬ";
-            publish.addEventListener("click", () => setMaterialPublished(item.id, !item.is_published));
-            actions.append(edit, publish);
-            if (!item.is_published) {
-              const remove = document.createElement("button");
-              remove.type = "button";
-              remove.className = "admin-mini-button admin-delete-draft";
-              remove.textContent = "УДАЛИТЬ ЧЕРНОВИК";
-              remove.addEventListener("click", () => deleteDraftMaterial(item.id, item.title));
-              actions.append(remove);
-            }
-            card.append(info, actions);
-            adminMaterialList.append(card);
-          }
+        adminMaterialCaseFilter.replaceChildren();
+        const allCasesOption = document.createElement("option");
+        allCasesOption.value = "all";
+        allCasesOption.textContent = "Все дела";
+        adminMaterialCaseFilter.append(allCasesOption);
+        for (const caseItem of data.cases) {
+          const option = document.createElement("option");
+          option.value = caseItem.id;
+          option.textContent = caseItem.title;
+          adminMaterialCaseFilter.append(option);
         }
+        if (data.cases.some(item => item.id === adminMaterialFilterCase)) {
+          adminMaterialCaseFilter.value = adminMaterialFilterCase;
+        } else {
+          adminMaterialFilterCase = "all";
+          adminMaterialCaseFilter.value = "all";
+        }
+        renderAdminMaterialPlanner(data);
       } catch (error) {
         showAdminMessage(materialMessage, error.message, true);
       }

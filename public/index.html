@@ -583,7 +583,10 @@
       const response = await fetch("/api/player/materials/" + encodeURIComponent(id) + "/read", {
         method: "POST", credentials: "same-origin"
       });
-      if (!response.ok) throw new Error("Не удалось открыть материал.");
+      let data = {};
+      try { data = await response.json(); } catch {}
+      if (!response.ok) throw new Error(data.error || "Не удалось отметить письмо прочитанным.");
+      return data;
     }
 
     function isVisibleMail(item) {
@@ -867,11 +870,26 @@
             button.addEventListener("click", () => { action(); menu.remove(); renderMailClient(); });
             menu.append(button);
           };
-          addAction(item.is_read ? "Пометить непрочитанным" : "Пометить прочитанным", () => {
-            if (item.is_read) item.is_read = 0;
-            else item.is_read = 1;
-            if (item.is_read) markMaterialRead(item.id).catch(()=>{});
-            else { openedMailIds.delete(item.id); }
+          addAction(item.is_read ? "Пометить непрочитанным" : "Пометить прочитанным", async () => {
+            if (item.is_read) {
+              item.is_read = 0;
+              archiveMaterials.forEach(entry => { if (entry.id === item.id) entry.is_read = 0; });
+              emails.forEach(entry => { if (entry.id === item.id) entry.is_read = 0; });
+              openedMailIds.delete(item.id);
+            } else {
+              try {
+                await markMaterialRead(item.id);
+                item.is_read = 1;
+                archiveMaterials.forEach(entry => { if (entry.id === item.id) entry.is_read = 1; });
+                emails.forEach(entry => { if (entry.id === item.id) entry.is_read = 1; });
+              } catch (error) {
+                const toast = document.getElementById("desktop-notice-toast");
+                if (toast) { toast.textContent = error.message; toast.hidden = false; }
+              }
+            }
+            const unreadCount = emails.filter(entry => !entry.is_read).length;
+            playerMailCount.textContent = unreadCount ? unreadCount + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
+            updateMailBadge();
           });
           if (currentFolder !== "spam" && currentFolder !== "trash") {
             addAction("Переместить в спам", () => setIds("spam", [...getIds("spam"), item.id]));
@@ -901,11 +919,15 @@
             try {
               await markMaterialRead(item.id);
               item.is_read = 1;
-              const archivedItem = archiveMaterials.find(entry => entry.id === item.id);
-              if (archivedItem) archivedItem.is_read = 1;
-              updateMailBadge();
+              archiveMaterials.forEach(entry => {
+                if (entry.id === item.id) entry.is_read = 1;
+              });
+              emails.forEach(entry => {
+                if (entry.id === item.id) entry.is_read = 1;
+              });
               const unreadCount = emails.filter(entry => !entry.is_read).length;
               playerMailCount.textContent = unreadCount ? unreadCount + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
+              updateMailBadge();
             } catch (error) {
               const toast = document.getElementById("desktop-notice-toast");
               if (toast) {

@@ -1808,7 +1808,8 @@
 
     function refreshTriggerOptions(selectedId = "") {
       const caseId = materialCase.value;
-      const available = triggerMaterials.filter(material => material.case_id === caseId);
+      const editingMaterialId = document.getElementById("material-id").value;
+      const available = triggerMaterials.filter(material => material.case_id === caseId && material.id !== editingMaterialId);
       const placeholder = document.createElement("option");
       placeholder.value = "";
       placeholder.textContent = available.length ? "Выберите материал-предусловие" : "В этом деле пока нет других материалов";

@@ -7027,3 +7027,140 @@ body.is-workstation .desktop-shell .desktop-icon:focus-visible {
     transition:none !important;
   }
 }
+
+
+/* ITERUM holographic companion — visual direction matched to the supplied reference */
+body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
+  width:166px !important;
+  height:184px !important;
+  filter:drop-shadow(0 5px 18px rgba(77,197,231,.28));
+}
+body.is-workstation .desktop-shell .iterum-ghost-aura {
+  inset:8px -8px -8px;
+  background:
+    radial-gradient(ellipse at 50% 38%,rgba(120,232,255,.34),rgba(76,183,224,.16) 42%,transparent 73%),
+    radial-gradient(ellipse at 50% 90%,rgba(66,192,255,.26),transparent 60%);
+  filter:blur(12px);
+}
+body.is-workstation .desktop-shell .iterum-ghost-body {
+  left:5px !important;
+  top:38px !important;
+  width:156px !important;
+  height:132px !important;
+  overflow:visible;
+  clip-path:polygon(25% 0,75% 0,88% 12%,94% 35%,100% 82%,94% 91%,87% 85%,80% 100%,70% 92%,61% 100%,50% 94%,39% 100%,29% 92%,19% 100%,12% 88%,5% 94%,0 82%,7% 35%,13% 12%);
+  border:1px solid rgba(205,250,255,.8);
+  border-radius:48% 48% 18% 18% / 24% 24% 13% 13%;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 8px,rgba(218,253,255,.055) 9px,transparent 10px),
+    linear-gradient(90deg,rgba(190,247,255,.2),rgba(239,255,255,.58) 20%,rgba(115,212,244,.25) 49%,rgba(229,255,255,.48) 76%,rgba(112,201,237,.2)),
+    linear-gradient(180deg,rgba(222,252,255,.46),rgba(102,196,232,.26) 58%,rgba(35,118,177,.32));
+  box-shadow:
+    inset 0 0 12px rgba(245,255,255,.62),
+    inset 0 -18px 24px rgba(62,173,224,.2),
+    0 0 12px rgba(160,235,255,.52),
+    0 0 28px rgba(59,169,224,.38);
+  backdrop-filter:blur(1.5px);
+}
+body.is-workstation .desktop-shell .iterum-ghost-body::before {
+  content:"";
+  position:absolute;
+  left:10px;right:10px;top:3px;height:38px;
+  border:0;
+  border-radius:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.46),rgba(222,251,255,.1) 55%,transparent);
+  pointer-events:none;
+}
+body.is-workstation .desktop-shell .iterum-ghost-body::after {
+  content:"";
+  position:absolute;
+  left:7px;right:7px;bottom:10px;height:18px;
+  border-top:1px solid rgba(228,255,255,.72);
+  border-radius:50%;
+  box-shadow:0 -5px 12px rgba(122,224,255,.24);
+  pointer-events:none;
+}
+body.is-workstation .desktop-shell .iterum-ghost-head-shell {
+  position:absolute;
+  z-index:1;
+  left:18px;top:-39px;
+  width:120px;height:116px;
+  border:1px solid rgba(227,255,255,.94);
+  border-radius:49% 51% 47% 47%;
+  background:
+    radial-gradient(ellipse at 32% 18%,rgba(255,255,255,.96),rgba(244,255,255,.54) 12%,transparent 32%),
+    radial-gradient(ellipse at 72% 22%,rgba(231,255,255,.7),transparent 30%),
+    linear-gradient(145deg,rgba(224,253,255,.8),rgba(111,207,239,.44) 48%,rgba(54,145,203,.38));
+  box-shadow:
+    inset 5px 5px 12px rgba(255,255,255,.78),
+    inset -7px -8px 18px rgba(36,134,192,.2),
+    0 0 12px rgba(197,250,255,.8),
+    0 0 28px rgba(82,192,235,.46);
+}
+body.is-workstation .desktop-shell .iterum-ghost-face {
+  position:absolute;
+  z-index:3;
+  left:34px;top:-5px;
+  width:88px;height:80px;
+  border:2px solid rgba(40,168,245,.95);
+  border-radius:48% 48% 47% 47%;
+  background:
+    radial-gradient(ellipse at 35% 18%,rgba(44,100,160,.45),transparent 34%),
+    linear-gradient(160deg,#07142c 0%,#020817 70%,#07182c 100%);
+  box-shadow:
+    inset 0 3px 8px rgba(111,202,255,.28),
+    inset 0 -7px 12px rgba(0,0,0,.7),
+    0 0 5px 2px rgba(42,170,255,.85),
+    0 0 16px rgba(24,139,255,.68);
+}
+body.is-workstation .desktop-shell .iterum-ghost-eyes {
+  top:28px !important;left:22px !important;gap:29px !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-eyes i {
+  width:10px !important;height:20px !important;
+  border-radius:50%;
+  background:#35eaff;
+  box-shadow:0 0 8px 3px rgba(38,224,255,.95),0 0 20px rgba(25,151,255,.8);
+}
+body.is-workstation .desktop-shell .iterum-ghost-cheeks {
+  display:none;
+}
+body.is-workstation .desktop-shell .iterum-ghost-mouth {
+  left:41px !important;top:61px !important;
+  width:6px;height:3px;
+  background:rgba(179,250,255,.8);
+  box-shadow:0 0 6px rgba(89,229,255,.8);
+}
+body.is-workstation .desktop-shell .iterum-ghost-forehead-mark,
+body.is-workstation .desktop-shell .iterum-ghost-core {
+  display:none;
+}
+body.is-workstation .desktop-shell .iterum-ghost-wisp {
+  z-index:0;
+  bottom:2px;
+  width:25px;height:48px;
+  border-color:rgba(196,247,255,.5);
+  background:linear-gradient(180deg,rgba(202,247,255,.2),rgba(64,169,222,.05));
+  filter:blur(.4px);
+}
+body.is-workstation .desktop-shell .iterum-ghost-wisp-left {left:3px;transform:rotate(9deg)}
+body.is-workstation .desktop-shell .iterum-ghost-wisp-right {right:3px;height:42px;transform:rotate(-9deg)}
+body.is-workstation .desktop-shell .iterum-ghost-particle {
+  width:3px;height:3px;
+  background:#e6ffff;
+  box-shadow:0 0 7px 2px rgba(87,224,255,.9),0 0 14px rgba(48,163,255,.45);
+}
+body.is-workstation .desktop-shell .iterum-ghost-particle-one {left:8px;top:93px}
+body.is-workstation .desktop-shell .iterum-ghost-particle-two {right:6px;top:67px}
+body.is-workstation .desktop-shell .iterum-ghost-particle-three {right:23px;bottom:8px}
+body.is-workstation .desktop-shell .iterum-ghost-sleep-z {right:2px;top:-37px}
+@media(max-width:760px) {
+  body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
+    width:126px !important;height:148px !important;
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-body {
+    left:2px !important;top:36px !important;
+    transform:scale(.78);transform-origin:top left;
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-sleep-z {right:1px;top:-27px}
+}

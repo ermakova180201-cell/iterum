@@ -898,7 +898,21 @@
           selectedMailId = item.id;
           readerMode = true;
           if (!item.is_read) {
-            try { await markMaterialRead(item.id); item.is_read = 1; } catch {}
+            try {
+              await markMaterialRead(item.id);
+              item.is_read = 1;
+              const archivedItem = archiveMaterials.find(entry => entry.id === item.id);
+              if (archivedItem) archivedItem.is_read = 1;
+              updateMailBadge();
+              const unreadCount = emails.filter(entry => !entry.is_read).length;
+              playerMailCount.textContent = unreadCount ? unreadCount + " НОВЫХ" : emails.length + " СООБЩЕНИЙ";
+            } catch (error) {
+              const toast = document.getElementById("desktop-notice-toast");
+              if (toast) {
+                toast.textContent = error.message || "Не удалось отметить письмо прочитанным.";
+                toast.hidden = false;
+              }
+            }
           }
           renderMailClient();
         }

@@ -158,7 +158,7 @@ async function handleApi(request, env) {
     const activeCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ? AND status = 'active'").bind(material.case_id).first();
     if (!activeCase) return json({ error: "Дело сейчас недоступно." }, 403);
     if (material.delivery_mode === "triggered") {
-      const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ?").bind(user.id, materialId).first();
+      const unlocked = await env.DB.prepare("SELECT 1 FROM material_unlocks WHERE user_id = ? AND material_id = ? AND unlocked_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now')").bind(user.id, materialId).first();
       if (!unlocked) return json({ error: "Этот материал ещё не открыт." }, 403);
     }
     await env.DB.prepare("INSERT OR IGNORE INTO player_material_reads (user_id, material_id) VALUES (?, ?)").bind(user.id, materialId).run();

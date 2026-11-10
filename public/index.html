@@ -1097,6 +1097,64 @@
     const assistantGhostMessage = assistantGhost.querySelector(".iterum-ghost-message");
     const assistantChatInput = document.getElementById("assistant-chat-input");
     const assistantEmotions = ["happy","curious","surprised","thinking","sleepy","grumpy"];
+
+    // Память помощника хранит только ход работы, а не тексты писем, документов или поисковых запросов.
+    const assistantMemory = {
+      caseId:null,
+      openedApps:{},
+      inspectedItems:0,
+      searches:0,
+      lastAction:"начало расследования",
+      lastActionAt:Date.now(),
+      lastApp:null,
+      lastAppAt:0,
+      hintsGiven:0
+    };
+    function assistantMemoryKey() {
+      return "iterum-assistant-memory-" + String(currentCaseId || "preview");
+    }
+    function saveAssistantMemory() {
+      try {
+        localStorage.setItem(assistantMemoryKey(), JSON.stringify({
+          openedApps:assistantMemory.openedApps,
+          inspectedItems:assistantMemory.inspectedItems,
+          searches:assistantMemory.searches,
+          lastAction:assistantMemory.lastAction,
+          lastActionAt:assistantMemory.lastActionAt,
+          lastApp:assistantMemory.lastApp,
+          lastAppAt:assistantMemory.lastAppAt,
+          hintsGiven:assistantMemory.hintsGiven
+        }));
+      } catch (error) { /* Память необязательна: помощник продолжит работать и без неё. */ }
+    }
+    function loadAssistantMemory() {
+      assistantMemory.openedApps = {};
+      assistantMemory.inspectedItems = 0;
+      assistantMemory.searches = 0;
+      assistantMemory.lastAction = "начало расследования";
+      assistantMemory.lastActionAt = Date.now();
+      assistantMemory.lastApp = null;
+      assistantMemory.lastAppAt = 0;
+      assistantMemory.hintsGiven = 0;
+      try {
+        const saved = JSON.parse(localStorage.getItem(assistantMemoryKey()) || "null");
+        if (saved && typeof saved === "object") {
+          assistantMemory.openedApps = saved.openedApps || {};
+          assistantMemory.inspectedItems = Number(saved.inspectedItems) || 0;
+          assistantMemory.searches = Number(saved.searches) || 0;
+          assistantMemory.lastAction = saved.lastAction || assistantMemory.lastAction;
+          assistantMemory.lastActionAt = Number(saved.lastActionAt) || Date.now();
+          assistantMemory.lastApp = saved.lastApp || null;
+          assistantMemory.lastAppAt = Number(saved.lastAppAt) || 0;
+          assistantMemory.hintsGiven = Number(saved.hintsGiven) || 0;
+        }
+      } catch (error) { /* Повреждённая или недоступная память не мешает работе. */ }
+      assistantMemory.caseId = currentCaseId || "preview";
+    }
+    let ghostNapTimer = null;
+    let ghostActionTimer = null;
+    let ghostReturnTimer = null;
+
     function setAssistantMood(mood, phrase) {
       assistantGhost.classList.remove("is-sleeping");
       window.clearTimeout(assistantGhost._napWakeTimer);
@@ -1105,61 +1163,84 @@
       if (phrase) assistantGhostMessage.textContent = phrase;
       assistantGhost.setAttribute("aria-label", "Системный помощник ITERUM: " + mood);
     }
-
-    // The ghost occasionally visits desktop app icons and comments on them.
+    function recordAssistantAction(action, detail) {
+      assistantMemory.lastAction = action;
+      assistantMemory.lastActionAt = Date.now();
+      if (detail) assistantMemory.lastApp = detail;
+      saveAssistantMemory();
+      scheduleGhostNap();
+    }
+    function getAssistantCurrentApp() {
+      const open = document.querySelector(".desktop-area .desktop-window:not([hidden])");
+      return open ? open.id : null;
+    }
     const ghostAppVisits = [
-      { key:"mail-window", phrase:"Почта! Люблю письма. Особенно те, где нет счетов за электричество.", mood:"happy" },
-      { key:"search-window", phrase:"Поиск данных… Сейчас найдём что-нибудь любопытное. Или хотя бы опечатку.", mood:"curious" },
-      { key:"materials-window", phrase:"Материалы дела. Бумаги, документы… У вас, людей, столько всего хранится.", mood:"thinking" },
-      { key:"news-window", phrase:"Новости? Надеюсь, сегодня без сенсаций про привидений.", mood:"surprised" },
-      { key:"help-window", phrase:"Помощь? Эй, это моя работа! Хотя иногда и мне нужна помощь.", mood:"happy" }
+      { key:"mail-window", phrase:"Почта. Здесь иногда прячется больше, чем кажется на первый взгляд.", mood:"curious" },
+      { key:"search-window", phrase:"Поиск данных… Только не забывай проверять найденное.", mood:"thinking" },
+      { key:"materials-window", phrase:"Материалы дела. Не спеши: важная деталь может быть совсем небольшой.", mood:"thinking" },
+      { key:"news-window", phrase:"Новости. Посмотрим, что происходит за пределами нашего маленького архива.", mood:"curious" },
+      { key:"help-window", phrase:"Заглянул в помощь? Ничего, я не ревную. Почти.", mood:"happy" }
     ];
-    let ghostAppVisitIndex = 0;
-    let ghostAppVisitTimer = null;
     function visitDesktopApp() {
-      if (!assistantChat.hidden || assistantGhost.classList.contains("is-sleeping")) return;
+      if (!assistantChat.hidden || assistantGhost.classList.contains("is-sleeping") || document.hidden) return;
       const area = document.querySelector(".desktop-area");
       const icons = [...document.querySelectorAll(".desktop-icons [data-open-window], .desktop-help-shortcut[data-open-window]")];
       if (!area || !icons.length) return;
+      const candidates = ghostAppVisits.filter(item => {
+        const app = document.getElementById(item.key);
+        return app && !app.hidden && item.key !== getAssistantCurrentApp();
+      });
+      const visit = candidates.length ? candidates[Math.floor(Math.random() * candidates.length)] : ghostAppVisits[Math.floor(Math.random() * ghostAppVisits.length)];
+      const icon = icons.find(item => item.dataset.openWindow === visit.key);
+      if (!icon) return;
       const areaRect = area.getBoundingClientRect();
-      const icon = icons[ghostAppVisitIndex % icons.length];
-      ghostAppVisitIndex = (ghostAppVisitIndex + 1) % icons.length;
       const iconRect = icon.getBoundingClientRect();
       if (!iconRect.width || !iconRect.height || !areaRect.width || !areaRect.height) return;
       const left = Math.max(48, Math.min(areaRect.width - 48, iconRect.left + iconRect.width / 2 - areaRect.left));
       const top = Math.max(58, Math.min(areaRect.height - 58, iconRect.top + iconRect.height / 2 - areaRect.top));
-      const visit = ghostAppVisits.find(item => item.key === icon.dataset.openWindow);
-      if (!visit) return;
       assistantGhost.classList.add("is-visiting-app");
       assistantGhost.style.left = left + "px";
       assistantGhost.style.top = top + "px";
       setAssistantMood(visit.mood, visit.phrase);
-      window.clearTimeout(assistantGhost._visitReturnTimer);
-      assistantGhost._visitReturnTimer = window.setTimeout(() => {
+      window.clearTimeout(ghostReturnTimer);
+      ghostReturnTimer = window.setTimeout(() => {
         assistantGhost.classList.remove("is-visiting-app");
         assistantGhost.style.removeProperty("left");
         assistantGhost.style.removeProperty("top");
-      }, 4300);
+      }, 3800);
     }
-    if (!ghostAppVisitTimer) ghostAppVisitTimer = window.setInterval(visitDesktopApp, 11500);
-
-    // Every now and then the little assistant takes a short nap.
-    let ghostNapTimer = null;
+    function scheduleGhostAction() {
+      window.clearTimeout(ghostActionTimer);
+      ghostActionTimer = window.setTimeout(() => {
+        if (!assistantChat.hidden || assistantGhost.classList.contains("is-sleeping")) {
+          scheduleGhostAction();
+          return;
+        }
+        visitDesktopApp();
+        scheduleGhostAction();
+      }, 90000 + Math.random() * 90000);
+    }
     function scheduleGhostNap() {
       window.clearTimeout(ghostNapTimer);
+      if (!assistantChat.hidden || assistantGhost.classList.contains("is-sleeping")) return;
+      const idleFor = Date.now() - assistantMemory.lastActionAt;
+      const napIn = Math.max(15000, 120000 + Math.random() * 60000 - idleFor);
       ghostNapTimer = window.setTimeout(() => {
-        if (assistantChat.hidden && !assistantGhost.classList.contains("is-visiting-app")) {
-          setAssistantMood("sleepy", "Тс-с… кажется, я на минутку…");
+        if (assistantChat.hidden && !assistantGhost.classList.contains("is-visiting-app") &&
+            Date.now() - assistantMemory.lastActionAt >= 115000) {
+          assistantGhost.classList.remove("is-visiting-app");
+          assistantGhost.style.removeProperty("left");
+          assistantGhost.style.removeProperty("top");
+          setAssistantMood("sleepy", "Тс-с… я немного подремлю. Разбуди, если понадоблюсь.");
           assistantGhost.classList.add("is-sleeping");
-          assistantGhost._napWakeTimer = window.setTimeout(() => {
-            assistantGhost.classList.remove("is-sleeping");
-            setAssistantMood("curious", "Ой! Я не уснул. Просто… моргал подольше.");
-          }, 7200);
+        } else {
+          scheduleGhostNap();
         }
-        scheduleGhostNap();
-      }, 32000 + Math.random() * 26000);
+      }, napIn);
     }
+    scheduleGhostAction();
     scheduleGhostNap();
+
     function assistantSay(text, mood="happy", userText="") {
       assistantChatBody.replaceChildren();
       if (userText) {
@@ -1167,6 +1248,16 @@
       }
       const reply = document.createElement("p"); reply.className = "assistant-bubble"; reply.textContent = text; assistantChatBody.append(reply);
       setAssistantMood(mood, mood === "curious" ? "О, интересно…" : mood === "thinking" ? "Сейчас подумаю…" : mood === "surprised" ? "Ого!" : mood === "grumpy" ? "Ну вот опять…" : mood === "sleepy" ? "Я тут…" : "Хи-хи.");
+      recordAssistantAction("разговор с помощником");
+    }
+    function assistantWelcomeLine() {
+      const app = getAssistantCurrentApp();
+      const appNames = {"mail-window":"почту","search-window":"поиск данных","materials-window":"материалы дела","news-window":"новости","help-window":"раздел помощи"};
+      if (assistantGhost.classList.contains("is-sleeping")) return "А-а! Ты меня разбудил. Я не спал, я… экономил призрачную энергию. Что случилось?";
+      if (app && appNames[app]) return "Вижу, ты сейчас изучаешь " + appNames[app] + ". Могу подсказать, если что-то непонятно. Или просто составить компанию.";
+      if (assistantMemory.inspectedItems > 0) return "С возвращением. Мы уже успели посмотреть кое-какие материалы. Не потерял нить расследования?";
+      if (assistantMemory.openedApps["mail-window"]) return "Снова ты! Почту мы уже открывали. Может, теперь проверим остальные разделы?";
+      return "А вот и ты! Я пока осматриваюсь. Могу объяснить устройство системы, но расследовать придётся тебе.";
     }
     function showAssistantLaunch(caseId) {
       pendingAssistantCaseId = caseId;
@@ -1179,44 +1270,71 @@
       assistantLaunchOverlay.hidden = true;
       if (!caseId) return;
       openCase(caseId);
+      loadAssistantMemory();
+      recordAssistantAction("начало расследования");
       if (withAssistant) {
         assistantChat.hidden = false;
-        assistantSay("О, привет! Я уже заждался. Ну что, осмотримся? Я могу объяснить, как тут всё устроено. А расследовать придётся тебе — у меня лапки. Почти буквально.", "happy");
+        assistantSay("О, привет! Я уже заждался. Давай осмотримся. Я помогу разобраться с системой, а улики оставлю тебе — у каждого свои обязанности.", "happy");
       } else { setAssistantMood("sleepy", "Ладно, буду рядом."); }
     }
     document.getElementById("assistant-launch-yes").addEventListener("click", () => beginSelectedCase(true));
     document.getElementById("assistant-launch-no").addEventListener("click", () => beginSelectedCase(false));
     assistantGhost.addEventListener("click", () => {
+      if (assistantGhost.classList.contains("is-visiting-app")) {
+        assistantGhost.classList.remove("is-visiting-app");
+        assistantGhost.style.removeProperty("left");
+        assistantGhost.style.removeProperty("top");
+      }
       assistantChat.hidden = !assistantChat.hidden;
       if (!assistantChat.hidden) {
-        assistantSay("А вот и ты! Что случилось? Могу подсказать по устройству системы. Только не проси меня искать преступника — я вообще-то привидение, а не детектив.", "curious");
+        assistantSay(assistantWelcomeLine(), "curious");
         assistantChatInput.focus();
+      } else {
+        recordAssistantAction("закрыл диалог");
       }
     });
-    document.getElementById("assistant-chat-close").addEventListener("click", () => { assistantChat.hidden = true; setAssistantMood("sleepy", "Я здесь."); });
+    document.getElementById("assistant-chat-close").addEventListener("click", () => {
+      assistantChat.hidden = true;
+      setAssistantMood("sleepy", "Я здесь.");
+      recordAssistantAction("закрыл диалог");
+    });
     const assistantHelp = {
-      mail: "Почта — здесь появляются сообщения по делу. Открой приложение «Почта» на рабочем столе, чтобы читать письма и просматривать вложения. И да, иногда стоит перечитать письмо: люди не всегда говорят прямо.",
-      search: "Поиск данных помогает искать сведения в базе текущего дела. Введи имя, идентификатор или ключевое слово. Поиск работает только в пределах доступных материалов. Только не вводи сюда рецепт блинов — база такого не поймёт.",
-      materials: "В «Материалах дела» собраны документы и другие доступные материалы. Открывай их и изучай внимательно. Я бы на твоём месте ничего не выбрасывал… хотя у меня самого карманы насквозь.",
-      windows: "Нажми на значок приложения, чтобы открыть его. Окно можно перемещать за верхнюю панель, а закрыть кнопкой ×. Если потеряешься — нажми на меня. Я заметный. Особенно в темноте."
+      mail: "Почта — здесь появляются сообщения по делу. Открой приложение «Почта», чтобы читать письма и просматривать вложения. Иногда полезно перечитать письмо: люди не всегда говорят прямо.",
+      search: "Поиск данных помогает искать сведения в базе текущего дела. Введи имя, идентификатор или ключевое слово. Поиск работает только в пределах доступных материалов.",
+      materials: "В «Материалах дела» собраны документы и другие доступные материалы. Открывай их и изучай внимательно. Я бы ничего не пропускал — даже если документ кажется скучным.",
+      windows: "Нажми на значок приложения, чтобы открыть его. Окно можно перемещать за верхнюю панель, а закрыть кнопкой ×. Если потеряешься — нажми на меня."
     };
     const assistantLabels = {mail:"Почта",search:"Поиск данных",materials:"Материалы дела",windows:"Окна и рабочий стол"};
     document.querySelectorAll("[data-assistant-topic]").forEach(button => button.addEventListener("click", () => {
       const key = button.dataset.assistantTopic;
       assistantSay(assistantHelp[key], key === "search" ? "curious" : key === "materials" ? "thinking" : "happy", assistantLabels[key]);
+      assistantMemory.hintsGiven++;
+      saveAssistantMemory();
     }));
     function answerAssistantQuestion(raw) {
       const q = raw.toLowerCase().trim();
+      if (/что я (делал|сделал|уже смотрел)|что мы (делали|смотрели)|помнишь/.test(q)) {
+        const apps = Object.entries(assistantMemory.openedApps).filter(([,count]) => count > 0).map(([id]) => ({
+          "mail-window":"почту","search-window":"поиск данных","materials-window":"материалы дела","news-window":"новости","help-window":"помощь"
+        }[id])).filter(Boolean);
+        return apps.length ? "Я помню: мы уже заглядывали в " + apps.join(", ") + ". Ещё ты изучил(а) материалов: " + assistantMemory.inspectedItems + ". Не записываю содержание документов — только отмечаю, что мы их открывали." : "Пока мы почти ничего не успели посмотреть. Начни с почты или материалов дела — а я буду следить за нашими шагами.";
+      }
+      if (/что дальше|куда (мне )?(идти|нажать)|с чего начать|что делать/.test(q)) {
+        if (!assistantMemory.openedApps["mail-window"]) return "Я бы начал с почты. Там могут быть сообщения, которые объясняют, с чего началось дело.";
+        if (!assistantMemory.openedApps["materials-window"]) return "Почту мы уже открывали. Теперь загляни в «Материалы дела» — там собраны документы и другие сведения.";
+        if (!assistantMemory.openedApps["search-window"]) return "Ты уже посмотрел почту и материалы. Попробуй поискать в базе имена или детали, которые встретились в документах.";
+        return "Ты уже освоился с основными разделами. Сопоставь сведения из писем, материалов и результатов поиска. Я не стану решать дело за тебя, но могу помочь с интерфейсом.";
+      }
       if (/привет|здравств|добрый|хай/.test(q)) return ["О, привет-привет! Рад, что заглянул. Чем займёмся?","И тебе привет! Я как раз тренировался выглядеть загадочно. Получается?"][Math.floor(Math.random()*2)];
       if (/кто ты|как тебя зовут|ты кто/.test(q)) return "Я — системный помощник ITERUM. Местный специалист по кнопкам, окнам и внезапному появлению в самый неподходящий момент. Зови просто Приведением.";
-      if (/помощ|что умеешь|что можешь/.test(q)) return "Могу объяснить, где почта, как пользоваться поиском и где лежат материалы. А вот разгадывать дело за тебя не стану. У каждого свои обязанности!";
+      if (/помощ|что умеешь|что можешь/.test(q)) return "Могу объяснить, где почта, как пользоваться поиском и где лежат материалы. А ещё я запоминаю, какие разделы мы уже открывали. А вот разгадывать дело за тебя не стану.";
       if (/почт|письм/.test(q)) return assistantHelp.mail;
       if (/поиск|искать|баз/.test(q)) return assistantHelp.search;
       if (/материал|документ|файл|вложен/.test(q)) return assistantHelp.materials;
       if (/окно|закры|откры|рабоч.*стол/.test(q)) return assistantHelp.windows;
-      if (/скуч|устал|сложно|трудно/.test(q)) return "Не торопись. Расследования любят внимательных, а не быстрых. Сделай паузу, если нужно. Я посторожу рабочий стол. Хотя он и так никуда не денется.";
+      if (/скуч|устал|сложно|трудно/.test(q)) return "Не торопись. Я заметил, что расследование требует времени. Сделай паузу, если нужно. Я посторожу рабочий стол.";
       if (/спасибо|благодар/.test(q)) return "Всегда пожалуйста! Для этого я тут и парю. Буквально парю.";
-      return "Хм… я не совсем понял. Я пока умею отвечать на вопросы о работе сайта и его разделах. Попробуй спросить про почту, поиск или материалы дела. И не смотри так — я стараюсь!";
+      return "Хм… я пока не умею рассуждать о содержании дела, но могу помнить наши действия и подсказать, где искать дальше. Попробуй спросить: «Что я уже смотрел?» или «Что делать дальше?»";
     }
     document.getElementById("assistant-chat-compose").addEventListener("submit", event => {
       event.preventDefault();
@@ -1230,14 +1348,34 @@
     document.addEventListener("click", event => {
       const app = event.target.closest("[data-open-window]");
       if (!app || !document.body.classList.contains("is-workstation")) return;
+      const key = app.dataset.openWindow;
       const reactions = {
         "mail-window":["surprised","Письмо? Ого!"],
         "search-window":["curious","Что будем искать?"],
         "materials-window":["thinking","Изучаем улики…"],
-        "help-window":["happy","О, за помощью? Это ко мне!"]
+        "help-window":["happy","О, за помощью? Это ко мне!"],
+        "news-window":["curious","Новости? Сейчас посмотрим."]
       };
-      const reaction = reactions[app.dataset.openWindow];
-      if (reaction) setAssistantMood(reaction[0], reaction[1]);
+      const reaction = reactions[key];
+      if (!reaction) return;
+      const count = (Number(assistantMemory.openedApps[key]) || 0) + 1;
+      assistantMemory.openedApps[key] = count;
+      recordAssistantAction("открыл раздел", key);
+      if (assistantChat.hidden && !assistantGhost.classList.contains("is-sleeping")) {
+        if (count === 1) setAssistantMood(reaction[0], reaction[1]);
+        else if (count === 2) setAssistantMood("curious", "Мы снова здесь. Кажется, ты что-то проверяешь.");
+        else setAssistantMood("thinking", "Ты уже не впервые сюда заглядываешь. Ищешь что-то конкретное?");
+      }
+    }, true);
+    document.getElementById("player-search-form")?.addEventListener("submit", () => {
+      assistantMemory.searches++;
+      recordAssistantAction("выполнил поиск");
+    });
+    document.getElementById("player-archive").addEventListener("click", event => {
+      if (event.target.closest(".desktop-window") && !event.target.closest("button, input, form, a")) {
+        assistantMemory.inspectedItems++;
+        recordAssistantAction("изучил материал");
+      }
     }, true);
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") {

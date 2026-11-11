@@ -7830,7 +7830,7 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-vis
 body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking).is-grumpy .iterum-ghost-model-wrap {
   animation:iterumActGrumpy 2.2s ease-in-out infinite;
 }
-body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking).is-sleepy .iterum-ghost-model-wrap {
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking):not(.is-sleeping).is-sleepy .iterum-ghost-model-wrap {
   animation:iterumActSleepy 4.8s ease-in-out infinite;
 }
 body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking).is-shy .iterum-ghost-model-wrap {

@@ -8002,3 +8002,13 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-fac
     transform:translate(-2px,4px) rotate(9deg) scaleY(.68);
   }
 }
+
+/* Emotion preview controls inside the assistant conversation */
+.assistant-emotion-test{padding:9px 10px 10px;border-top:1px solid rgba(133,204,217,.14);background:rgba(5,16,25,.28)}
+.assistant-emotion-test-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px;color:#a9cbd3;font:8px var(--sans);letter-spacing:.09em}
+.assistant-emotion-test-heading small{color:#718d9b;font-size:7px;letter-spacing:.04em}
+.assistant-emotion-buttons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.assistant-emotion-buttons button{min-width:0;padding:7px 3px;border:1px solid rgba(133,204,217,.18);border-radius:3px;background:rgba(95,161,180,.055);color:#c4dce2;font:8px var(--sans);cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.assistant-emotion-buttons button:hover,.assistant-emotion-buttons button:focus-visible{outline:none;border-color:rgba(142,220,229,.65);background:rgba(95,161,180,.17);color:#e5fbff}
+.assistant-bubble-mood-test{font-size:9px}
+@media(max-width:420px){.assistant-emotion-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}}

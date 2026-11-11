@@ -97,6 +97,10 @@
                 <span class="desktop-icon-art folder-art news-art" aria-hidden="true"><span class="folder-paper"></span></span>
                 <span class="icon-caption">Новости</span>
               </button>
+              <button class="desktop-icon" type="button" data-open-window="assistant-emotions-window" aria-label="Тест эмоций" title="Тест эмоций">
+                <span class="desktop-icon-art folder-art assistant-emotions-art" aria-hidden="true"><span class="folder-paper"></span><span class="emotion-folder-mark">☺</span></span>
+                <span class="icon-caption">Тест эмоций</span>
+              </button>
               
               
               
@@ -128,7 +132,6 @@
 <div class="iterum-assistant-chat" id="iterum-assistant-chat" hidden role="dialog" aria-label="Диалог с системным помощником">
   <div class="iterum-assistant-chat-head"><div><span class="assistant-chat-status"></span><strong>ПРИВЕДЕНИЕ</strong><small>СИСТЕМНЫЙ ПОМОЩНИК</small></div><div class="assistant-chat-head-actions"><button type="button" id="assistant-chat-close" aria-label="Закрыть">×</button></div></div>
   <div class="iterum-assistant-chat-body" id="assistant-chat-body" aria-live="polite"><p class="assistant-bubble">О, привет! Я здесь вроде как за главного по технической части. Давай покажу, что здесь к чему. Ничего не сломаешь. Наверное.</p></div>
-  <div class="assistant-emotion-test" id="assistant-emotion-test"><div class="assistant-emotion-test-heading"><span>ТЕСТ ВЫРАЖЕНИЙ</span><small>НАЖМИ, ЧТОБЫ ПОСМОТРЕТЬ</small></div><div class="assistant-emotion-buttons"><button type="button" data-assistant-mood="calm">Спокойствие</button><button type="button" data-assistant-mood="curious">Любопытство</button><button type="button" data-assistant-mood="happy">Радость</button><button type="button" data-assistant-mood="surprised">Удивление</button><button type="button" data-assistant-mood="thinking">Размышление</button><button type="button" data-assistant-mood="grumpy">Недовольство</button><button type="button" data-assistant-mood="sleepy">Сонливость</button><button type="button" data-assistant-mood="shy">Смущение</button></div></div>
   <div class="iterum-assistant-topics"><button type="button" data-assistant-topic="mail">Почта</button><button type="button" data-assistant-topic="search">Поиск данных</button><button type="button" data-assistant-topic="materials">Материалы дела</button><button type="button" data-assistant-topic="windows">Окна и рабочий стол</button></div>
   <form class="assistant-chat-compose" id="assistant-chat-compose"><input id="assistant-chat-input" type="text" maxlength="180" autocomplete="off" placeholder="Спроси меня о системе…" aria-label="Сообщение помощнику"><button type="submit" aria-label="Отправить сообщение">➤</button></form>
 </div>
@@ -161,6 +164,31 @@
             <button class="window-close" type="button" data-close-window="mail-window" aria-label="Закрыть окно">×</button>
           </div>
           <div id="player-mail-list" class="player-mail-list"></div>
+        </section>
+
+        <section id="assistant-emotions-window" class="player-tool-section desktop-window assistant-emotions-window" aria-labelledby="assistant-emotions-heading" hidden>
+          <div class="player-tool-heading window-drag-handle">
+            <div><span class="section-kicker">СЛУЖЕБНЫЙ ИНСТРУМЕНТ / ASSISTANT LAB</span><h2 id="assistant-emotions-heading">Тест эмоций</h2></div>
+            <button class="window-close" type="button" data-close-window="assistant-emotions-window" aria-label="Закрыть окно">×</button>
+          </div>
+          <div class="assistant-emotions-intro">
+            <span class="assistant-emotions-symbol">☺</span>
+            <div><strong>ПРОВЕРКА ВЫРАЖЕНИЙ ПРИВИДЕНИЯ</strong><p>Выбери состояние, чтобы посмотреть, как помощник меняет выражение и поведение. Это тестовая панель — она не влияет на ход расследования.</p></div>
+          </div>
+          <div class="assistant-emotion-test" id="assistant-emotion-test">
+            <div class="assistant-emotion-test-heading"><span>ВОСЕМЬ СОСТОЯНИЙ</span><small>ВЫБЕРИ ЭМОЦИЮ</small></div>
+            <div class="assistant-emotion-buttons">
+              <button type="button" data-assistant-mood="calm">Спокойствие</button>
+              <button type="button" data-assistant-mood="curious">Любопытство</button>
+              <button type="button" data-assistant-mood="happy">Радость</button>
+              <button type="button" data-assistant-mood="surprised">Удивление</button>
+              <button type="button" data-assistant-mood="thinking">Размышление</button>
+              <button type="button" data-assistant-mood="grumpy">Недовольство</button>
+              <button type="button" data-assistant-mood="sleepy">Сонливость</button>
+              <button type="button" data-assistant-mood="shy">Смущение</button>
+            </div>
+          </div>
+          <p class="assistant-emotions-status" id="assistant-emotions-status" role="status" aria-live="polite">Ожидание выбора. Нажми на любую эмоцию.</p>
         </section>
 
         <section id="materials-window" class="player-tool-section desktop-window" aria-labelledby="materials-heading" hidden>
@@ -1482,11 +1510,8 @@
       if (!assistantEmotions.includes(mood)) return;
       setAssistantMood(mood, assistantMoodLabels[mood]);
       assistantGhost.classList.remove("is-sleeping");
-      assistantChatBody.querySelectorAll(".assistant-bubble-mood-test").forEach(node => node.remove());
-      const note = document.createElement("p");
-      note.className = "assistant-bubble assistant-bubble-muted assistant-bubble-mood-test";
-      note.textContent = "Режим проверки: " + assistantMoodLabels[mood] + ". Нажми другую эмоцию, чтобы сравнить.";
-      assistantChatBody.append(note);
+      const status = document.getElementById("assistant-emotions-status");
+      if (status) status.textContent = "Выбрано состояние: " + assistantMoodLabels[mood] + ". Выбери другую эмоцию, чтобы сравнить.";
     }));
     document.querySelectorAll("[data-assistant-topic]").forEach(button => button.addEventListener("click", () => {
       const key = button.dataset.assistantTopic;
@@ -1649,7 +1674,7 @@
             desktopShell.querySelectorAll("[data-open-window]").forEach(button => button.classList.toggle("is-selected", button.dataset.openWindow === opener.dataset.openWindow));
             const runningApps = document.getElementById("taskbar-running-apps");
             if (runningApps) {
-              const appNames = { "mail-window": ["✉", "Почта"], "search-window": ["⌕", "Поиск данных"], "materials-window": ["▤", "Материалы дела"], "help-window": ["?", "Помощь"], "news-window": ["◈", "Новости"] };
+              const appNames = { "mail-window": ["✉", "Почта"], "search-window": ["⌕", "Поиск данных"], "materials-window": ["▤", "Материалы дела"], "help-window": ["?", "Помощь"], "news-window": ["◈", "Новости"], "assistant-emotions-window": ["☺", "Тест эмоций"] };
               const app = appNames[opener.dataset.openWindow] || ["▣", win.querySelector("h2")?.textContent.trim() || "Приложение"];
               runningApps.replaceChildren();
               const runningButton = document.createElement("button");

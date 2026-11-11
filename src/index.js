@@ -241,6 +241,31 @@ async function handleApi(request, env) {
     }
 
 
+
+    // First authenticated administrator visit initializes the new D1 table.
+    // Migration 0007 is kept for CLI-based, repeatable deployments; this route
+    // allows non-technical site owners to activate the feature safely.
+    if (request.method === "POST" && url.pathname === "/api/admin/dossiers/initialize") {
+      await env.DB.prepare(
+        "CREATE TABLE IF NOT EXISTS person_dossiers (" +
+        "id TEXT PRIMARY KEY, " +
+        "case_id TEXT NOT NULL REFERENCES cases(id) ON DELETE CASCADE, " +
+        "full_name TEXT NOT NULL, role_name TEXT NOT NULL DEFAULT '', " +
+        "birth_date TEXT NOT NULL DEFAULT '', occupation TEXT NOT NULL DEFAULT '', " +
+        "biography TEXT NOT NULL DEFAULT '', relationships TEXT NOT NULL DEFAULT '', " +
+        "chronology TEXT NOT NULL DEFAULT '', related_materials TEXT NOT NULL DEFAULT '', " +
+        "photo_data TEXT NOT NULL DEFAULT '', author_notes TEXT NOT NULL DEFAULT '', " +
+        "is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published IN (0,1)), " +
+        "created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), " +
+        "updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))" +
+        ")"
+      ).run();
+      await env.DB.prepare(
+        "CREATE INDEX IF NOT EXISTS idx_person_dossiers_case_visible ON person_dossiers(case_id, is_published, full_name)"
+      ).run();
+      return json({ ok: true });
+    }
+
     // Dossier management is restricted to the existing server-side administrator role.
     if (request.method === "GET" && url.pathname === "/api/admin/dossiers") {
       const rows = await env.DB.prepare(

@@ -7492,3 +7492,22 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iteru
   .admin-release-planner .admin-material-actions .admin-mini-button { flex:1 1 100%; }
   .admin-delay-controls { grid-template-columns:1fr 1fr; }
 }
+
+
+/* ITERUM ghost assistant — slow, continuous desktop wandering */
+@media (prefers-reduced-motion:no-preference) {
+  body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
+    animation:iterumGhostDrift 92s ease-in-out infinite !important;
+    will-change:left,top;
+  }
+  body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper.is-visiting-app,
+  body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper.is-sleeping {
+    animation:none !important;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
+    animation:none !important;
+    will-change:auto;
+  }
+}

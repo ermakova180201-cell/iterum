@@ -7607,8 +7607,11 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-playful-bounce .iteru
   50% { transform:scaleY(.58); }
 }
 @keyframes iterumEyesSurprised {
-  0%,100% { transform:scaleY(1.18) scaleX(1.04); }
-  50% { transform:scaleY(1.28) scaleX(1.08); }
+  0%,100% { transform:scaleY(1.32) scaleX(1.18) translateY(-1px); }
+  18% { transform:scaleY(1.58) scaleX(1.28) translateY(-2px); }
+  38% { transform:scaleY(1.42) scaleX(1.2) translateY(0); }
+  58% { transform:scaleY(1.58) scaleX(1.28) translateY(-2px); }
+  78% { transform:scaleY(1.32) scaleX(1.18) translateY(-1px); }
 }
 @keyframes iterumEyesThinkingLeft {
   0%,100% { transform:translate(-2px,-2px) rotate(-13deg) scaleY(.72); }
@@ -7652,7 +7655,20 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-f
 }
 /* Surprised: eyes widen briefly, then settle. */
 body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face i {
-  animation:iterumEyesSurprised .72s ease-in-out infinite;
+  animation:iterumEyesSurprised 1.05s ease-in-out infinite;
+  background:radial-gradient(ellipse at 29% 23%,#fff 0 12%,#d9fbff 15%,#8af1ff 39%,#43cfff 72%,#159fc9 100%);
+  box-shadow:0 0 5px #fff,0 0 10px rgba(113,235,255,.98),0 0 18px rgba(65,207,255,.82);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face i::after {
+  content:"";
+  position:absolute;
+  width:22%;
+  height:18%;
+  top:58%;
+  right:13%;
+  border-radius:50%;
+  background:rgba(255,255,255,.9);
+  box-shadow:0 0 5px rgba(255,255,255,.85);
 }
 /* Thinking: the gaze drifts slightly to one side. */
 body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i:first-child {
@@ -7715,7 +7731,11 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-fac
   body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:first-child { transform:rotate(-9deg); }
   body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:nth-child(2) { transform:rotate(5deg) scaleY(.88); }
   body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-face i { transform:scaleY(.7); }
-  body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face i { transform:scaleY(1.2); }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face i {
+    transform:scaleY(1.48) scaleX(1.22);
+    background:radial-gradient(ellipse at 29% 23%,#fff 0 12%,#d9fbff 15%,#8af1ff 39%,#43cfff 72%,#159fc9 100%);
+    box-shadow:0 0 5px #fff,0 0 10px rgba(113,235,255,.98),0 0 18px rgba(65,207,255,.82);
+  }
   body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i:first-child { transform:rotate(-13deg) scaleY(.72); }
   body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i:nth-child(2) { transform:rotate(8deg) scaleY(.9); }
   body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i { transform:rotate(17deg) scaleY(.56); }

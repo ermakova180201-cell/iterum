@@ -7870,3 +7870,135 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-fac
     animation:none !important;
   }
 }
+
+
+/* Final eye-expression pass: EMO-like readability, original rounded cyan eyes only. */
+@keyframes iterumFinalCalmBlink {
+  0%,43%,46%,100% { transform:scaleY(1); opacity:.94; }
+  44.5% { transform:scaleY(.08); opacity:.72; }
+}
+@keyframes iterumFinalHappyEyes {
+  0%,100% { transform:scaleY(.34) rotate(0); }
+  22%,66% { transform:scaleY(.24) rotate(-2deg); }
+  44% { transform:scaleY(.3) rotate(1deg); }
+}
+@keyframes iterumFinalCuriousLeft {
+  0%,100% { transform:translateY(-3px) rotate(-13deg) scale(1.04,1.12); }
+  50% { transform:translateY(-5px) rotate(-17deg) scale(1.02,.96); }
+}
+@keyframes iterumFinalCuriousRight {
+  0%,100% { transform:translateY(3px) rotate(7deg) scale(.94,.82); }
+  50% { transform:translateY(1px) rotate(4deg) scale(.96,1.02); }
+}
+@keyframes iterumFinalSurprisedEyes {
+  0%,100% { transform:scale(1.12,1.28); }
+  18% { transform:scale(1.22,1.52); }
+  36% { transform:scale(1.14,1.34); }
+  56% { transform:scale(1.22,1.52); }
+  76% { transform:scale(1.12,1.28); }
+}
+@keyframes iterumFinalThinkingLeft {
+  0%,100% { transform:translate(5px,-3px) rotate(9deg) scaleY(.88); }
+  40%,64% { transform:translate(7px,-5px) rotate(12deg) scaleY(.82); }
+}
+@keyframes iterumFinalThinkingRight {
+  0%,100% { transform:translate(5px,-3px) rotate(9deg) scaleY(.88); }
+  40%,64% { transform:translate(7px,-5px) rotate(12deg) scaleY(.82); }
+}
+@keyframes iterumFinalGrumpyEyes {
+  0%,100% { transform:rotate(18deg) scaleY(.48); }
+  50% { transform:rotate(21deg) scaleY(.38); }
+}
+@keyframes iterumFinalSleepyEyes {
+  0%,100% { transform:translateY(4px) scaleY(.28); }
+  36%,68% { transform:translateY(7px) scaleY(.16); }
+  52% { transform:translateY(8px) scaleY(.1); }
+}
+@keyframes iterumFinalShyLeft {
+  0%,100% { transform:translate(2px,4px) rotate(-9deg) scaleY(.68); }
+  50% { transform:translate(4px,5px) rotate(-13deg) scaleY(.54); }
+}
+@keyframes iterumFinalShyRight {
+  0%,100% { transform:translate(-2px,4px) rotate(9deg) scaleY(.68); }
+  50% { transform:translate(-4px,5px) rotate(13deg) scaleY(.54); }
+}
+
+/* Calm: gentle glow and occasional natural blink. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-calm .iterum-ghost-face i {
+  animation:iterumFinalCalmBlink 5.4s ease-in-out infinite;
+  filter:saturate(.9);
+  opacity:.94;
+}
+/* Happy: the same oval eyes become closed smiling crescents. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-face i {
+  height:30%;
+  clip-path:inset(0 0 43% 0 round 50%);
+  transform-origin:center;
+  animation:iterumFinalHappyEyes 1.9s ease-in-out infinite;
+}
+/* Curious: deliberately asymmetric eye height and angle, paired with a head tilt. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:first-child {
+  animation:iterumFinalCuriousLeft 2.4s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:nth-child(2) {
+  animation:iterumFinalCuriousRight 2.4s ease-in-out infinite;
+}
+/* Surprised: both original eyes open wide, then settle. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face i {
+  width:16%;
+  height:38%;
+  clip-path:none;
+  animation:iterumFinalSurprisedEyes 1.05s ease-in-out infinite;
+}
+/* Thinking: both eyes glance together to one side, then return. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i {
+  animation:iterumFinalThinkingLeft 3.1s ease-in-out infinite;
+}
+/* Grumpy: narrowed, angled eyes. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i {
+  animation:iterumFinalGrumpyEyes 1.7s ease-in-out infinite;
+}
+/* Sleepy: eyelids gradually lower; body has a separate gentle nod. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleepy:not(.is-sleeping) .iterum-ghost-face i {
+  animation:iterumFinalSleepyEyes 4.2s ease-in-out infinite;
+}
+/* Shy: eyes lower and turn inward; the existing soft blush is retained. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:first-child {
+  animation:iterumFinalShyLeft 2.6s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:nth-child(2) {
+  animation:iterumFinalShyRight 2.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .iterum-ghost-helper .iterum-ghost-face i {
+    animation:none !important;
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-face i {
+    transform:scaleY(.3);
+    clip-path:inset(0 0 43% 0 round 50%);
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:first-child {
+    transform:translateY(-3px) rotate(-13deg) scaleY(1.12);
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:nth-child(2) {
+    transform:translateY(3px) rotate(7deg) scaleY(.82);
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face i {
+    transform:scale(1.12,1.35);
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i {
+    transform:translate(5px,-3px) rotate(9deg) scaleY(.88);
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i {
+    transform:rotate(18deg) scaleY(.48);
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleepy:not(.is-sleeping) .iterum-ghost-face i {
+    transform:translateY(5px) scaleY(.18);
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:first-child {
+    transform:translate(2px,4px) rotate(-9deg) scaleY(.68);
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:nth-child(2) {
+    transform:translate(-2px,4px) rotate(9deg) scaleY(.68);
+  }
+}

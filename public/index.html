@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css?v=assistant-11">
-  <link rel="stylesheet" href="/search.css">
+  <link rel="stylesheet" href="/search.css?v=archive-2">
   <link rel="stylesheet" href="/materials.css">
   <link rel="stylesheet" href="/dossiers.css">
   <script defer src="/dossiers.js"></script>
@@ -142,11 +142,11 @@
             <div class="desktop-wallpaper-mark">ITERUM</div>
         <section id="search-window" class="player-tool-section desktop-window search-terminal" aria-labelledby="search-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 02 · DATABASE QUERY</span><h2 id="search-heading">Поиск данных</h2></div>
+            <div><span class="section-kicker">ITERUM / АРХИВ / СИСТЕМА ПОИСКА</span><h2 id="search-heading">Поиск данных</h2></div>
             <button class="window-close" type="button" data-close-window="search-window" aria-label="Закрыть окно">×</button>
           </div>
           <div class="search-terminal-status"><span><i></i> БАЗА ДАННЫХ ДОСТУПНА</span><span>УРОВЕНЬ ДОСТУПА: <b>ОГРАНИЧЕННЫЙ</b></span><span>УЗЕЛ: <b>ITERUM-04</b></span></div>
-          <div class="search-terminal-intro"><span class="search-terminal-mark">⌕</span><div><strong>ПОИСК ПО БАЗЕ ДАННЫХ</strong><p>Ищите досье людей по имени, фамилии или профессии, а также документы и события. Результаты ограничены текущим делом.</p></div></div>
+          <div class="search-terminal-intro"><span class="search-terminal-mark">⌕</span><div><strong>Единый архив расследования</strong><p>Досье персон, служебные документы и материалы дела. Сопоставляйте сведения из разных источников.</p></div></div>
           <form id="player-search-form" class="player-search-form">
             <label for="player-search-query">ПОИСКОВЫЙ ЗАПРОС</label>
             <div class="player-search-row">
@@ -154,10 +154,10 @@
               <input id="player-search-query" type="search" minlength="2" placeholder="ФИО, профессия, документ, событие…" required autocomplete="off">
               <button type="submit" class="admin-mini-button">ВЫПОЛНИТЬ ПОИСК</button>
             </div>
-            <span class="search-query-hint">МИНИМАЛЬНАЯ ДЛИНА ЗАПРОСА — 2 СИМВОЛА</span>
+            <span class="search-query-hint">МИНИМУМ 2 СИМВОЛА · ПОИСК ПО ТЕКУЩЕМУ ДЕЛУ</span>
           </form>
           <div class="search-results-toolbar"><span id="player-search-summary">ОЖИДАНИЕ ЗАПРОСА</span><span>ПОИСК В ПРЕДЕЛАХ ДЕЛА</span></div>
-          <div id="player-search-filters" class="player-search-filters" hidden aria-label="Фильтр результатов"></div>
+          <div id="player-search-filters" class="player-search-filters" hidden role="group" aria-label="Фильтр результатов"></div>
           <div id="player-search-results" class="player-search-results" aria-live="polite"><div class="search-empty-state"><span>⌕</span><strong>ОЖИДАНИЕ ДАННЫХ</strong><p>Результаты поиска появятся в этом окне.</p></div></div>
         </section>
 
@@ -523,7 +523,7 @@
     <span>ITERUM © 2026</span>
   </footer>
   <script src="/materials.js"></script>
-  <script src="/search.js"></script>
+  <script src="/search.js?v=archive-2"></script>
   <script>
     const authPanel = document.querySelector(".auth-panel");
     const authForm = document.getElementById("auth-form");

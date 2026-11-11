@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/search.css?v=archive-2">
   <link rel="stylesheet" href="/materials.css">
   <link rel="stylesheet" href="/dossiers.css">
+  <link rel="stylesheet" href="/workstation-concept-one.css?v=1">
   <script defer src="/dossiers.js"></script>
 </head>
 <body>
@@ -77,31 +78,31 @@
       <section class="player-archive" id="player-archive" hidden>
         <div class="desktop-shell">
           <div class="desktop-toolbar">
-            <div class="desktop-window-title"><span class="desktop-led"></span> ITERUM / РАБОЧАЯ СТАНЦИЯ</div>
+            <div class="desktop-window-title"><span class="desktop-led" aria-hidden="true"></span><span class="iterum-toolbar-brand"><strong>ITERUM / РАБОЧАЯ СТАНЦИЯ</strong><small>СИСТЕМА РАССЛЕДОВАНИЙ И АНАЛИЗА ДЕЛ</small></span></div>
             <button class="all-cases-button" id="all-cases-button" type="button">К СПИСКУ ДЕЛ</button>
             <div class="desktop-toolbar-right"><span class="desktop-account"><span class="desktop-account-label">АККАУНТ</span><strong id="desktop-account-name">—</strong></span><span id="desktop-case-label">ДЕЛО ОТКРЫТО</span><span id="desktop-case-name" hidden></span><span id="player-archive-count"></span></div>
           </div>
           <div class="desktop-area">
             <div class="desktop-icons" aria-label="Приложения">
               <button class="desktop-icon" type="button" data-open-window="mail-window" aria-label="Почта" title="Почта">
-                <span class="desktop-icon-art mail-art" aria-hidden="true"><span class="mail-symbol"></span><span id="desktop-mail-badge" class="desktop-mail-badge" hidden>1</span></span>
+                <span class="desktop-icon-art mail-art" aria-hidden="true"><svg class="iterum-app-glyph" viewBox="0 0 80 80"><use href="/workstation-icons.svg#mail"></use></svg><span class="mail-symbol"></span><span id="desktop-mail-badge" class="desktop-mail-badge" hidden>1</span></span>
                 <span class="icon-caption">Почта</span>
               </button>
               <button class="desktop-icon" type="button" data-open-window="search-window" aria-label="Поиск данных" title="Поиск данных">
-                <span class="desktop-icon-art search-art" aria-hidden="true"><span class="search-lens"></span></span>
+                <span class="desktop-icon-art search-art" aria-hidden="true"><svg class="iterum-app-glyph" viewBox="0 0 80 80"><use href="/workstation-icons.svg#search"></use></svg><span class="search-lens"></span></span>
                 <span class="icon-caption">Поиск данных</span>
               </button>
               <button class="desktop-icon" type="button" data-open-window="materials-window" aria-label="Материалы дела" title="Материалы дела">
-                <span class="desktop-icon-art folder-art" aria-hidden="true"><span class="folder-paper"></span></span>
+                <span class="desktop-icon-art folder-art" aria-hidden="true"><svg class="iterum-app-glyph" viewBox="0 0 80 80"><use href="/workstation-icons.svg#materials"></use></svg><span class="folder-paper"></span></span>
                 <span class="icon-caption">Материалы дела</span>
               </button>
 
               <button class="desktop-icon" type="button" data-open-window="news-window" aria-label="Новости" title="Новости">
-                <span class="desktop-icon-art folder-art news-art" aria-hidden="true"><span class="folder-paper"></span></span>
+                <span class="desktop-icon-art folder-art news-art" aria-hidden="true"><svg class="iterum-app-glyph" viewBox="0 0 80 80"><use href="/workstation-icons.svg#news"></use></svg><span class="folder-paper"></span></span>
                 <span class="icon-caption">Новости</span>
               </button>
               <button class="desktop-icon" type="button" data-open-window="assistant-emotions-window" aria-label="Тест эмоций" title="Тест эмоций">
-                <span class="desktop-icon-art folder-art assistant-emotions-art" aria-hidden="true"><span class="folder-paper"></span><span class="emotion-folder-mark">☺</span></span>
+                <span class="desktop-icon-art folder-art assistant-emotions-art" aria-hidden="true"><svg class="iterum-app-glyph" viewBox="0 0 80 80"><use href="/workstation-icons.svg#emotions"></use></svg><span class="folder-paper"></span><span class="emotion-folder-mark">☺</span></span>
                 <span class="icon-caption">Тест эмоций</span>
               </button>
               
@@ -109,7 +110,7 @@
               
             </div>
             <button class="desktop-icon desktop-help-shortcut" type="button" data-open-window="help-window" aria-label="Помощь" title="Помощь">
-              <span class="desktop-icon-art folder-art help-art" aria-hidden="true"><span class="help-question">?</span></span>
+              <span class="desktop-icon-art folder-art help-art" aria-hidden="true"><svg class="iterum-app-glyph" viewBox="0 0 80 80"><use href="/workstation-icons.svg#help"></use></svg><span class="help-question">?</span></span>
               <span class="icon-caption">Помощь</span>
             </button>
             <section class="desktop-date-panel" aria-label="Дата и время">
@@ -139,7 +140,7 @@
   <form class="assistant-chat-compose" id="assistant-chat-compose"><input id="assistant-chat-input" type="text" maxlength="180" autocomplete="off" placeholder="Спроси меня о системе…" aria-label="Сообщение помощнику"><button type="submit" aria-label="Отправить сообщение">➤</button></form>
 </div>
 <div class="desktop-notice-toast" id="desktop-notice-toast" role="status" aria-live="polite" hidden></div>
-            <div class="desktop-wallpaper-mark">ITERUM</div>
+            <div class="desktop-wallpaper-mark" aria-hidden="true">ITERUM</div><div class="iterum-workstation-footnote" aria-hidden="true">СЛЕДСТВЕННЫЙ АРХИВ / NODE 04</div>
         <section id="search-window" class="player-tool-section desktop-window search-terminal" aria-labelledby="search-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
             <div><span class="section-kicker">ITERUM / АРХИВ / СИСТЕМА ПОИСКА</span><h2 id="search-heading">Поиск данных</h2></div>

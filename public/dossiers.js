@@ -7,9 +7,6 @@
   const adminList = byId("dossier-admin-list");
   const status = byId("dossier-status");
   const caseSelect = byId("dossier-case");
-  const playerList = byId("dossier-player-list");
-  const playerDetails = byId("dossier-details");
-  const playerStatus = byId("dossier-player-status");
   const photoInput = byId("dossier-photo");
   const photoPreview = byId("dossier-photo-preview");
   let dossiers = [];
@@ -189,67 +186,6 @@
         : "Черновик скрыт от игроков."));
     } catch (error) { note(error.message, true); }
     finally { submit.disabled = false; }
-  });
-
-  function displayDetails(d) {
-    playerDetails.replaceChildren();
-    const heading = element("div", "dossier-profile-header");
-    if (d.photo_data) {
-      const img = element("img");
-      img.src = d.photo_data;
-      img.alt = "Фотография: " + d.full_name;
-      heading.append(img);
-    }
-    const title = element("div");
-    title.append(element("h3", "", d.full_name));
-    if (d.role_name) title.append(element("p", "dossier-muted", d.role_name));
-    if (d.birth_date) title.append(element("p", "dossier-muted", "Дата рождения: " + d.birth_date));
-    if (d.occupation) title.append(element("p", "dossier-muted", "Профессия: " + d.occupation));
-    heading.append(title);
-    playerDetails.append(heading);
-    for (const [label, key] of [
-      ["Биография","biography"], ["Связи","relationships"],
-      ["Хронология","chronology"], ["Связанные материалы","related_materials"]]) {
-      if (!d[key]) continue;
-      const section = element("section");
-      section.append(element("strong", "", label));
-      section.append(element("p", "dossier-profile-text", d[key]));
-      playerDetails.append(section);
-    }
-    playerDetails.hidden = false;
-  }
-  async function loadPlayer() {
-    const caseId = typeof window.iterumSelectedCaseId === "function"
-      ? window.iterumSelectedCaseId() : null;
-    playerList.replaceChildren();
-    playerDetails.hidden = true;
-    playerStatus.textContent = "Загрузка картотеки…";
-    if (!caseId) { playerStatus.textContent = "Сначала откройте дело."; return; }
-    try {
-      const data = await api("/api/player/dossiers?caseId=" + encodeURIComponent(caseId));
-      const people = data.dossiers || [];
-      playerStatus.textContent = people.length
-        ? "Опубликованных досье: " + people.length
-        : "По этому делу досье пока не опубликованы.";
-      for (const d of people) {
-        const btn = element("button", "dossier-person-card");
-        btn.type = "button";
-        if (d.photo_data) {
-          const img = element("img");
-          img.src = d.photo_data;
-          img.alt = "";
-          btn.append(img);
-        } else btn.append(element("span", "dossier-placeholder", "◌"));
-        btn.append(element("strong", "", d.full_name));
-        if (d.role_name) btn.append(element("small", "", d.role_name));
-        btn.addEventListener("click", () => displayDetails(d));
-        playerList.append(btn);
-      }
-    } catch (error) { playerStatus.textContent = error.message; }
-  }
-  // The desktop's window opener uses event delegation; dossiers load on opening.
-  document.addEventListener("click", event => {
-    if (event.target.closest('[data-open-window="dossiers-window"]')) loadPlayer();
   });
 
   // Authentication state changes after login are reflected on the existing admin panel.

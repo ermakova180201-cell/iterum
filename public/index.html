@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/materials.css">
   <link rel="stylesheet" href="/dossiers.css">
   <link rel="stylesheet" href="/workstation-concept-one.css?v=1">
+  <link rel="stylesheet" href="/archive-concept-one.css?v=1">
   <script defer src="/dossiers.js"></script>
 </head>
 <body>
@@ -420,7 +421,7 @@
       <section class="dossier-admin" id="admin-dossier-panel" aria-label="Управление досье персон">
         <p class="section-kicker">КАРТОТЕКА / УПРАВЛЕНИЕ ПЕРСОНАМИ</p>
         <h3>Досье персон</h3>
-        <p class="dossier-note">Создавайте личные карточки участников дела, прикрепляйте фотографию и сохраняйте их в базе. Черновики не видны игрокам. Публикация открывает досье в приложении «Досье» выбранного дела.</p>
+        <p class="dossier-note">Создавайте личные карточки участников дела, прикрепляйте фотографию и сохраняйте их в базе. Черновики не видны игрокам. Публикация делает карточку доступной игрокам в приложении «Поиск данных» выбранного дела.</p>
         <div class="dossier-admin-actions">
           <button id="dossier-new" type="button">+ Новое досье</button>
           <button id="dossier-refresh" type="button">Обновить картотеку</button>
@@ -1704,10 +1705,27 @@
           const cover = document.createElement("span");
           cover.className = "available-case-cover";
           cover.setAttribute("aria-hidden", "true");
+          const caseMeta = document.createElement("span");
+          caseMeta.className = "archive-case-meta";
+          const caseCode = document.createElement("span");
+          caseCode.className = "archive-case-identifier";
+          caseCode.textContent = item.case_code || "ДЕЛО";
+          const caseStatus = document.createElement("span");
+          caseStatus.className = "archive-case-status" + (item.status === "draft" ? " is-draft" : "");
+          caseStatus.textContent = item.status === "draft" ? "ЧЕРНОВИК" : "ДОСТУПНО";
+          caseMeta.append(caseCode, caseStatus);
+          cover.append(caseMeta);
           const title = document.createElement("span");
           title.className = "available-case-title";
           title.textContent = item.title;
-          card.append(cover, title);
+          const footer = document.createElement("span");
+          footer.className = "archive-case-footer";
+          const arrow = document.createElement("span");
+          arrow.className = "archive-case-arrow";
+          arrow.setAttribute("aria-hidden", "true");
+          arrow.textContent = "›";
+          footer.append(title, arrow);
+          card.append(cover, footer);
           card.addEventListener("click", () => showAssistantLaunch(item.id));
           availableCaseList.append(card);
         }

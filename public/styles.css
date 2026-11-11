@@ -8031,3 +8031,20 @@ body.is-workstation .iterum-assistant-chat{max-height:min(520px,calc(100% - 16px
 body.is-workstation .iterum-assistant-chat-body{flex:1 1 auto;min-height:72px;max-height:145px}
 body.is-workstation .assistant-emotion-test{flex:0 0 auto;max-height:none;overflow:visible}
 @media(max-width:650px){body.is-workstation .iterum-assistant-chat{max-height:calc(100% - 28px)}}
+
+/* ITERUM assistant emotion test — standalone desktop application */
+body.is-workstation .desktop-shell .assistant-emotions-art{background:linear-gradient(145deg,rgba(137,174,160,.25),rgba(48,72,69,.55)),#1d302e}
+body.is-workstation .desktop-shell .assistant-emotions-art .emotion-folder-mark{position:absolute;z-index:2;left:50%;top:45%;transform:translate(-50%,-50%);color:#c9e7d9;font:22px "Space Grotesk",sans-serif;text-shadow:0 0 10px rgba(155,238,210,.55)}
+body.is-workstation .assistant-emotions-window{width:min(540px,calc(100% - 28px));max-height:min(560px,calc(100% - 28px));overflow:auto;border-color:rgba(137,174,160,.42)}
+body.is-workstation .assistant-emotions-intro{display:flex;align-items:center;gap:14px;padding:15px;margin:4px 0 18px;border:1px solid rgba(137,174,160,.22);background:rgba(87,125,111,.09)}
+body.is-workstation .assistant-emotions-symbol{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:12px;color:#c9e7d9;background:rgba(115,165,145,.15);font:30px "Space Grotesk",sans-serif}
+body.is-workstation .assistant-emotions-intro strong{display:block;color:#d7e6dc;font:600 9px "IBM Plex Mono",monospace;letter-spacing:.09em}
+body.is-workstation .assistant-emotions-intro p{margin:7px 0 0;color:#aab8b0;font:11px/1.55 "Manrope",sans-serif}
+body.is-workstation #assistant-emotions-window .assistant-emotion-test{display:block!important;max-height:none;overflow:visible;padding:0;border:0;background:transparent}
+body.is-workstation #assistant-emotions-window .assistant-emotion-test-heading{display:flex;justify-content:space-between;gap:10px;margin:0 0 10px;color:#c5d8cb;font:8px "IBM Plex Mono",monospace;letter-spacing:.1em}
+body.is-workstation #assistant-emotions-window .assistant-emotion-test-heading small{color:#82968a;font:7px "IBM Plex Mono",monospace}
+body.is-workstation #assistant-emotions-window .assistant-emotion-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+body.is-workstation #assistant-emotions-window .assistant-emotion-buttons button{min-height:43px;padding:10px 12px;border:1px solid rgba(137,174,160,.28);border-radius:7px;color:#d1ded5;background:linear-gradient(145deg,rgba(84,119,103,.18),rgba(35,49,45,.45));font:10px "Manrope",sans-serif;text-align:left;cursor:pointer;transition:background .18s,border-color .18s,transform .18s}
+body.is-workstation #assistant-emotions-window .assistant-emotion-buttons button:hover{border-color:rgba(169,218,190,.7);background:rgba(105,157,128,.2);transform:translateY(-1px)}
+body.is-workstation #assistant-emotions-window .assistant-emotions-status{margin:14px 0 0;padding:10px 12px;border-left:2px solid #86a995;color:#9fb3a6;background:rgba(87,125,111,.08);font:9px/1.5 "IBM Plex Mono",monospace}
+@media(max-width:520px){body.is-workstation #assistant-emotions-window .assistant-emotion-buttons{grid-template-columns:1fr}}

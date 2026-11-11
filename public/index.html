@@ -95,10 +95,7 @@
                 <span class="desktop-icon-art folder-art" aria-hidden="true"><span class="folder-paper"></span></span>
                 <span class="icon-caption">Материалы дела</span>
               </button>
-              <button class="desktop-icon" type="button" data-open-window="dossiers-window" aria-label="Досье персон" title="Досье персон">
-                <span class="dossier-icon-art" aria-hidden="true">▣</span>
-                <span class="icon-caption">Досье</span>
-              </button>
+
               <button class="desktop-icon" type="button" data-open-window="news-window" aria-label="Новости" title="Новости">
                 <span class="desktop-icon-art folder-art news-art" aria-hidden="true"><span class="folder-paper"></span></span>
                 <span class="icon-caption">Новости</span>
@@ -149,12 +146,12 @@
             <button class="window-close" type="button" data-close-window="search-window" aria-label="Закрыть окно">×</button>
           </div>
           <div class="search-terminal-status"><span><i></i> БАЗА ДАННЫХ ДОСТУПНА</span><span>УРОВЕНЬ ДОСТУПА: <b>ОГРАНИЧЕННЫЙ</b></span><span>УЗЕЛ: <b>ITERUM-04</b></span></div>
-          <div class="search-terminal-intro"><span class="search-terminal-mark">⌕</span><div><strong>ПОИСК ПО БАЗЕ ДАННЫХ</strong><p>Введите имя, идентификатор или ключевое слово. Результаты ограничены текущим делом.</p></div></div>
+          <div class="search-terminal-intro"><span class="search-terminal-mark">⌕</span><div><strong>ПОИСК ПО БАЗЕ ДАННЫХ</strong><p>Ищите досье людей по имени, фамилии или профессии, а также документы и события. Результаты ограничены текущим делом.</p></div></div>
           <form id="player-search-form" class="player-search-form">
             <label for="player-search-query">ПОИСКОВЫЙ ЗАПРОС</label>
             <div class="player-search-row">
               <span class="search-input-prefix">⌕</span>
-              <input id="player-search-query" type="search" minlength="2" placeholder="Имя, фамилия, документ, событие…" required autocomplete="off">
+              <input id="player-search-query" type="search" minlength="2" placeholder="ФИО, профессия, документ, событие…" required autocomplete="off">
               <button type="submit" class="admin-mini-button">ВЫПОЛНИТЬ ПОИСК</button>
             </div>
             <span class="search-query-hint">МИНИМАЛЬНАЯ ДЛИНА ЗАПРОСА — 2 СИМВОЛА</span>
@@ -207,18 +204,7 @@
 
         
 
-        <section id="dossiers-window" class="player-tool-section desktop-window dossier-window" aria-labelledby="dossiers-heading" hidden>
-          <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">ПРИЛОЖЕНИЕ / КАРТОТЕКА</span><h2 id="dossiers-heading">Досье персон</h2></div>
-            <button class="window-close" type="button" data-close-window="dossiers-window" aria-label="Закрыть окно">×</button>
-          </div>
-          <div class="dossier-panel">
-            <p class="dossier-note">Личные дела и известные сведения об участниках расследования.</p>
-            <p class="dossier-muted" id="dossier-player-status" role="status">Откройте дело, чтобы просмотреть картотеку.</p>
-            <div class="dossier-player-list" id="dossier-player-list"></div>
-            <article class="dossier-details" id="dossier-details" hidden></article>
-          </div>
-        </section>
+
 
         <section id="help-window" class="player-tool-section desktop-window help-window" aria-labelledby="help-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
@@ -1455,7 +1441,7 @@
     }
     function assistantWelcomeLine() {
       const app = getAssistantCurrentApp();
-      const appNames = {"mail-window":"почту","search-window":"поиск данных","dossiers-window": ["▣", "Досье"], "materials-window":"материалы дела","news-window":"новости","help-window":"раздел помощи"};
+      const appNames = {"mail-window":"почту","search-window":"поиск данных","materials-window":"материалы дела","news-window":"новости","help-window":"раздел помощи"};
       if (assistantGhost.classList.contains("is-sleeping")) return "А-а! Ты меня разбудил. Я не спал, я… экономил призрачную энергию. Что случилось?";
       if (Math.random() < 0.18) return "О! Ты вернулся. Я тут совершенно случайно ничего не натворил. Пока.";
       if (app && appNames[app]) return "Вижу, ты сейчас изучаешь " + appNames[app] + ". Могу подсказать, если что-то непонятно. Или просто составить компанию.";

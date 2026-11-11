@@ -671,3 +671,89 @@ body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-plan
   body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-arrow,
   body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-logout {transition:none !important;}
 }
+
+
+/* Archive items, publication queue and the person's dossier editor use the
+ * same palette as the two main author forms. */
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-case,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-material-planner-card {
+  min-width:0;
+  border:1px solid rgba(130,182,186,.28);
+  border-radius:6px;
+  background:linear-gradient(120deg,rgba(21,52,60,.63),rgba(5,23,31,.77));
+  box-shadow:inset 0 1px rgba(195,229,221,.05);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-case {
+  padding:14px 16px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-case strong,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-material-info > strong {
+  color:#e9e7dc;
+  font:600 12px/1.45 var(--sans);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-case small,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-material-info > small {
+  color:#d3ae79;
+  font:600 9px/1.5 "IBM Plex Mono",var(--mono);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-material-info > span {
+  color:#a9c4c3;
+  font:10px/1.6 var(--sans);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-planner-toolbar {
+  border:1px solid rgba(116,187,192,.25);
+  background:rgba(5,28,37,.57);
+  border-radius:6px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-planner-toolbar label {
+  display:grid;
+  gap:6px;
+  font:600 9px/1.5 "IBM Plex Mono",var(--mono);
+  color:#cbb184;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-order-button {
+  background:rgba(24,64,72,.55);
+  border:1px solid rgba(122,182,183,.45);
+  border-radius:4px;
+  color:#e4e8de;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-order-button:hover:not(:disabled) {
+  color:#faf1df;
+  border-color:rgba(213,176,128,.74);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-material-order > strong {
+  color:#d5b787;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-planner-total {
+  color:#a6c5c6;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-empty,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-setup-note {
+  color:#aac5c5;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-delay-fields {
+  border:1px solid rgba(139,182,184,.29);
+  background:rgba(7,34,42,.38);
+  border-radius:6px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel .dossier-admin-list {
+  gap:13px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel .dossier-status {
+  color:#d9b786;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-checkbox-label {
+  color:#c4d3cf !important;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel input[type="checkbox"],
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel input[type="checkbox"] {
+  accent-color:#73b7b6;
+}
+@media(max-width:520px) {
+  body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-material-planner-card {
+    padding:11px;
+  }
+  body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-planner-toolbar {
+    padding:10px;
+  }
+}

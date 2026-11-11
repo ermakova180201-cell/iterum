@@ -8025,3 +8025,9 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-fac
 .assistant-emotion-buttons button{display:block;min-width:0;min-height:29px;padding:6px 3px;border:1px solid rgba(133,204,217,.34);border-radius:3px;background:rgba(95,161,180,.14);color:#e0f2f5;font:8px var(--sans);cursor:pointer}
 .assistant-emotion-buttons button:hover,.assistant-emotion-buttons button:focus-visible{outline:none;border-color:rgba(142,220,229,.8);background:rgba(95,161,180,.3);color:#fff}
 @media(max-width:420px){.assistant-emotion-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Ensure the emotion controls fit inside the assistant window. */
+body.is-workstation .iterum-assistant-chat{max-height:min(520px,calc(100% - 16px))}
+body.is-workstation .iterum-assistant-chat-body{flex:1 1 auto;min-height:72px;max-height:145px}
+body.is-workstation .assistant-emotion-test{flex:0 0 auto;max-height:none;overflow:visible}
+@media(max-width:650px){body.is-workstation .iterum-assistant-chat{max-height:calc(100% - 28px)}}

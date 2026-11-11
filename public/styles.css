@@ -7546,3 +7546,43 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-
     transform:scaleY(.72);
   }
 }
+
+
+/* ITERUM assistant personality: playful, readable expressions, restrained motion. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-calm .iterum-ghost-face i {
+  opacity:.92;
+  filter:saturate(.86);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:first-child {
+  transform:translateY(2px) rotate(-9deg) scaleY(.82);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:nth-child(2) {
+  transform:translateY(2px) rotate(9deg) scaleY(.82);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face::before {
+  content:"";
+  position:absolute;
+  left:8%;
+  right:8%;
+  bottom:5%;
+  height:28%;
+  border-radius:50%;
+  background:
+    radial-gradient(ellipse at 18% 50%,rgba(255,143,177,.5),transparent 46%),
+    radial-gradient(ellipse at 82% 50%,rgba(255,143,177,.5),transparent 46%);
+  filter:blur(2px);
+  opacity:.85;
+}
+@keyframes iterumGhostPlayfulBounce {
+  0%,100% {transform:translateY(0) rotate(0) scale(1);}
+  35% {transform:translateY(-12px) rotate(-4deg) scale(1.035);}
+  68% {transform:translateY(2px) rotate(3deg) scale(.985);}
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-playful-bounce .iterum-ghost-model-wrap {
+  animation:iterumGhostPlayfulBounce .82s cubic-bezier(.2,.75,.25,1) both !important;
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-playful-bounce .iterum-ghost-model-wrap {
+    animation:none !important;
+  }
+}

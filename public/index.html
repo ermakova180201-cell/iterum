@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="/styles.css?v=assistant-11">
   <link rel="stylesheet" href="/search.css">
   <link rel="stylesheet" href="/materials.css">
+  <link rel="stylesheet" href="/dossiers.css">
+  <script defer src="/dossiers.js"></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -92,6 +94,10 @@
               <button class="desktop-icon" type="button" data-open-window="materials-window" aria-label="Материалы дела" title="Материалы дела">
                 <span class="desktop-icon-art folder-art" aria-hidden="true"><span class="folder-paper"></span></span>
                 <span class="icon-caption">Материалы дела</span>
+              </button>
+              <button class="desktop-icon" type="button" data-open-window="dossiers-window" aria-label="Досье персон" title="Досье персон">
+                <span class="dossier-icon-art" aria-hidden="true">▣</span>
+                <span class="icon-caption">Досье</span>
               </button>
               <button class="desktop-icon" type="button" data-open-window="news-window" aria-label="Новости" title="Новости">
                 <span class="desktop-icon-art folder-art news-art" aria-hidden="true"><span class="folder-paper"></span></span>
@@ -200,6 +206,19 @@
         </section>
 
         
+
+        <section id="dossiers-window" class="player-tool-section desktop-window dossier-window" aria-labelledby="dossiers-heading" hidden>
+          <div class="player-tool-heading window-drag-handle">
+            <div><span class="section-kicker">ПРИЛОЖЕНИЕ / КАРТОТЕКА</span><h2 id="dossiers-heading">Досье персон</h2></div>
+            <button class="window-close" type="button" data-close-window="dossiers-window" aria-label="Закрыть окно">×</button>
+          </div>
+          <div class="dossier-panel">
+            <p class="dossier-note">Личные дела и известные сведения об участниках расследования.</p>
+            <p class="dossier-muted" id="dossier-player-status" role="status">Откройте дело, чтобы просмотреть картотеку.</p>
+            <div class="dossier-player-list" id="dossier-player-list"></div>
+            <article class="dossier-details" id="dossier-details" hidden></article>
+          </div>
+        </section>
 
         <section id="help-window" class="player-tool-section desktop-window help-window" aria-labelledby="help-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
@@ -411,6 +430,75 @@
           <div id="admin-material-list" class="admin-material-list"><p class="admin-empty">Пока материалов нет.</p></div>
         </div>
       </section>
+      <section class="dossier-admin" id="admin-dossier-panel" aria-label="Управление досье персон">
+        <p class="section-kicker">КАРТОТЕКА / УПРАВЛЕНИЕ ПЕРСОНАМИ</p>
+        <h3>Досье персон</h3>
+        <p class="dossier-note">Создавайте личные карточки участников дела, прикрепляйте фотографию и сохраняйте их в базе. Черновики не видны игрокам. Публикация открывает досье в приложении «Досье» выбранного дела.</p>
+        <div class="dossier-admin-actions">
+          <button id="dossier-new" type="button">+ Новое досье</button>
+          <button id="dossier-refresh" type="button">Обновить картотеку</button>
+        </div>
+        <div id="dossier-admin-list" class="dossier-admin-list"><p>Загрузка картотеки…</p></div>
+        <div class="dossier-form-wrap">
+          <h3 id="dossier-form-heading">Новое досье</h3>
+          <form id="dossier-form">
+            <div class="dossier-fields">
+              <div class="dossier-field">
+                <label for="dossier-case">ДЕЛО</label>
+                <select id="dossier-case" name="caseId" required></select>
+              </div>
+              <div class="dossier-field">
+                <label for="dossier-name">ФИО ИЛИ ИМЯ *</label>
+                <input id="dossier-name" name="fullName" maxlength="160" placeholder="Например: Илья" required>
+              </div>
+              <div class="dossier-field">
+                <label for="dossier-role">РОЛЬ В РАССЛЕДОВАНИИ</label>
+                <input id="dossier-role" name="roleName" maxlength="140" placeholder="Например: главный фигурант">
+              </div>
+              <div class="dossier-field">
+                <label for="dossier-birth">ДАТА РОЖДЕНИЯ</label>
+                <input id="dossier-birth" name="birthDate" type="date">
+              </div>
+              <div class="dossier-field wide">
+                <label for="dossier-occupation">РАБОТА / ПРОФЕССИЯ</label>
+                <input id="dossier-occupation" name="occupation" maxlength="200">
+              </div>
+              <div class="dossier-field wide">
+                <label for="dossier-biography">БИОГРАФИЯ</label>
+                <textarea id="dossier-biography" name="biography" maxlength="10000" rows="4"></textarea>
+              </div>
+              <div class="dossier-field wide">
+                <label for="dossier-relationships">СВЯЗИ С ДРУГИМИ ЛЮДЬМИ</label>
+                <textarea id="dossier-relationships" name="relationships" maxlength="5000" rows="3"></textarea>
+              </div>
+              <div class="dossier-field wide">
+                <label for="dossier-chronology">ХРОНОЛОГИЯ</label>
+                <textarea id="dossier-chronology" name="chronology" maxlength="6000" rows="3"></textarea>
+              </div>
+              <div class="dossier-field wide">
+                <label for="dossier-related">СВЯЗАННЫЕ МАТЕРИАЛЫ / НОМЕРА ДОКУМЕНТОВ</label>
+                <textarea id="dossier-related" name="relatedMaterials" maxlength="5000" rows="2"></textarea>
+              </div>
+              <div class="dossier-field wide">
+                <label for="dossier-author-notes">ЛИЧНЫЕ ЗАМЕТКИ АВТОРА (ИГРОК НЕ ВИДИТ)</label>
+                <textarea id="dossier-author-notes" name="authorNotes" maxlength="4000" rows="3"></textarea>
+              </div>
+              <div class="dossier-field wide">
+                <label for="dossier-photo">ФОТОГРАФИЯ (JPG, PNG, WEBP)</label>
+                <input id="dossier-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp">
+                <img id="dossier-photo-preview" alt="Предпросмотр фотографии" width="100" height="126" style="object-fit:cover" hidden>
+                <button id="dossier-remove-photo" type="button">Удалить фотографию</button>
+              </div>
+            </div>
+            <div class="dossier-form-actions">
+              <label class="dossier-publish"><input name="isPublished" type="checkbox"> Опубликовать для игроков</label>
+              <button id="dossier-submit" type="submit">Сохранить досье</button>
+              <button id="dossier-delete" class="dossier-danger" type="button" hidden>Удалить досье</button>
+            </div>
+            <p id="dossier-status" class="dossier-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
       <p class="admin-setup-note" id="admin-setup-note" hidden>Управление архивом ещё не настроено. Администратор должен быть назначен в настройках Worker.</p>
     </section>
 
@@ -509,6 +597,7 @@
     let archiveCases = [];
     let archiveMaterials = [];
     let currentCaseId = null;
+    window.iterumSelectedCaseId = () => currentCaseId;
     const playerMaterialList = document.getElementById("player-material-list");
     const playerArchiveCount = document.getElementById("player-archive-count");
     let registering = false;
@@ -1366,7 +1455,7 @@
     }
     function assistantWelcomeLine() {
       const app = getAssistantCurrentApp();
-      const appNames = {"mail-window":"почту","search-window":"поиск данных","materials-window":"материалы дела","news-window":"новости","help-window":"раздел помощи"};
+      const appNames = {"mail-window":"почту","search-window":"поиск данных","dossiers-window": ["▣", "Досье"], "materials-window":"материалы дела","news-window":"новости","help-window":"раздел помощи"};
       if (assistantGhost.classList.contains("is-sleeping")) return "А-а! Ты меня разбудил. Я не спал, я… экономил призрачную энергию. Что случилось?";
       if (Math.random() < 0.18) return "О! Ты вернулся. Я тут совершенно случайно ничего не натворил. Пока.";
       if (app && appNames[app]) return "Вижу, ты сейчас изучаешь " + appNames[app] + ". Могу подсказать, если что-то непонятно. Или просто составить компанию.";

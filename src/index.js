@@ -216,11 +216,113 @@ async function handleApi(request, env) {
     return json({ cases: cases.results || [], materials: materials.results || [] });
   }
 
+
+  // Case-scoped dossier reader; draft and author-only fields must not leak.
+  if (request.method === "GET" && url.pathname === "/api/player/dossiers") {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    const caseId = url.searchParams.get("caseId") || "";
+    if (!/^[a-f0-9]{32}$/.test(caseId)) return json({ error: "Неверное дело." }, 400);
+    const foundCase = await env.DB.prepare("SELECT status FROM cases WHERE id = ?").bind(caseId).first();
+    if (!foundCase) return json({ error: "Дело не найдено." }, 404);
+    const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
+    if (!isAdmin && foundCase.status !== "active") return json({ error: "Дело недоступно." }, 403);
+    const rows = await env.DB.prepare(
+      "SELECT id, case_id, full_name, role_name, birth_date, occupation, biography, relationships, chronology, related_materials, photo_data FROM person_dossiers WHERE case_id = ? AND is_published = 1 ORDER BY full_name COLLATE NOCASE"
+    ).bind(caseId).all();
+    return json({ dossiers: rows.results || [] });
+  }
+
   if (url.pathname.startsWith("/api/admin/")) {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
     if (user.email.toLowerCase() !== ADMIN_EMAIL) {
       return json({ error: "Доступ к панели администратора запрещён." }, 403);
+    }
+
+
+
+    // First authenticated administrator visit initializes the new D1 table.
+    // Migration 0007 is kept for CLI-based, repeatable deployments; this route
+    // allows non-technical site owners to activate the feature safely.
+    if (request.method === "POST" && url.pathname === "/api/admin/dossiers/initialize") {
+      await env.DB.prepare(
+        "CREATE TABLE IF NOT EXISTS person_dossiers (" +
+        "id TEXT PRIMARY KEY, " +
+        "case_id TEXT NOT NULL REFERENCES cases(id) ON DELETE CASCADE, " +
+        "full_name TEXT NOT NULL, role_name TEXT NOT NULL DEFAULT '', " +
+        "birth_date TEXT NOT NULL DEFAULT '', occupation TEXT NOT NULL DEFAULT '', " +
+        "biography TEXT NOT NULL DEFAULT '', relationships TEXT NOT NULL DEFAULT '', " +
+        "chronology TEXT NOT NULL DEFAULT '', related_materials TEXT NOT NULL DEFAULT '', " +
+        "photo_data TEXT NOT NULL DEFAULT '', author_notes TEXT NOT NULL DEFAULT '', " +
+        "is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published IN (0,1)), " +
+        "created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), " +
+        "updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))" +
+        ")"
+      ).run();
+      await env.DB.prepare(
+        "CREATE INDEX IF NOT EXISTS idx_person_dossiers_case_visible ON person_dossiers(case_id, is_published, full_name)"
+      ).run();
+      return json({ ok: true });
+    }
+
+    // Dossier management is restricted to the existing server-side administrator role.
+    if (request.method === "GET" && url.pathname === "/api/admin/dossiers") {
+      const rows = await env.DB.prepare(
+        "SELECT d.*, c.title AS case_title FROM person_dossiers d JOIN cases c ON c.id = d.case_id ORDER BY c.created_at DESC, d.full_name COLLATE NOCASE"
+      ).all();
+      return json({ dossiers: rows.results || [] });
+    }
+
+    const dossierRoute = url.pathname.match(/^\/api\/admin\/dossiers\/([a-f0-9]{32})$/);
+    if (request.method === "DELETE" && dossierRoute) {
+      const existing = await env.DB.prepare("SELECT id FROM person_dossiers WHERE id = ?").bind(dossierRoute[1]).first();
+      if (!existing) return json({ error: "Досье не найдено." }, 404);
+      await env.DB.prepare("DELETE FROM person_dossiers WHERE id = ?").bind(dossierRoute[1]).run();
+      return json({ ok: true });
+    }
+    if ((request.method === "POST" && url.pathname === "/api/admin/dossiers") ||
+        (request.method === "PUT" && dossierRoute)) {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Проверьте введённые данные." }, 400); }
+      const caseId = String(body.caseId || "");
+      const fullName = String(body.fullName || "").trim();
+      const roleName = String(body.roleName || "").trim();
+      const birthDate = String(body.birthDate || "").trim();
+      const occupation = String(body.occupation || "").trim();
+      const biography = String(body.biography || "").trim();
+      const relationships = String(body.relationships || "").trim();
+      const chronology = String(body.chronology || "").trim();
+      const relatedMaterials = String(body.relatedMaterials || "").trim();
+      const authorNotes = String(body.authorNotes || "").trim();
+      const photoData = String(body.photoData || "");
+      const isPublished = body.isPublished === true ? 1 : 0;
+      if (!/^[a-f0-9]{32}$/.test(caseId) || !fullName ||
+          fullName.length > 160 || roleName.length > 140 ||
+          (birthDate && !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) ||
+          occupation.length > 200 || biography.length > 10000 ||
+          relationships.length > 5000 || chronology.length > 6000 ||
+          relatedMaterials.length > 5000 || authorNotes.length > 4000 ||
+          photoData.length > 550000 ||
+          (photoData && !/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(photoData))) {
+        return json({ error: "Проверьте поля досье и размер фотографии." }, 400);
+      }
+      const foundCase = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseId).first();
+      if (!foundCase) return json({ error: "Указанное дело не существует." }, 404);
+      if (request.method === "POST") {
+        const id = randomToken(16);
+        await env.DB.prepare(
+          "INSERT INTO person_dossiers (id, case_id, full_name, role_name, birth_date, occupation, biography, relationships, chronology, related_materials, photo_data, author_notes, is_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        ).bind(id, caseId, fullName, roleName, birthDate, occupation, biography, relationships, chronology, relatedMaterials, photoData, authorNotes, isPublished).run();
+        return json({ ok: true, id });
+      }
+      const id = dossierRoute[1];
+      const existing = await env.DB.prepare("SELECT id FROM person_dossiers WHERE id = ?").bind(id).first();
+      if (!existing) return json({ error: "Досье не найдено." }, 404);
+      await env.DB.prepare(
+        "UPDATE person_dossiers SET case_id=?, full_name=?, role_name=?, birth_date=?, occupation=?, biography=?, relationships=?, chronology=?, related_materials=?, photo_data=?, author_notes=?, is_published=?, updated_at=strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id=?"
+      ).bind(caseId, fullName, roleName, birthDate, occupation, biography, relationships, chronology, relatedMaterials, photoData, authorNotes, isPublished, id).run();
+      return json({ ok: true, id });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/overview") {

@@ -7727,3 +7727,146 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-fac
   body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleepy .iterum-ghost-face i { transform:scaleY(.2); }
   body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i { transform:scaleY(.65); }
 }
+
+
+/* EMO-inspired character acting: keep the original simple oval eyes.
+   Personality comes from timing, gaze, and the ghost's body language. */
+@keyframes iterumActHappy {
+  0%,100% { transform:translateY(0) rotate(0) scale(1); }
+  18% { transform:translateY(-8px) rotate(-3deg) scale(1.025,1.04); }
+  38% { transform:translateY(-2px) rotate(2deg) scale(.99,1.015); }
+  58% { transform:translateY(-6px) rotate(3deg) scale(1.015,1.03); }
+  78% { transform:translateY(0) rotate(-1deg) scale(1); }
+}
+@keyframes iterumActCurious {
+  0%,100% { transform:translateY(0) rotate(0) scale(1); }
+  28% { transform:translateY(-4px) rotate(-7deg) scale(1.015); }
+  58% { transform:translateY(-2px) rotate(-5deg) scale(1); }
+  78% { transform:translateY(1px) rotate(2deg); }
+}
+@keyframes iterumActSurprised {
+  0%,100% { transform:translateY(0) scale(1); }
+  12% { transform:translateY(4px) scale(1.035,.94); }
+  28% { transform:translateY(-10px) scale(.97,1.075); }
+  46% { transform:translateY(-5px) scale(1.015,1.025); }
+  68% { transform:translateY(-2px) scale(1); }
+}
+@keyframes iterumActThinking {
+  0%,100% { transform:translateY(0) rotate(0); }
+  25% { transform:translateY(-2px) rotate(4deg); }
+  52% { transform:translateY(-3px) rotate(6deg); }
+  78% { transform:translateY(0) rotate(-2deg); }
+}
+@keyframes iterumActGrumpy {
+  0%,100% { transform:translateY(0) rotate(-2deg) scale(1); }
+  24% { transform:translateY(1px) rotate(-4deg) scale(1,.985); }
+  48% { transform:translateY(0) rotate(-2deg); }
+  72% { transform:translateY(-1px) rotate(1deg); }
+}
+@keyframes iterumActSleepy {
+  0%,100% { transform:translateY(3px) rotate(0) scale(.985,.97); }
+  42% { transform:translateY(7px) rotate(2deg) scale(.97,.95); }
+  58% { transform:translateY(8px) rotate(2deg) scale(.97,.95); }
+  76% { transform:translateY(2px) rotate(-1deg) scale(.99,.985); }
+}
+@keyframes iterumActShy {
+  0%,100% { transform:translateY(0) rotate(0) scale(1); }
+  24% { transform:translate(-2px,2px) rotate(-4deg) scale(.985); }
+  52% { transform:translate(-2px,1px) rotate(-5deg) scale(.99); }
+  78% { transform:translateY(1px) rotate(1deg); }
+}
+@keyframes iterumEyesHappyAnime {
+  0%,100% { transform:scaleY(.72) rotate(0); }
+  24%,62% { transform:scaleY(.3) rotate(-7deg); }
+  42% { transform:scaleY(.42) rotate(0); }
+}
+@keyframes iterumEyesCuriousAnimeLeft {
+  0%,100% { transform:translateY(-1px) rotate(-12deg) scaleY(1.12); }
+  50% { transform:translateY(-3px) rotate(-17deg) scaleY(.88); }
+}
+@keyframes iterumEyesCuriousAnimeRight {
+  0%,100% { transform:translateY(2px) rotate(7deg) scaleY(.82); }
+  50% { transform:translateY(0) rotate(4deg) scaleY(1.02); }
+}
+@keyframes iterumEyesThinkingAnimeLeft {
+  0%,100% { transform:translate(-2px,-2px) rotate(-14deg) scaleY(.72); }
+  38%,62% { transform:translate(-4px,-4px) rotate(-18deg) scaleY(.68); }
+}
+@keyframes iterumEyesThinkingAnimeRight {
+  0%,100% { transform:translate(2px,-1px) rotate(10deg) scaleY(.88); }
+  38%,62% { transform:translate(4px,-3px) rotate(14deg) scaleY(.82); }
+}
+@keyframes iterumEyesGrumpyAnime {
+  0%,100% { transform:rotate(19deg) scaleY(.48); }
+  50% { transform:rotate(22deg) scaleY(.38); }
+}
+@keyframes iterumEyesSleepyAnime {
+  0%,100% { transform:translateY(3px) scaleY(.2); }
+  35%,68% { transform:translateY(5px) scaleY(.1); }
+  52% { transform:translateY(5px) scaleY(.06); }
+}
+@keyframes iterumEyesShyAnimeLeft {
+  0%,100% { transform:translate(0,2px) rotate(-8deg) scaleY(.66); }
+  50% { transform:translate(-2px,3px) rotate(-12deg) scaleY(.52); }
+}
+@keyframes iterumEyesShyAnimeRight {
+  0%,100% { transform:translate(0,2px) rotate(8deg) scaleY(.66); }
+  50% { transform:translate(2px,3px) rotate(12deg) scaleY(.52); }
+}
+
+/* Whole-body reactions are deliberately subtle and never alter the model. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking).is-happy .iterum-ghost-model-wrap {
+  animation:iterumActHappy 2.4s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking).is-curious .iterum-ghost-model-wrap {
+  animation:iterumActCurious 3.1s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking).is-surprised .iterum-ghost-model-wrap {
+  animation:iterumActSurprised 1.05s cubic-bezier(.2,.8,.25,1) both;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking).is-thinking .iterum-ghost-model-wrap {
+  animation:iterumActThinking 3.6s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking).is-grumpy .iterum-ghost-model-wrap {
+  animation:iterumActGrumpy 2.2s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking).is-sleepy .iterum-ghost-model-wrap {
+  animation:iterumActSleepy 4.8s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking).is-shy .iterum-ghost-model-wrap {
+  animation:iterumActShy 3.2s ease-in-out infinite;
+}
+
+/* Expressive anime timing, without pupils, irises, highlights, or square shapes. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-face i {
+  animation:iterumEyesHappyAnime 1.8s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:first-child {
+  animation:iterumEyesCuriousAnimeLeft 2.2s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:nth-child(2) {
+  animation:iterumEyesCuriousAnimeRight 2.2s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i:first-child {
+  animation:iterumEyesThinkingAnimeLeft 3s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i:nth-child(2) {
+  animation:iterumEyesThinkingAnimeRight 3s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i {
+  animation:iterumEyesGrumpyAnime 1.5s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleepy .iterum-ghost-face i {
+  animation:iterumEyesSleepyAnime 4.2s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:first-child {
+  animation:iterumEyesShyAnimeLeft 2.4s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:nth-child(2) {
+  animation:iterumEyesShyAnimeRight 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model .iterum-ghost-model-wrap {
+    animation:none !important;
+  }
+}

@@ -12,8 +12,11 @@
   let activeId = null;
   let activeFilter = "all";
 
-  const labelCount = n => n === 1 ? "1 запись" : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14))
-    ? n + " записи" : n + " записей";
+  const labelCount = n => {
+    const lastTwo = n % 100, last = n % 10;
+    return n + " " + (lastTwo >= 11 && lastTwo <= 14 ? "записей"
+      : last === 1 ? "запись" : last >= 2 && last <= 4 ? "записи" : "записей");
+  };
   const kind = item => item.result_type === "person" ? "person" : "material";
   const key = item => kind(item) + ":" + item.id;
 

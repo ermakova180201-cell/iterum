@@ -7511,3 +7511,38 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.model-load-failed .iteru
     will-change:auto;
   }
 }
+
+
+/* Subtle face reactions: keep the original eyes and smile, change only eyelids. */
+@keyframes iterumGhostSoftSquint {
+  0%,100% { transform:scaleY(.82); }
+  50% { transform:scaleY(.48); }
+}
+@keyframes iterumGhostAngryEyes {
+  0%,100% { transform:rotate(16deg) scaleY(.68); }
+  50% { transform:rotate(16deg) scaleY(.52); }
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper:hover .iterum-ghost-face i,
+body.is-workstation .desktop-shell .iterum-ghost-helper:focus-visible .iterum-ghost-face i {
+  animation:iterumGhostSoftSquint 1.25s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i {
+  animation:iterumGhostAngryEyes 1.1s ease-in-out infinite;
+}
+/* Anger is expressed through narrowed, tilted eyes — the familiar smile stays unchanged. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face::after {
+  top:70%;
+  width:17%;
+  height:7%;
+  border:0;
+  border-bottom:2px solid rgba(119,231,255,.95);
+  border-radius:0 0 50% 50%;
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .iterum-ghost-helper:hover .iterum-ghost-face i,
+  body.is-workstation .desktop-shell .iterum-ghost-helper:focus-visible .iterum-ghost-face i,
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i {
+    animation:none !important;
+    transform:scaleY(.72);
+  }
+}

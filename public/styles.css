@@ -7586,3 +7586,139 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-playful-bounce .iteru
     animation:none !important;
   }
 }
+
+
+/* ITERUM ghost: distinct eye acting for the complete eight-emotion set.
+   Keep the original face design and smile; emotions are carried by the eyes. */
+@keyframes iterumEyesCalm {
+  0%,44%,48%,100% { transform:scaleY(1); }
+  46% { transform:scaleY(.08); }
+}
+@keyframes iterumEyesCuriousLeft {
+  0%,100% { transform:translate(-1px,-2px) rotate(-9deg) scaleY(1.04); }
+  50% { transform:translate(-1px,-3px) rotate(-13deg) scaleY(.9); }
+}
+@keyframes iterumEyesCuriousRight {
+  0%,100% { transform:translate(1px,2px) rotate(5deg) scaleY(.88); }
+  50% { transform:translate(1px,1px) rotate(8deg) scaleY(.96); }
+}
+@keyframes iterumEyesHappy {
+  0%,100% { transform:scaleY(.78); }
+  50% { transform:scaleY(.58); }
+}
+@keyframes iterumEyesSurprised {
+  0%,100% { transform:scaleY(1.18) scaleX(1.04); }
+  50% { transform:scaleY(1.28) scaleX(1.08); }
+}
+@keyframes iterumEyesThinkingLeft {
+  0%,100% { transform:translate(-2px,-2px) rotate(-13deg) scaleY(.72); }
+  50% { transform:translate(-3px,-3px) rotate(-17deg) scaleY(.62); }
+}
+@keyframes iterumEyesThinkingRight {
+  0%,100% { transform:translate(2px,1px) rotate(8deg) scaleY(.9); }
+  50% { transform:translate(3px,1px) rotate(12deg) scaleY(.82); }
+}
+@keyframes iterumEyesGrumpy {
+  0%,100% { transform:rotate(17deg) scaleY(.56); }
+  50% { transform:rotate(20deg) scaleY(.46); }
+}
+@keyframes iterumEyesSleepy {
+  0%,100% { transform:translateY(3px) scaleY(.22); }
+  50% { transform:translateY(4px) scaleY(.12); }
+}
+@keyframes iterumEyesShyLeft {
+  0%,100% { transform:translateY(2px) rotate(-8deg) scaleY(.7); }
+  50% { transform:translateY(3px) rotate(-5deg) scaleY(.55); }
+}
+@keyframes iterumEyesShyRight {
+  0%,100% { transform:translateY(2px) rotate(8deg) scaleY(.7); }
+  50% { transform:translateY(3px) rotate(5deg) scaleY(.55); }
+}
+
+/* Base state: relaxed eyes, natural blink. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-calm .iterum-ghost-face i {
+  animation:iterumEyesCalm 5.2s ease-in-out infinite;
+}
+/* Curious: one eye lifts first, as if the ghost noticed something. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:first-child {
+  animation:iterumEyesCuriousLeft 2.1s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:nth-child(2) {
+  animation:iterumEyesCuriousRight 2.1s ease-in-out infinite;
+}
+/* Happy: friendly smiling eyes, without changing the drawn smile. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-face i {
+  animation:iterumEyesHappy 1.8s ease-in-out infinite;
+}
+/* Surprised: eyes widen briefly, then settle. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face i {
+  animation:iterumEyesSurprised .72s ease-in-out infinite;
+}
+/* Thinking: the gaze drifts slightly to one side. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i:first-child {
+  animation:iterumEyesThinkingLeft 2.8s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i:nth-child(2) {
+  animation:iterumEyesThinkingRight 2.8s ease-in-out infinite;
+}
+/* Grumpy: narrowed, angled eyes; the familiar smile remains untouched. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i {
+  animation:iterumEyesGrumpy 1.35s ease-in-out infinite;
+}
+/* Sleepy: heavy eyelids and a very slow blink. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleepy .iterum-ghost-face i {
+  animation:iterumEyesSleepy 3.8s ease-in-out infinite;
+}
+/* Shy: gaze lowered, with a soft blush. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:first-child {
+  animation:iterumEyesShyLeft 2.2s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:nth-child(2) {
+  animation:iterumEyesShyRight 2.2s ease-in-out infinite;
+}
+/* Do not reshape the mouth per mood: preserve the original curved smile. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-face::after,
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face::after,
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face::after,
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face::after,
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face::after,
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleepy .iterum-ghost-face::after,
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face::after {
+  top:70%;
+  width:17%;
+  height:7%;
+  border:0;
+  border-bottom:2px solid rgba(119,231,255,.95);
+  border-radius:0 0 50% 50%;
+}
+/* Mood-specific blush only appears while shy. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face::before {
+  content:"";
+  position:absolute;
+  left:8%;
+  right:8%;
+  bottom:5%;
+  height:28%;
+  border-radius:50%;
+  background:
+    radial-gradient(ellipse at 18% 50%,rgba(255,143,177,.5),transparent 46%),
+    radial-gradient(ellipse at 82% 50%,rgba(255,143,177,.5),transparent 46%);
+  filter:blur(2px);
+  opacity:.85;
+  pointer-events:none;
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .iterum-ghost-helper .iterum-ghost-face i {
+    animation:none !important;
+  }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-calm .iterum-ghost-face i { transform:none; }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:first-child { transform:rotate(-9deg); }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:nth-child(2) { transform:rotate(5deg) scaleY(.88); }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-face i { transform:scaleY(.7); }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face i { transform:scaleY(1.2); }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i:first-child { transform:rotate(-13deg) scaleY(.72); }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i:nth-child(2) { transform:rotate(8deg) scaleY(.9); }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i { transform:rotate(17deg) scaleY(.56); }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleepy .iterum-ghost-face i { transform:scaleY(.2); }
+  body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i { transform:scaleY(.65); }
+}

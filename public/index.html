@@ -1162,7 +1162,7 @@
     const assistantGhost = document.querySelector(".iterum-ghost-helper");
     const assistantGhostMessage = assistantGhost.querySelector(".iterum-ghost-message");
     const assistantChatInput = document.getElementById("assistant-chat-input");
-    const assistantEmotions = ["happy","curious","surprised","thinking","sleepy","grumpy"];
+    const assistantEmotions = ["calm","curious","happy","surprised","thinking","grumpy","sleepy","shy"];
 
     // Память помощника хранит только ход работы, а не тексты писем, документов или поисковых запросов.
     const assistantMemory = {
@@ -1234,7 +1234,7 @@
         }, 1450);
       }
       assistantEmotions.forEach(name => assistantGhost.classList.remove("is-" + name));
-      assistantGhost.classList.add("is-" + (assistantEmotions.includes(mood) ? mood : "happy"));
+      assistantGhost.classList.add("is-" + (assistantEmotions.includes(mood) ? mood : "calm"));
       if (phrase) assistantGhostMessage.textContent = phrase;
       assistantGhost.setAttribute("aria-label", "Системный помощник ITERUM: " + mood);
     }
@@ -1256,6 +1256,12 @@
       { key:"news-window", phrase:"Новости. Посмотрим, что происходит за пределами нашего маленького архива.", mood:"curious" },
       { key:"help-window", phrase:"Заглянул в помощь? Ничего, я не ревную. Почти.", mood:"happy" }
     ];
+    const ghostPlayfulAsides = [
+      { phrase:"Я ничего не трогал. Оно само. Честное призрачное.", mood:"shy" },
+      { phrase:"Ты так внимательно всё изучаешь… А я думал, мы просто гуляем.", mood:"happy" },
+      { phrase:"Пс-с. Кажется, я знаю, где тут самое интересное. Но сначала попробуй сам.", mood:"curious" },
+      { phrase:"Не отвлекайся. Я просто проверяю, не уснул ли ты над документами.", mood:"thinking" }
+    ];
     function visitDesktopApp() {
       if (!assistantChat.hidden || assistantGhost.classList.contains("is-sleeping") || document.hidden) return;
       const area = document.querySelector(".desktop-area");
@@ -1276,7 +1282,11 @@
       assistantGhost.classList.add("is-visiting-app");
       assistantGhost.style.left = left + "px";
       assistantGhost.style.top = top + "px";
-      setAssistantMood(visit.mood, visit.phrase);
+      const playfulAside = Math.random() < 0.22 ? ghostPlayfulAsides[Math.floor(Math.random() * ghostPlayfulAsides.length)] : null;
+      setAssistantMood(playfulAside ? playfulAside.mood : visit.mood, playfulAside ? playfulAside.phrase : visit.phrase);
+      assistantGhost.classList.add("is-playful-bounce");
+      window.clearTimeout(assistantGhost._playfulBounceTimer);
+      assistantGhost._playfulBounceTimer = window.setTimeout(() => assistantGhost.classList.remove("is-playful-bounce"), 850);
       window.clearTimeout(ghostReturnTimer);
       ghostReturnTimer = window.setTimeout(() => {
         assistantGhost.classList.remove("is-visiting-app");
@@ -1322,13 +1332,14 @@
         const user = document.createElement("p"); user.className = "assistant-bubble assistant-bubble-user"; user.textContent = userText; assistantChatBody.append(user);
       }
       const reply = document.createElement("p"); reply.className = "assistant-bubble"; reply.textContent = text; assistantChatBody.append(reply);
-      setAssistantMood(mood, mood === "curious" ? "О, интересно…" : mood === "thinking" ? "Сейчас подумаю…" : mood === "surprised" ? "Ого!" : mood === "grumpy" ? "Ну вот опять…" : mood === "sleepy" ? "Я тут…" : "Хи-хи.");
+      setAssistantMood(mood, mood === "calm" ? "Я рядом." : mood === "curious" ? "О, интересно…" : mood === "thinking" ? "Сейчас подумаю…" : mood === "surprised" ? "Ого!" : mood === "grumpy" ? "Ну вот опять…" : mood === "sleepy" ? "Я тут…" : mood === "shy" ? "Ой… ты меня заметил." : mood === "happy" ? "Хи-хи!" : "Хи-хи.");
       recordAssistantAction("разговор с помощником");
     }
     function assistantWelcomeLine() {
       const app = getAssistantCurrentApp();
       const appNames = {"mail-window":"почту","search-window":"поиск данных","materials-window":"материалы дела","news-window":"новости","help-window":"раздел помощи"};
       if (assistantGhost.classList.contains("is-sleeping")) return "А-а! Ты меня разбудил. Я не спал, я… экономил призрачную энергию. Что случилось?";
+      if (Math.random() < 0.18) return "О! Ты вернулся. Я тут совершенно случайно ничего не натворил. Пока.";
       if (app && appNames[app]) return "Вижу, ты сейчас изучаешь " + appNames[app] + ". Могу подсказать, если что-то непонятно. Или просто составить компанию.";
       if (assistantMemory.inspectedItems > 0) return "С возвращением. Мы уже успели посмотреть кое-какие материалы. Не потерял нить расследования?";
       if (assistantMemory.openedApps["mail-window"]) return "Снова ты! Почту мы уже открывали. Может, теперь проверим остальные разделы?";

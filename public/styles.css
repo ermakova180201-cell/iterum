@@ -8012,3 +8012,15 @@ body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-fac
 .assistant-emotion-buttons button:hover,.assistant-emotion-buttons button:focus-visible{outline:none;border-color:rgba(142,220,229,.65);background:rgba(95,161,180,.17);color:#e5fbff}
 .assistant-bubble-mood-test{font-size:9px}
 @media(max-width:420px){.assistant-emotion-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Explicit, always-visible emotion preview control in the assistant header */
+body.is-workstation .iterum-assistant-chat-head{flex-shrink:0;gap:10px}
+body.is-workstation .assistant-chat-head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+body.is-workstation .iterum-assistant-chat-head .assistant-chat-head-actions button#assistant-emotion-toggle{padding:6px 8px;border:1px solid rgba(133,204,217,.32);border-radius:3px;background:rgba(95,161,180,.12);color:#c4e8ed;font:8px var(--mono);letter-spacing:.06em;white-space:nowrap}
+body.is-workstation .iterum-assistant-chat-head .assistant-chat-head-actions button#assistant-emotion-toggle:hover,
+body.is-workstation .iterum-assistant-chat-head .assistant-chat-head-actions button#assistant-emotion-toggle:focus-visible{border-color:rgba(142,220,229,.75);background:rgba(95,161,180,.24);outline:none}
+body.is-workstation .iterum-assistant-chat-head .assistant-chat-head-actions button#assistant-chat-close{font-size:20px;line-height:1;padding:0 2px}
+body.is-workstation .assistant-emotion-test[hidden]{display:none!important}
+body.is-workstation .assistant-emotion-test{display:block;flex:0 0 auto;max-height:190px;overflow:auto}
+body.is-workstation .assistant-emotion-buttons button{min-height:30px}

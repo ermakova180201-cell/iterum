@@ -145,3 +145,25 @@
   .search-dossier-reader { padding: 17px 14px; min-height: 180px; }
   .search-reader-title { font-size: 20px; }
 }
+
+
+/* Search results: people appear as an archive dossier, alongside documents. */
+.search-result-entry.is-person { border-left: 2px solid rgba(157,176,166,.55); }
+.search-person-heading { display:flex;gap:18px;align-items:flex-start;margin:13px 0 17px; }
+.search-person-heading-text { min-width:0;flex:1; }
+.search-person-heading .search-reader-title { margin-top:0; }
+.search-person-photo, .search-person-silhouette {
+  width:104px;height:130px;flex:0 0 104px;object-fit:cover;border:1px solid rgba(174,145,108,.3);
+  border-radius:5px;background:#222b2d;
+}
+.search-person-silhouette {display:flex;align-items:center;justify-content:center;color:#8c8f86;font-size:42px;}
+.search-person-fact {font:10px/1.7 var(--sans);color:#c8bdab;margin:7px 0;}
+.search-person-fact strong {color:#c6ad87;font-weight:600;}
+.search-person-section {padding-top:14px;margin-top:15px;border-top:1px solid rgba(174,145,108,.23);}
+.search-person-section h4 {font:500 11px var(--mono);color:#ceb18a;text-transform:uppercase;letter-spacing:.08em;margin:0 0 9px;}
+.search-person-prose {font:11px/1.8 var(--sans);color:#ded4c3;white-space:pre-wrap;overflow-wrap:anywhere;margin:0;}
+@media(max-width:620px){
+  .search-person-heading{gap:11px;}
+  .search-person-photo,.search-person-silhouette{width:75px;height:94px;flex-basis:75px;}
+  .search-person-heading .search-reader-title{font-size:17px;}
+}

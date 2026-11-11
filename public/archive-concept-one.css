@@ -1,0 +1,673 @@
+/* ITERUM — Case archive / workstation concept 01
+ * The public case selector and author archive share the visual materials of
+ * workstation-concept-one.css. No changes to auth, data, or opened apps.
+ * Explicitly scoped so logged-out and workstation screens are unaffected. */
+body:not(.is-workstation):has(#workspace:not([hidden])) {
+  --archive-ink: #f2e9da;
+  --archive-muted: #a9c2c4;
+  --archive-gold: #d6ae7c;
+  --archive-cyan: #75c5ca;
+  --archive-line: rgba(200,165,116,.42);
+  color:var(--archive-ink);
+  min-height:100vh;
+  background:
+    linear-gradient(90deg,rgba(3,12,18,.33),rgba(3,14,19,.09) 38%,rgba(4,13,20,.23)),
+    linear-gradient(180deg,rgba(4,14,20,.25),rgba(7,21,29,.55) 73%,rgba(5,14,20,.88)),
+    url("/archive-room.svg") center top/cover fixed no-repeat,
+    #071923;
+}
+body:not(.is-workstation):has(#workspace:not([hidden]))::before {
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  opacity:.56;
+  background:
+    linear-gradient(rgba(115,176,180,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(115,176,180,.035) 1px,transparent 1px);
+  background-size:40px 40px;
+  mask-image:linear-gradient(180deg,#000 20%,transparent 100%);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #ambient-network {
+  opacity:.07;
+  pointer-events:none;
+}
+
+/* Shared header — same optical hierarchy, metal, cyan and warm gold as the desktop. */
+body:not(.is-workstation):has(#workspace:not([hidden])) .topbar {
+  position:relative;
+  z-index:8;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+  height:auto;
+  min-height:79px;
+  padding:12px max(4vw,24px);
+  background:
+    radial-gradient(ellipse at 18% 0%,rgba(73,152,162,.14),transparent 36%),
+    linear-gradient(105deg,rgba(7,21,29,.99),rgba(4,15,22,.99) 55%,rgba(9,27,36,.99));
+  border-top:1px solid rgba(206,170,120,.27);
+  border-bottom:1px solid rgba(210,169,112,.53);
+  box-shadow:0 10px 32px rgba(0,0,0,.35),inset 0 1px rgba(242,231,198,.06);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .topbar::after {
+  content:"";
+  position:absolute;
+  bottom:-2px;
+  left:43%;
+  height:2px;
+  width:14%;
+  background:linear-gradient(90deg,transparent,rgba(237,188,116,.75),transparent);
+  box-shadow:0 0 12px rgba(221,178,111,.34);
+  pointer-events:none;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .brand {
+  display:inline-flex;
+  align-items:center;
+  gap:16px;
+  min-width:0;
+  color:#f1e9d9;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .brand::before {
+  content:"";
+  display:block;
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+  border:2px solid rgba(117,220,225,.83);
+  border-bottom-color:rgba(214,174,124,.8);
+  border-right-color:rgba(214,174,124,.42);
+  border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,rgba(71,175,193,.12),transparent 58%);
+  box-shadow:0 0 0 4px rgba(82,187,197,.05),0 0 19px rgba(89,201,206,.21),inset 0 0 10px rgba(74,184,189,.16);
+  transform:rotate(-22deg);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .brand-name {
+  display:block;
+  color:#ead4b1;
+  font:600 clamp(19px,2.1vw,28px)/1.12 "Space Grotesk",var(--sans);
+  letter-spacing:.28em;
+  text-shadow:0 0 25px rgba(212,170,103,.1);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .brand-name small {
+  display:block;
+  margin-top:7px;
+  color:#a9bec0;
+  font:500 9px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.2em;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-right {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-end;
+  gap:13px;
+  color:#a9c4c8;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-status,
+body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-version {
+  color:#b9c9c4;
+  font:600 9px/1.35 "IBM Plex Mono",var(--mono);
+  letter-spacing:.11em;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .status-dot {
+  width:7px;height:7px;
+  background:#a8dab5;
+  box-shadow:0 0 12px rgba(101,207,172,.56);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-divider {
+  height:22px;
+  border-left:1px solid rgba(207,172,121,.34);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-logout {
+  min-height:39px;
+  padding:11px 16px;
+  color:#e4ece7;
+  background:linear-gradient(120deg,rgba(20,62,70,.85),rgba(6,26,35,.92));
+  border:1px solid rgba(102,196,198,.57);
+  border-radius:5px;
+  font:600 9px/1.3 "IBM Plex Mono",var(--mono);
+  letter-spacing:.09em;
+  transition:background .18s ease,box-shadow .18s ease;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-logout:hover {
+  color:#fff5e6;
+  background:linear-gradient(120deg,rgba(37,82,84,.95),rgba(9,38,45,.95));
+  box-shadow:0 0 17px rgba(102,193,199,.18);
+}
+
+/* Content: bring cases closer to the banner; preserve admin length and scrolling */
+body:not(.is-workstation):has(#workspace:not([hidden])) #workspace {
+  position:relative;
+  z-index:1;
+  width:min(1160px,calc(100% - 56px));
+  padding:clamp(38px,6vh,67px) 0 90px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #workspace > .section-heading,
+body:not(.is-workstation):has(#workspace:not([hidden])) #workspace > .member-summary {
+  display:none;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-cases {
+  position:relative;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  padding:0;
+  margin:0;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .case-selection-heading {
+  position:relative;
+  padding:0 0 22px;
+  margin:0 0 31px;
+  border-bottom:1px solid rgba(221,180,122,.65);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .case-selection-heading::before {
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:-2px;
+  width:220px;
+  height:2px;
+  background:linear-gradient(90deg,#e0bb83,transparent);
+  box-shadow:0 0 18px rgba(212,163,96,.2);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .case-selection-heading::after {
+  content:"CASE DATABASE / ITERUM";
+  right:0;
+  bottom:24px;
+  position:absolute;
+  color:#c8af87;
+  font:600 10px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.21em;
+  pointer-events:none;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .case-selection-kicker {
+  margin:0 0 12px;
+  color:#d5b17d;
+  font:600 10px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.25em;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .case-selection-kicker::before {
+  content:"▱";
+  display:inline-block;
+  margin-right:12px;
+  font-size:20px;
+  line-height:8px;
+  vertical-align:middle;
+  color:#dfc397;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .case-selection-heading h2 {
+  margin:0;
+  color:#f4e7d2;
+  font:500 clamp(33px,4.1vw,53px)/1.15 "Playfair Display",Georgia,serif;
+  letter-spacing:-.035em;
+  text-shadow:0 4px 25px rgba(0,0,0,.45);
+}
+
+/* One dynamic case card per actual case in the database; no artificial limit */
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-list {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr));
+  gap:26px;
+  max-width:1070px;
+  margin:0 auto;
+  align-items:stretch;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card {
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  min-width:0;
+  min-height:300px;
+  gap:0;
+  margin:0;
+  padding:0;
+  color:#f6f1e6;
+  text-align:left;
+  overflow:hidden;
+  border:1px solid rgba(217,171,113,.64);
+  border-radius:10px;
+  background:linear-gradient(146deg,rgba(21,54,65,.97),rgba(6,20,29,.98));
+  box-shadow:0 15px 45px rgba(0,0,0,.43),inset 0 1px rgba(207,247,239,.12),0 0 0 1px rgba(6,29,37,.65);
+  cursor:pointer;
+  transform:translateZ(0);
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card::before {
+  content:"";
+  position:absolute;
+  z-index:4;
+  top:0;
+  left:4%;
+  right:4%;
+  height:2px;
+  background:linear-gradient(90deg,transparent,rgba(103,214,220,.85) 48%,rgba(230,180,109,.58) 60%,transparent);
+  box-shadow:0 0 15px rgba(110,225,233,.23);
+  pointer-events:none;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card::after {
+  content:"";
+  position:absolute;
+  z-index:3;
+  inset:7px;
+  border:1px solid rgba(215,180,127,.18);
+  border-radius:5px;
+  pointer-events:none;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card:hover,
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card:focus-visible {
+  padding:0;
+  border-color:rgba(121,221,229,.83);
+  box-shadow:0 22px 55px rgba(0,0,0,.5),0 0 33px rgba(82,199,209,.17),inset 0 1px rgba(217,245,236,.19);
+  transform:translateY(-5px);
+  filter:none;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card:focus-visible {
+  outline:2px solid rgba(226,193,149,.97);
+  outline-offset:5px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-cover {
+  position:relative;
+  display:block;
+  flex:1 1 auto;
+  width:100%;
+  min-height:225px;
+  aspect-ratio:16/9;
+  isolation:isolate;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg,rgba(5,17,24,.12),rgba(3,13,20,.15) 64%,rgba(4,13,20,.55)),
+    url("/archive-case-cover.svg") center / cover no-repeat,
+    #071e2a;
+  box-shadow:inset 0 0 0 1px rgba(151,207,207,.22);
+  transition:filter .22s ease;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-cover::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  clip-path:none;
+  background:
+    linear-gradient(90deg,rgba(7,22,28,.45),transparent 20%,transparent 80%,rgba(7,22,28,.25)),
+    repeating-linear-gradient(0deg,transparent 0 7px,rgba(106,169,169,.025) 7px 8px);
+  opacity:1;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-cover::after {
+  content:"";
+  position:absolute;
+  z-index:0;
+  inset:0;
+  opacity:.9;
+  background:radial-gradient(circle at 50% 75%,rgba(101,195,203,.17),transparent 49%);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card:hover .available-case-cover {
+  filter:brightness(1.12) saturate(1.1);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-meta {
+  position:absolute;
+  z-index:2;
+  top:13px;
+  left:16px;
+  right:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:8px;
+  pointer-events:none;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-identifier {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:5px 8px;
+  color:#f0ca99;
+  background:rgba(5,21,29,.67);
+  border:1px solid rgba(189,158,110,.32);
+  border-radius:3px;
+  font:600 10px/1.35 "IBM Plex Mono",var(--mono);
+  letter-spacing:.12em;
+  text-shadow:0 1px 6px rgba(0,0,0,.7);
+  overflow-wrap:anywhere;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-identifier::before {
+  content:"▱";
+  color:#d2b17b;
+  font-size:15px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-status {
+  display:inline-block;
+  max-width:120px;
+  padding:6px 8px;
+  color:#bce7d8;
+  background:rgba(9,39,38,.82);
+  border:1px solid rgba(123,202,176,.41);
+  border-radius:3px;
+  font:600 9px/1.3 "IBM Plex Mono",var(--mono);
+  letter-spacing:.065em;
+  text-align:right;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-status.is-draft {
+  color:#e6c492;
+  background:rgba(46,35,24,.82);
+  border-color:rgba(205,166,104,.47);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-footer {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  justify-content:space-between;
+  min-height:76px;
+  padding:14px 17px;
+  border-top:1px solid rgba(199,158,108,.43);
+  background:linear-gradient(90deg,rgba(13,47,54,.93),rgba(5,19,29,.98));
+  box-shadow:inset 0 1px rgba(180,232,220,.075);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-title {
+  display:block;
+  flex:1;
+  min-width:0;
+  margin:0;
+  padding:0 0 0 13px;
+  color:#f5ecd9;
+  font:500 clamp(16px,1.75vw,21px)/1.4 "Playfair Display",Georgia,serif;
+  letter-spacing:-.015em;
+  overflow-wrap:anywhere;
+  text-shadow:0 2px 8px rgba(0,0,0,.43);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-title::before {
+  width:3px;
+  left:0;
+  top:3px;
+  bottom:3px;
+  background:#e2b577;
+  box-shadow:0 0 11px rgba(239,185,105,.38);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-arrow {
+  display:grid;
+  place-items:center;
+  flex:0 0 32px;
+  width:32px;
+  height:32px;
+  color:#eed0a4;
+  background:radial-gradient(circle,rgba(196,147,84,.17),transparent 68%);
+  border:1px solid rgba(211,170,115,.32);
+  border-radius:50%;
+  font:500 26px/1 "Space Grotesk",var(--sans);
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card:hover .archive-case-arrow {
+  transform:translateX(3px);
+  box-shadow:0 0 18px rgba(213,172,111,.2);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-list > .player-empty {
+  padding:24px;
+  border:1px solid rgba(171,202,201,.31);
+  background:linear-gradient(140deg,rgba(10,38,50,.95),rgba(5,19,27,.95));
+  color:#c7d7d8;
+  border-radius:8px;
+  font:12px/1.7 var(--sans);
+}
+
+/* Admin console mirrors desktop's translucent metal-glass panels */
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel {
+  position:relative;
+  width:100%;
+  margin:37px 0 20px;
+  padding:clamp(23px,3vw,37px);
+  border:1px solid rgba(204,161,108,.67);
+  border-radius:12px;
+  color:#e9e5dd;
+  background:
+    radial-gradient(ellipse at 83% 0%,rgba(54,127,133,.17),transparent 45%),
+    linear-gradient(144deg,rgba(8,38,47,.96),rgba(5,20,29,.98) 76%);
+  box-shadow:0 25px 75px rgba(0,0,0,.5),inset 0 1px rgba(220,227,209,.09),0 0 0 1px rgba(4,26,33,.64);
+  backdrop-filter:blur(14px);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel::before,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel::before {
+  content:"";
+  position:absolute;
+  top:0;
+  left:35px;
+  width:140px;
+  height:2px;
+  background:linear-gradient(90deg,#dfb67e,transparent);
+  box-shadow:0 0 15px rgba(225,172,105,.3);
+  pointer-events:none;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-heading {
+  align-items:center;
+  display:flex;
+  gap:20px;
+  justify-content:space-between;
+  margin:0 0 14px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .section-kicker,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel > .section-kicker {
+  margin:0 0 8px;
+  color:#d5b07b;
+  font:600 10px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.23em;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-heading h2 {
+  margin:0;
+  color:#f7e9d4;
+  font:500 clamp(27px,3vw,39px)/1.18 "Playfair Display",Georgia,serif;
+  letter-spacing:-.015em;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .archive-stamp {
+  padding:12px 17px;
+  border:1px solid rgba(209,169,111,.6);
+  border-radius:5px;
+  color:#e8c89a;
+  background:linear-gradient(140deg,rgba(39,55,50,.65),rgba(6,23,31,.73));
+  box-shadow:inset 0 1px rgba(243,204,151,.1);
+  font:600 9px/1.2 "IBM Plex Mono",var(--mono);
+  letter-spacing:.1em;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .archive-stamp::before {content:"⚙";margin-right:8px;font-size:13px;color:#d4b281;}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-intro {
+  max-width:860px;
+  margin:0 0 24px;
+  color:#bed0d0;
+  font:12px/1.77 var(--sans);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-columns {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:start;
+  gap:20px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-form,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-inventory,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel .dossier-form-wrap {
+  min-width:0;
+  border:1px solid rgba(172,162,134,.36);
+  border-radius:8px;
+  background:
+    linear-gradient(130deg,rgba(15,45,54,.91),rgba(5,22,30,.85));
+  box-shadow:inset 0 1px rgba(209,238,221,.06),0 11px 27px rgba(0,0,0,.16);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-form {
+  gap:10px;
+  padding:22px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-form h3,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-inventory h3,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel h3 {
+  display:block;
+  margin:0 0 12px;
+  padding-bottom:13px;
+  border-bottom:1px solid rgba(177,200,189,.17);
+  color:#f2e6cf;
+  font:500 22px/1.3 "Playfair Display",Georgia,serif;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel #case-form > h3::before {content:"▱";font:24px var(--sans);margin-right:12px;color:#d9b782;}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel #material-form > h3::before {content:"▤";font:23px var(--sans);margin-right:12px;color:#d9b782;}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-form label,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel label {
+  color:#d1b789;
+  font:600 10px/1.5 "IBM Plex Mono",var(--mono);
+  letter-spacing:.09em;
+  margin-top:5px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-form input:not([type="checkbox"]):not([type="file"]),
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-form textarea,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-form select,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-planner-toolbar input,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-planner-toolbar select,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel input:not([type="checkbox"]):not([type="file"]),
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel textarea,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel select {
+  min-width:0;
+  max-width:100%;
+  border:1px solid rgba(133,183,181,.47);
+  border-radius:5px;
+  color:#ecf0e9;
+  background:rgba(3,17,25,.75);
+  box-shadow:inset 0 1px rgba(128,206,207,.055);
+  padding:11px 12px;
+  font:500 12px/1.45 var(--sans);
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel input:focus,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel textarea:focus,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel select:focus,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel input:focus,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel textarea:focus,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel select:focus {
+  outline:2px solid rgba(216,180,131,.68);
+  outline-offset:1px;
+  border-color:rgba(226,184,127,.83);
+  box-shadow:0 0 0 3px rgba(217,178,113,.09);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel input::placeholder,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel textarea::placeholder,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel input::placeholder {
+  color:#839e9e;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel input[type="file"] {
+  color:#b8cccd;
+  font-size:11px;
+  padding:9px;
+  border:1px dashed rgba(117,192,196,.45);
+  border-radius:5px;
+  background:rgba(14,51,61,.25);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-help,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel .dossier-note {
+  color:#a7c1c1;
+  font:11px/1.7 var(--sans);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-submit {
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  min-height:42px;
+  margin-top:10px;
+  padding:10px 18px;
+  color:#121d22;
+  background:linear-gradient(110deg,#e4c395,#b99566);
+  border:1px solid rgba(245,206,151,.82);
+  border-radius:5px;
+  box-shadow:inset 0 1px rgba(255,245,214,.55),0 8px 23px rgba(0,0,0,.17);
+  font:700 10px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.08em;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-submit:hover {
+  background:linear-gradient(110deg,#f0d4a6,#caaa7b);
+  box-shadow:0 0 21px rgba(214,174,124,.21);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-inventory {
+  margin-top:23px;
+  padding:20px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-mini-button,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel button {
+  color:#e4eadf;
+  background:linear-gradient(130deg,#1b4c55,#0c2b36);
+  border:1px solid rgba(109,182,184,.55);
+  border-radius:5px;
+  padding:9px 13px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-mini-button:hover,
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel button:hover {
+  color:#f8f2e7;
+  background:linear-gradient(130deg,#32666d,#16414a);
+  border-color:rgba(216,182,130,.65);
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-message {
+  color:#bbd9d2;
+  line-height:1.6;
+}
+
+/* Extra author panels inherit the same glass, not a conflicting brown theme */
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel {
+  margin-top:22px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel > h3 {
+  font-size:27px;
+  border:0;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel .dossier-form-wrap {
+  padding:18px;
+  margin-top:22px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel .dossier-admin-card {
+  min-height:100px;
+}
+body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-planner-toolbar {
+  gap:12px;
+}
+@media(max-width:1050px) {
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-list {max-width:100%;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card {min-height:270px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-cover {min-height:190px;}
+}
+@media(max-width:780px) {
+  body:not(.is-workstation):has(#workspace:not([hidden])) #workspace {width:calc(100% - 36px);padding-top:34px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .topbar {padding:12px 17px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .brand::before {width:31px;height:31px;flex-basis:31px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .brand-name {font-size:20px;letter-spacing:.17em;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .brand-name small {font-size:7px;letter-spacing:.07em;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-status {font-size:8px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .case-selection-heading::after {position:static;display:block;margin-top:15px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .case-selection-heading {margin-bottom:22px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .case-selection-heading h2 {font-size:38px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-list {grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card {min-height:235px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-cover {min-height:158px;aspect-ratio:16/10;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-footer {min-height:68px;padding:11px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-title {font-size:15px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-columns {grid-template-columns:1fr;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel,
+  body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel {padding:20px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-heading {align-items:flex-start;}
+}
+@media(max-width:520px) {
+  body:not(.is-workstation):has(#workspace:not([hidden])) .topbar {gap:8px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-right {width:100%;justify-content:space-between;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-logout {margin-left:auto;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) #workspace {width:calc(100% - 28px);padding-top:27px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .case-selection-heading h2 {font-size:35px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-list {grid-template-columns:1fr;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card {min-height:250px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-cover {min-height:187px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel,
+  body:not(.is-workstation):has(#workspace:not([hidden])) #admin-dossier-panel {padding:16px;margin-top:21px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-heading {flex-direction:column;gap:10px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) #admin-panel .admin-form {padding:15px;}
+  body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-identifier {font-size:9px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-card,
+  body:not(.is-workstation):has(#workspace:not([hidden])) .available-case-cover,
+  body:not(.is-workstation):has(#workspace:not([hidden])) .archive-case-arrow,
+  body:not(.is-workstation):has(#workspace:not([hidden])) .topbar-logout {transition:none !important;}
+}

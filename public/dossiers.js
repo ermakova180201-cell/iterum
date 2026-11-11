@@ -97,6 +97,7 @@
   async function loadAdmin() {
     if (admin.hidden) return;
     try {
+      await api("/api/admin/dossiers/initialize", { method: "POST" });
       const info = await api("/api/admin/overview");
       const old = caseSelect.value;
       caseSelect.replaceChildren();

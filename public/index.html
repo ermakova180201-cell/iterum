@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css?v=assistant-11">
-  <link rel="stylesheet" href="/search.css?v=archive-2">
+  <link rel="stylesheet" href="/search.css?v=personnel-3">
   <link rel="stylesheet" href="/materials.css">
   <link rel="stylesheet" href="/dossiers.css">
   <link rel="stylesheet" href="/workstation-concept-one.css?v=1">
@@ -142,25 +142,53 @@
 </div>
 <div class="desktop-notice-toast" id="desktop-notice-toast" role="status" aria-live="polite" hidden></div>
             <div class="desktop-wallpaper-mark" aria-hidden="true">ITERUM</div><div class="iterum-workstation-footnote" aria-hidden="true">СЛЕДСТВЕННЫЙ АРХИВ / NODE 04</div>
-        <section id="search-window" class="player-tool-section desktop-window search-terminal" aria-labelledby="search-heading" hidden>
+        <section id="search-window" class="player-tool-section desktop-window search-terminal search-personnel" aria-labelledby="search-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">ITERUM / АРХИВ / СИСТЕМА ПОИСКА</span><h2 id="search-heading">Поиск данных</h2></div>
+            <div class="search-window-topline">
+              <span class="section-kicker">ITERUM / АРХИВ / КАРТОТЕКА ПЕРСОН</span>
+              <span class="search-topline-label">ЗАКРЫТАЯ ИНФОРМАЦИОННАЯ СИСТЕМА</span>
+            </div>
             <button class="window-close" type="button" data-close-window="search-window" aria-label="Закрыть окно">×</button>
           </div>
-          <div class="search-terminal-status"><span><i></i> БАЗА ДАННЫХ ДОСТУПНА</span><span>УРОВЕНЬ ДОСТУПА: <b>ОГРАНИЧЕННЫЙ</b></span><span>УЗЕЛ: <b>ITERUM-04</b></span></div>
-          <div class="search-terminal-intro"><span class="search-terminal-mark">⌕</span><div><strong>Единый архив расследования</strong><p>Досье персон, служебные документы и материалы дела. Сопоставляйте сведения из разных источников.</p></div></div>
-          <form id="player-search-form" class="player-search-form">
-            <label for="player-search-query">ПОИСКОВЫЙ ЗАПРОС</label>
-            <div class="player-search-row">
-              <span class="search-input-prefix">⌕</span>
-              <input id="player-search-query" type="search" minlength="2" placeholder="ФИО, профессия, документ, событие…" required autocomplete="off">
-              <button type="submit" class="admin-mini-button">ВЫПОЛНИТЬ ПОИСК</button>
+          <div class="search-personnel-hero">
+            <div class="search-personnel-hero-content">
+              <span class="search-personnel-eyebrow">РЕЕСТР ПЕРСОН / ЛИЧНЫЕ ДЕЛА</span>
+              <h2 id="search-heading">Поиск данных</h2>
+              <p>Установите личность. Изучите биографию. Проверьте связи.</p>
             </div>
-            <span class="search-query-hint">МИНИМУМ 2 СИМВОЛА · ПОИСК ПО ТЕКУЩЕМУ ДЕЛУ</span>
+            <div class="search-personnel-art" aria-hidden="true">
+              <span class="search-personnel-halo"></span>
+              <span class="search-personnel-file search-personnel-file-back"></span>
+              <span class="search-personnel-file search-personnel-file-front"></span>
+            </div>
+          </div>
+          <div class="search-personnel-status">
+            <span class="search-personnel-online"><i aria-hidden="true"></i> КАРТОТЕКА ДОСТУПНА</span>
+            <span>ОБЛАСТЬ: ТЕКУЩЕЕ ДЕЛО</span>
+            <span>УЗЕЛ: ITERUM-04</span>
+          </div>
+          <form id="player-search-form" class="player-search-form">
+            <label for="player-search-query">НАЙТИ ЧЕЛОВЕКА</label>
+            <div class="player-search-row">
+              <span class="search-input-prefix" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.8" cy="10.8" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
+              </span>
+              <input id="player-search-query" type="search" minlength="2" maxlength="100" placeholder="Фамилия, имя или профессия…" required autocomplete="off" spellcheck="false">
+              <button type="submit" class="admin-mini-button search-personnel-submit">НАЙТИ <span aria-hidden="true">→</span></button>
+            </div>
+            <p class="search-query-hint">ДОСТАТОЧНО ДВУХ СИМВОЛОВ · ПОИСК ПО ОПУБЛИКОВАННЫМ ДОСЬЕ</p>
           </form>
-          <div class="search-results-toolbar"><span id="player-search-summary">ОЖИДАНИЕ ЗАПРОСА</span><span>ПОИСК В ПРЕДЕЛАХ ДЕЛА</span></div>
-          <div id="player-search-filters" class="player-search-filters" hidden role="group" aria-label="Фильтр результатов"></div>
-          <div id="player-search-results" class="player-search-results" aria-live="polite"><div class="search-empty-state"><span>⌕</span><strong>ОЖИДАНИЕ ДАННЫХ</strong><p>Результаты поиска появятся в этом окне.</p></div></div>
+          <div class="search-results-toolbar">
+            <span id="player-search-summary" role="status">ОЖИДАНИЕ ЗАПРОСА</span>
+            <span class="search-personnel-toolbar-note">ЛИЧНЫЕ ДЕЛА / СВЯЗИ / БИОГРАФИИ</span>
+          </div>
+          <div id="player-search-results" class="player-search-results" aria-live="polite">
+            <div class="search-personnel-welcome">
+              <div class="search-personnel-welcome-icon" aria-hidden="true">⌕</div>
+              <strong>Картотека готова к поиску</strong>
+              <p>Введите имя или фамилию, найденную в материалах расследования.</p>
+            </div>
+          </div>
         </section>
 
         <section id="mail-window" class="player-tool-section desktop-window" aria-labelledby="mail-heading" hidden>
@@ -525,7 +553,7 @@
     <span>ITERUM © 2026</span>
   </footer>
   <script src="/materials.js"></script>
-  <script src="/search.js?v=archive-2"></script>
+  <script src="/search.js?v=personnel-3"></script>
   <script>
     const authPanel = document.querySelector(".auth-panel");
     const authForm = document.getElementById("auth-form");

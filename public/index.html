@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="/app-windows-unified.css?v=1">
   <link rel="stylesheet" href="/materials-library.css?v=1">
   <link rel="stylesheet" href="/mail-ad-gallery.css?v=1">
+  <link rel="stylesheet" href="/mail-reference.css?v=1">
   <script defer src="/dossiers.js"></script>
 </head>
 <body>
@@ -194,15 +195,15 @@
         <section id="mail-window" class="player-tool-section desktop-window iterum-unified-window" aria-labelledby="mail-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
             <div class="search-window-topline">
-              <span class="section-kicker">ITERUM / АРХИВ / СООБЩЕНИЯ</span>
-              <span class="search-topline-label">ЗАКРЫТАЯ ИНФОРМАЦИОННАЯ СИСТЕМА</span>
+              <span class="section-kicker mail-system-brand"><span class="mail-menu-glyph" aria-hidden="true">☰</span> ITERUM</span>
+              <span class="search-topline-label">ВНУТРЕННЯЯ СЕТЬ ЦЕНТРА</span>
             </div>
             <button class="window-close" type="button" data-close-window="mail-window" aria-label="Закрыть окно">×</button>
           </div>
           <div class="iterum-app-hero">
             <div class="iterum-app-hero-content">
               <span class="iterum-app-eyebrow">КОММУНИКАЦИОННЫЙ МОДУЛЬ / ПОЧТОВЫЙ АРХИВ</span>
-              <h2 id="mail-heading">Почта</h2>
+              <div class="mail-reference-title"><span class="mail-reference-icon" aria-hidden="true"><svg viewBox="0 0 68 68"><path d="M12 20h44v29H12zM12 21l22 17 22-17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span><h2 id="mail-heading">Почта</h2></div>
             </div>
             <div class="iterum-app-hero-art" aria-hidden="true">
               <span class="iterum-app-hero-ring"></span>
@@ -994,6 +995,10 @@
     }
 
     function openCase(caseId) {
+      if (window.__iterumMailAdTimer) {
+        window.clearInterval(window.__iterumMailAdTimer);
+        window.__iterumMailAdTimer = null;
+      }
       const selected = archiveCases.find(item => item.id === caseId);
       if (!selected) return;
       document.body.classList.add('is-workstation');
@@ -1111,23 +1116,9 @@
         let currentAdIndex = Math.floor(Math.random() * availableAds.length);
         let currentAd = availableAds[currentAdIndex];
         adCard.innerHTML = '<img class="mail-ad-art" alt="" loading="lazy" decoding="async"><span class="mail-ad-brand"></span><strong class="mail-ad-title"></strong><span class="mail-ad-copy"></span><span class="mail-ad-more">Подробнее ↗</span>';
-        const adNavigation = document.createElement("div");
-        adNavigation.className = "mail-ad-navigation";
-        const previousAd = document.createElement("button");
-        previousAd.type = "button";
-        previousAd.className = "mail-ad-control";
-        previousAd.textContent = "‹";
-        previousAd.setAttribute("aria-label", "Предыдущая реклама");
-        const adPosition = document.createElement("span");
-        adPosition.className = "mail-ad-position";
-        adPosition.setAttribute("aria-live", "polite");
-        const nextAd = document.createElement("button");
-        nextAd.type = "button";
-        nextAd.className = "mail-ad-control";
-        nextAd.textContent = "›";
-        nextAd.setAttribute("aria-label", "Следующая реклама");
-        adNavigation.append(previousAd, adPosition, nextAd);
-        function showAd(index) {
+        // Ads rotate on their own. No manual arrow buttons in the sidebar.
+        let pendingAdSwap = null;
+        function applyAd(index) {
           currentAdIndex = (index + availableAds.length) % availableAds.length;
           currentAd = availableAds[currentAdIndex];
           const art = adCard.querySelector(".mail-ad-art");
@@ -1139,11 +1130,38 @@
           adCard.classList.toggle("is-story-ad", !!currentAd.story);
           adCard.dataset.adTheme = currentAd.theme;
           adCard.setAttribute("aria-label", "Подробнее: " + currentAd.brand + " — " + currentAd.title);
-          adPosition.textContent = (currentAdIndex + 1) + " / " + availableAds.length;
         }
-        previousAd.addEventListener("click", () => showAd(currentAdIndex - 1));
-        nextAd.addEventListener("click", () => showAd(currentAdIndex + 1));
+        function showAd(index, animated = false) {
+          if (pendingAdSwap !== null) {
+            window.clearTimeout(pendingAdSwap);
+            pendingAdSwap = null;
+          }
+          const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+          if (!animated || reducedMotion) {
+            adCard.classList.remove("is-fading");
+            applyAd(index);
+            return;
+          }
+          adCard.classList.add("is-fading");
+          pendingAdSwap = window.setTimeout(() => {
+            applyAd(index);
+            adCard.classList.remove("is-fading");
+            pendingAdSwap = null;
+          }, 250);
+        }
         showAd(currentAdIndex);
+        // One timer per current mail view. Other cases and closed/suspended
+        // mail windows cannot keep driving stale ads or DOM updates.
+        window.__iterumMailAdTimer = window.setInterval(() => {
+          if (!adCard.isConnected || !document.body.classList.contains("is-workstation")) {
+            window.clearInterval(window.__iterumMailAdTimer);
+            window.__iterumMailAdTimer = null;
+            return;
+          }
+          if (document.hidden || document.getElementById("mail-window")?.hidden ||
+              client.querySelector(".mail-ad-dialog")) return;
+          showAd(currentAdIndex + 1, true);
+        }, 8000);
         adCard.addEventListener("click", () => {
           const dialog = document.createElement("div");
           dialog.className = "mail-ad-dialog";
@@ -1165,7 +1183,7 @@
           client.append(dialog);
           closeButton.focus();
         });
-        adColumn.append(adLabel, adCard, adNavigation);
+        adColumn.append(adLabel, adCard);
 
         const menuFor = (item, anchor) => {
           client.querySelectorAll(".mail-row-menu").forEach(node => node.remove());
@@ -1249,6 +1267,19 @@
           }
           renderMailClient();
         }
+        function formatMailStamp(value) {
+          if (!value) return "";
+          const stamp = new Date(value);
+          if (Number.isNaN(stamp.getTime())) return String(value).slice(0, 28);
+          const now = new Date();
+          const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const previous = new Date(midnight);
+          previous.setDate(previous.getDate() - 1);
+          const hhmm = new Intl.DateTimeFormat("ru-RU", {hour:"2-digit",minute:"2-digit"}).format(stamp);
+          if (stamp >= midnight) return "Сегодня, " + hhmm;
+          if (stamp >= previous) return "Вчера, " + hhmm;
+          return new Intl.DateTimeFormat("ru-RU", {day:"numeric", month:"short"}).format(stamp) + ", " + hhmm;
+        }
         function renderMailClient() {
           folders.replaceChildren();
           folderDefinitions.forEach(([key, symbol, label]) => {
@@ -1280,23 +1311,16 @@
             return false;
           }).filter(item => [item.sender_name,item.sender_address,item.title].join(" ").toLocaleLowerCase("ru").includes(query));
           visibleEmails.sort((a,b) => new Date(b.sent_at || b.created_at || 0) - new Date(a.sent_at || a.created_at || 0));
-          if (!readerMode) {
-            const columns = document.createElement("div");
-            columns.className = "mail-list-columns";
-            const senderHeading = document.createElement("span");
-            senderHeading.textContent = "Отправитель";
-            const dateHeading = document.createElement("span");
-            dateHeading.textContent = "Дата и время";
-            const subjectHeading = document.createElement("span");
-            subjectHeading.setAttribute("aria-hidden","true");
-            const spacer = document.createElement("span");
-            spacer.setAttribute("aria-hidden","true");
-            senderHeading.className = "mail-column-sender";
-            subjectHeading.className = "mail-column-subject";
-            dateHeading.className = "mail-column-date";
-            columns.append(senderHeading, subjectHeading, dateHeading, spacer);
-            list.append(columns);
-          }
+          const columns = document.createElement("div");
+          columns.className = "mail-list-columns";
+          const listLabel = document.createElement("span");
+          listLabel.className = "mail-list-heading-label";
+          listLabel.textContent = "ПИСЬМА";
+          const listSort = document.createElement("span");
+          listSort.className = "mail-list-sort-label";
+          listSort.textContent = "ПО ДАТЕ ↓";
+          columns.append(listLabel, listSort);
+          list.append(columns);
           if (readerMode) {
             const item = visibleEmails.find(entry => entry.id === selectedMailId);
             if (!item) { readerMode = false; }
@@ -1305,7 +1329,7 @@
               back.type = "button"; back.className = "mail-back-button"; back.textContent = "← Назад к " + folderDefinitions.find(x=>x[0]===currentFolder)[2].toLowerCase();
               back.addEventListener("click", showList);
               const top = document.createElement("div"); top.className = "mail-reader-top";
-              const date = document.createElement("time"); date.textContent = item.sent_at || item.created_at || ""; top.append(back,date);
+              const date = document.createElement("time"); date.textContent = formatMailStamp(item.sent_at || item.created_at); top.append(back,date);
               const subject = document.createElement("h3"); subject.className = "mail-reader-subject"; subject.textContent = item.title || "Без темы";
               const senderRow = document.createElement("div"); senderRow.className = "mail-sender-row";
               const avatar = document.createElement("span"); avatar.className = "mail-reader-avatar"; avatar.textContent = (item.sender_name || "?").trim().slice(0,1).toLocaleUpperCase("ru");
@@ -1356,7 +1380,7 @@
           }
           visibleEmails.forEach(item => {
             const row = document.createElement("div");
-            row.className = "mail-inbox-entry" + (!item.is_read ? " is-unread" : "");
+            row.className = "mail-inbox-entry" + (!item.is_read ? " is-unread" : "") + (readerMode && item.id === selectedMailId ? " is-current" : "");
             const details = document.createElement("div"); details.className = "mail-entry-details";
             const sender = document.createElement("span"); sender.className = "mail-entry-sender"; sender.textContent = item.sender_name || "Неизвестный отправитель";
             const address = document.createElement("span"); address.className = "mail-entry-address"; address.textContent = item.sender_address || "";
@@ -1365,7 +1389,7 @@
             const dot = document.createElement("span"); dot.className = "mail-unread-dot"; dot.setAttribute("aria-hidden","true");
             const subject = document.createElement("strong"); subject.textContent = item.title || "Без темы";
             subjectLine.append(dot,subject);
-            const date = document.createElement("time"); date.textContent = item.sent_at || item.created_at || "";
+            const date = document.createElement("time"); date.textContent = formatMailStamp(item.sent_at || item.created_at);
             const actions = document.createElement("div"); actions.className = "mail-row-actions";
             const open = document.createElement("button"); open.type = "button"; open.className = "mail-open-check"; open.setAttribute("aria-label","Открыть письмо"); open.textContent = "✓";
             open.addEventListener("click", event => { event.stopPropagation(); openMessage(item); });
@@ -1380,8 +1404,20 @@
             list.append(empty);
           }
           if (!readerMode) {
-            const hint = document.createElement("div"); hint.className = "mail-reader-placeholder";
-            hint.innerHTML = '';
+            const hint = document.createElement("div");
+            hint.className = "mail-reader-placeholder";
+            hint.setAttribute("aria-label", "Выберите письмо из списка для чтения");
+            const emblem = document.createElement("span");
+            emblem.className = "mail-reader-placeholder-symbol";
+            emblem.setAttribute("aria-hidden", "true");
+            emblem.innerHTML = '<svg viewBox="0 0 100 100"><path d="M18 30h64v40H18zM18 31l32 25 32-25" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/></svg>';
+            const title = document.createElement("p");
+            title.className = "mail-reader-placeholder-title";
+            title.textContent = "Выберите письмо";
+            const subtitle = document.createElement("span");
+            subtitle.className = "mail-reader-placeholder-subtitle";
+            subtitle.textContent = "из списка";
+            hint.append(emblem, title, subtitle);
             reader.append(hint);
           }
         }

@@ -1,0 +1,184 @@
+/* ITERUM / Mail layout without an unused preview column.
+ * Folders + advertising stay left. The message list fills the remaining
+ * width until a message is opened; then the full-width reader replaces it.
+ * Loaded after mail-reference.css to override its old three-pane rules.
+ */
+@media (min-width:761px) {
+  body.is-workstation .desktop-shell #mail-window .mail-client-toolbar {
+    left:24%;
+    width:76%;
+    border-right:0;
+  }
+}
+@media (min-width:761px) and (max-width:1250px) {
+  body.is-workstation .desktop-shell #mail-window .mail-client-toolbar {
+    left:22%;
+    width:78%;
+  }
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-content,
+body.is-workstation .desktop-shell #mail-window .mail-client-content.is-reading,
+body.is-workstation .desktop-shell #mail-window .mail-client-content:not(.is-reading) {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  grid-template-rows:minmax(0,1fr);
+  grid-column:2;
+  min-width:0;
+  width:100%;
+  height:100%;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-content:not(.is-reading) .mail-inbox-list {
+  display:block !important;
+  grid-column:1 !important;
+  grid-row:1;
+  width:100%;
+  height:100%;
+  padding-top:54px;
+  border-right:0 !important;
+  overflow-y:auto;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-content:not(.is-reading) .mail-reader {
+  display:none !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-content.is-reading .mail-inbox-list {
+  display:none !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-content.is-reading .mail-reader {
+  display:block !important;
+  grid-column:1 !important;
+  grid-row:1 !important;
+  width:100% !important;
+  height:100%;
+  min-height:0 !important;
+  padding:31px clamp(23px,4vw,55px) 38px;
+  border-right:0 !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client:has(.mail-client-content.is-reading) .mail-client-toolbar {
+  display:none !important;
+}
+
+/* Use the entire inbox width for sender, subject and message date, rather
+ * than leaving them cramped in the old middle column. */
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry {
+  grid-template-columns:32px minmax(145px,1fr) minmax(180px,1.8fr) minmax(100px,.66fr) !important;
+  grid-template-rows:auto !important;
+  align-items:center !important;
+  gap:12px !important;
+  min-height:76px !important;
+  padding:15px clamp(15px,2.4vw,30px) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-row-actions {
+  grid-column:1 !important;
+  grid-row:1 !important;
+  width:30px;
+  align-self:center;
+}
+body.is-workstation .desktop-shell #mail-window .mail-entry-details {
+  grid-column:2 !important;
+  grid-row:1 !important;
+  align-self:center;
+}
+body.is-workstation .desktop-shell #mail-window .mail-entry-subject {
+  grid-column:3 !important;
+  grid-row:1 !important;
+  align-self:center;
+  min-width:0;
+}
+body.is-workstation .desktop-shell #mail-window .mail-entry-subject strong {
+  color:#c9c4ae;
+  font-size:12px !important;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry time {
+  grid-column:4 !important;
+  grid-row:1 !important;
+  max-width:none;
+  align-self:center;
+  font-size:11px;
+  color:#b7b09a;
+  white-space:normal !important;
+  text-align:right;
+}
+body.is-workstation .desktop-shell #mail-window .mail-unread-dot {
+  left:12px;
+  top:16px;
+}
+body.is-workstation .desktop-shell #mail-window .mail-list-columns {
+  min-height:45px;
+  padding:11px clamp(16px,2.4vw,30px);
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader-top {
+  gap:18px;
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader-body {
+  max-width:900px;
+}
+
+/* Narrow desktop: preserve the full-width list without horizontal clipping. */
+@media (min-width:761px) and (max-width:1130px) {
+  body.is-workstation .desktop-shell #mail-window .mail-inbox-entry {
+    grid-template-columns:27px minmax(110px,1fr) minmax(95px,1.1fr) minmax(87px,.7fr) !important;
+    gap:8px !important;
+    padding:13px 12px !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-entry-sender {font-size:12px !important;}
+  body.is-workstation .desktop-shell #mail-window .mail-entry-subject strong {font-size:11px !important;}
+  body.is-workstation .desktop-shell #mail-window .mail-inbox-entry time {font-size:9px;}
+}
+
+/* On mobile, keep the established compact navigation and a single message
+ * view; no empty reader is rendered in the listing state. */
+@media (max-width:760px) {
+  body.is-workstation .desktop-shell #mail-window .mail-client-content,
+  body.is-workstation .desktop-shell #mail-window .mail-client-content.is-reading,
+  body.is-workstation .desktop-shell #mail-window .mail-client-content:not(.is-reading) {
+    display:flex !important;
+    flex-direction:column !important;
+    height:auto;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-client-content:not(.is-reading) .mail-inbox-list {
+    display:block !important;
+    min-height:250px !important;
+    max-height:435px !important;
+    padding-top:0 !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-client-content:not(.is-reading) .mail-reader {
+    display:none !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-client-content.is-reading .mail-inbox-list {
+    display:none !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-client-content.is-reading .mail-reader {
+    display:block !important;
+    height:auto;
+    min-height:320px !important;
+    padding:19px 15px;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-inbox-entry {
+    grid-template-columns:28px minmax(0,1fr) auto !important;
+    grid-template-rows:auto auto !important;
+    gap:3px 8px !important;
+    min-height:80px !important;
+    padding:13px 12px !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-row-actions {
+    grid-column:1 !important;
+    grid-row:1/3 !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-entry-details {
+    grid-column:2 !important;
+    grid-row:1 !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-entry-subject {
+    grid-column:2 !important;
+    grid-row:2 !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-inbox-entry time {
+    grid-column:3 !important;
+    grid-row:1 !important;
+    max-width:88px;
+    font-size:9px;
+  }
+}

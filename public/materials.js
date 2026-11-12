@@ -338,7 +338,10 @@
 
   window.renderMaterialsArchive = function(items) {
     materials = (items || []).filter(item => item.material_type !== "email");
-    if (viewer && !viewer.hidden && openedId && !materials.some(item => item.id === openedId)) {
+    // Case change or another app can hide the viewer without pressing Close.
+    // Clear old record content even when the desktop manager hid it first.
+    if (viewer && openedId &&
+        (viewer.hidden || !materials.some(item => item.id === openedId))) {
       closeDetail(false);
     }
     render();

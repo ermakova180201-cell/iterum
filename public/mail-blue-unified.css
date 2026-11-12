@@ -1,0 +1,65 @@
+/* ITERUM — consistent cold-blue app palette for the mail client.
+   Overrides the older green/teal mail theme without touching layout or behavior.
+   Matches the unified blue-black windows, cyan accents, and restrained gold edges. */
+body.is-workstation .desktop-shell .desktop-area > #mail-window {
+  --mail-ref-teal:#0a2130;
+  --mail-ref-line:rgba(155,188,208,.31);
+  background:linear-gradient(155deg,#0b2533 0%,#081b29 58%,#061723 100%) !important;
+}
+body.is-workstation .desktop-shell .desktop-area > #mail-window .player-tool-heading {
+  background:linear-gradient(90deg,#0b2332,#102d3e,#091c2a) !important;
+}
+body.is-workstation .desktop-shell .desktop-area > #mail-window .iterum-app-hero {
+  /* Retain the approved header photo while shifting its atmosphere toward blue. */
+  background:
+    linear-gradient(90deg,rgba(4,19,35,.78),rgba(7,37,58,.55) 55%,rgba(3,21,37,.60)),
+    url("/mail-header-highres.webp") center center / cover no-repeat,
+    #081f30 !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client {
+  background:linear-gradient(135deg,#091f2e,#0b2738 60%,#071b29) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-nav {
+  background:linear-gradient(175deg,#0b2433,#071b2a) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button:hover {
+  background:rgba(62,150,186,.16) !important;
+  border-color:rgba(116,199,223,.42) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button.is-active {
+  background:linear-gradient(90deg,rgba(35,113,158,.38),rgba(10,49,76,.45)) !important;
+  border-color:rgba(106,199,222,.64) !important;
+  box-shadow:inset 3px 0 rgba(126,220,242,.85),0 0 16px rgba(58,164,205,.08) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card {
+  background-color:#0b2334 !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-toolbar,
+body.is-workstation .desktop-shell #mail-window .mail-list-columns {
+  background:linear-gradient(90deg,rgba(9,33,49,.98),rgba(13,43,61,.98)) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-toolbar .mail-search-wrap {
+  background:rgba(7,25,39,.75) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-list,
+body.is-workstation .desktop-shell #mail-window .mail-client-content.is-reading .mail-inbox-list,
+body.is-workstation .desktop-shell #mail-window .mail-client-content:not(.is-reading) .mail-inbox-list {
+  background:linear-gradient(150deg,#0b2635,#071b29) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry.is-unread {
+  background:linear-gradient(90deg,rgba(44,105,149,.20),rgba(7,31,48,.62)) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry.is-current {
+  background:linear-gradient(90deg,rgba(37,115,161,.33),rgba(12,46,66,.70)) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry:hover {
+  background:rgba(64,145,187,.18) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader,
+body.is-workstation .desktop-shell #mail-window .mail-client-content.is-reading .mail-reader,
+body.is-workstation .desktop-shell #mail-window .mail-client-content:not(.is-reading) .mail-reader {
+  background:
+    radial-gradient(ellipse at 56% 51%,rgba(28,96,146,.18),transparent 52%),
+    linear-gradient(135deg,#0b2637,#071b2a 89%) !important;
+  scrollbar-color:rgba(114,173,202,.48) #081c2a;
+}

@@ -1,0 +1,41 @@
+/* ITERUM / 2026 investigation-wallpaper edition.
+ * This asset is DECORATION ONLY. Every application tile, case control,
+ * date/time widget, status panel and 3D assistant stays a live DOM control.
+ */
+body.is-workstation .desktop-shell .desktop-area {
+  background:
+    linear-gradient(90deg,
+      rgba(3,13,18,.11) 0%,
+      rgba(4,15,21,.02) 31%,
+      transparent 65%,
+      rgba(4,14,19,.10) 100%),
+    url("/iterum-investigation-wallpaper.webp") center 57% / cover no-repeat,
+    #071b23 !important;
+  background-color:#071b23 !important;
+}
+/* The wallpaper already carries the ITERUM lettering and grid; do not
+ * overlay the previous title/grid a second time. */
+body.is-workstation .desktop-shell .desktop-wallpaper-mark,
+body.is-workstation .desktop-shell .iterum-workstation-footnote {
+  display:none !important;
+}
+body.is-workstation .desktop-shell .desktop-area::before {
+  opacity:0 !important;
+  background:none !important;
+  box-shadow:none !important;
+}
+/* Keep the true floating assistant above the scenic image.
+ * Do not freeze, replace or disable the user's existing assistant. */
+body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
+  z-index:4;
+}
+@media(max-width:800px) {
+  body.is-workstation .desktop-shell .desktop-area {
+    background-position:center 55% !important;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .desktop-area {
+    background-attachment:scroll !important;
+  }
+}

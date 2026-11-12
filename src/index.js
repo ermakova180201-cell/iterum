@@ -314,7 +314,23 @@ async function handleApi(request, env) {
       cases = { results: [...(cases.results || []), ...(draftCases.results || [])] };
       materials = { results: [...(materials.results || []), ...(draftMaterials.results || [])] };
     }
-    return json({ cases: cases.results || [], materials: materials.results || [] });
+    await ensureDossierDiscoveryTable(env);
+    const discovered = await env.DB.prepare(
+      "SELECT d.id AS dossier_id, d.case_id, c.title AS case_title, " +
+      "d.full_name AS title, d.role_name AS summary, d.birth_date, d.occupation, " +
+      "d.biography, d.relationships, d.chronology, d.related_materials, d.photo_data, " +
+      "p.discovered_at AS created_at " +
+      "FROM player_dossier_discoveries p JOIN person_dossiers d ON d.id = p.dossier_id " +
+      "JOIN cases c ON c.id = d.case_id " +
+      "WHERE p.user_id = ? AND p.case_id = d.case_id AND d.is_published = 1 AND c.status = 'active' " +
+      "ORDER BY p.discovered_at"
+    ).bind(user.id).all();
+    const savedDossiers = (discovered.results || []).map(d => ({
+      ...d, id: "dossier:" + d.dossier_id, material_type: "dossier",
+      release_order: 99999, is_read: 1, is_published: 1, is_preview: 0, content: ""
+    }));
+    return json({ cases: cases.results || [],
+      materials: [...(materials.results || []), ...savedDossiers] });
   }
 
 
@@ -443,11 +459,13 @@ async function handleApi(request, env) {
       const existing = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseId).first();
       if (!existing) return json({ error: "Дело не найдено." }, 404);
 
+      await ensureDossierDiscoveryTable(env);
       const results = await env.DB.batch([
         env.DB.prepare("DELETE FROM player_material_reads WHERE user_id = ? AND material_id IN (SELECT id FROM materials WHERE case_id = ?)").bind(user.id, caseId),
         env.DB.prepare("DELETE FROM material_unlocks WHERE user_id = ? AND material_id IN (SELECT id FROM materials WHERE case_id = ?)").bind(user.id, caseId),
         env.DB.prepare("DELETE FROM player_progress WHERE user_id = ? AND case_id = ?").bind(user.id, caseId),
         env.DB.prepare("DELETE FROM player_notes WHERE user_id = ? AND case_id = ?").bind(user.id, caseId),
+        env.DB.prepare("DELETE FROM player_dossier_discoveries WHERE user_id = ? AND case_id = ?").bind(user.id, caseId),
         env.DB.prepare("DELETE FROM player_clues WHERE user_id = ? AND case_id = ?").bind(user.id, caseId)
       ]);
       const removed = (results || []).reduce((sum, item) => sum + Number(item.meta?.changes || 0), 0);

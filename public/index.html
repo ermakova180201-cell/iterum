@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="/workstation-concept-one.css?v=1">
   <link rel="stylesheet" href="/archive-concept-one.css?v=1">
   <link rel="stylesheet" href="/app-windows-unified.css?v=1">
+  <link rel="stylesheet" href="/materials-library.css?v=1">
   <script defer src="/dossiers.js"></script>
 </head>
 <body>
@@ -279,6 +280,31 @@
             
           </div>
           <div id="player-material-list" class="player-material-list"></div>
+        </section>
+
+        <section id="material-detail-window" class="player-tool-section desktop-window iterum-unified-window materials-detail-window" role="dialog" aria-labelledby="material-detail-heading" hidden>
+          <div class="player-tool-heading window-drag-handle">
+            <div class="search-window-topline">
+              <span class="section-kicker">ITERUM / АРХИВ / ПРОСМОТР МАТЕРИАЛА</span>
+              <span class="search-topline-label">ЗАКРЫТАЯ ИНФОРМАЦИОННАЯ СИСТЕМА</span>
+            </div>
+            <button id="material-detail-close" class="window-close" type="button" aria-label="Закрыть материал и вернуться к спискам">×</button>
+          </div>
+          <div class="iterum-app-hero materials-detail-hero">
+            <div class="iterum-app-hero-content">
+              <span id="material-detail-type" class="iterum-app-eyebrow">ЭЛЕКТРОННЫЙ АРХИВ / ЛИЧНОЕ ДЕЛО</span>
+              <h2 id="material-detail-heading">Просмотр материала</h2>
+            </div>
+            <div class="iterum-app-hero-art" aria-hidden="true">
+              <span class="iterum-app-hero-ring"></span>
+              <svg class="iterum-app-hero-symbol" viewBox="0 0 80 80"><use href="/workstation-icons.svg#materials"></use></svg>
+            </div>
+          </div>
+          <div class="iterum-app-status">
+            <span class="iterum-app-status-online"><i aria-hidden="true"></i> МАТЕРИАЛ ОТКРЫТ</span>
+            <button id="material-detail-back" class="materials-detail-back" type="button">← К СПИСКАМ</button>
+          </div>
+          <div id="material-detail-content" class="materials-detail-content" aria-live="polite"></div>
         </section>
 
         
@@ -632,7 +658,7 @@
   <footer>
     <span>ITERUM © 2026</span>
   </footer>
-  <script src="/materials.js?v=discovered-dossiers-1"></script>
+  <script src="/materials.js?v=library-lists-2"></script>
   <script src="/search.js?v=full-name-6"></script>
   <script>
     const authPanel = document.querySelector(".auth-panel");

@@ -42,3 +42,48 @@ body.is-workstation .desktop-shell .iterum-workstation-footnote {
     mask-image:linear-gradient(90deg,transparent 0%,#000 12%,#000 88%,transparent 100%);
   }
 }
+
+/* Tiny star-like glints near grid intersections; decorative only.
+ * A few brighter points sit among much dimmer ones so the grid stays calm.
+ */
+body.is-workstation .desktop-shell .desktop-area::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  width:auto !important;
+  height:auto !important;
+  top:0 !important;
+  right:0 !important;
+  z-index:0 !important;
+  pointer-events:none !important;
+  transform:none !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  background:
+    radial-gradient(circle at 12% 16%,rgba(245,252,255,.75) 0 1px,rgba(98,208,243,.22) 2px,transparent 8px),
+    radial-gradient(circle at 29% 39%,rgba(245,252,255,.48) 0 1px,rgba(96,203,236,.15) 2px,transparent 7px),
+    radial-gradient(circle at 43% 14%,rgba(251,254,255,.6) 0 1px,rgba(92,204,238,.16) 2px,transparent 7px),
+    radial-gradient(circle at 72% 27%,rgba(245,252,255,.72) 0 1px,rgba(98,208,243,.2) 2px,transparent 8px),
+    radial-gradient(circle at 88% 12%,rgba(251,254,255,.42) 0 1px,rgba(92,204,238,.13) 2px,transparent 7px),
+    radial-gradient(circle at 20% 74%,rgba(245,252,255,.52) 0 1px,rgba(98,208,243,.16) 2px,transparent 7px),
+    radial-gradient(circle at 64% 82%,rgba(251,254,255,.55) 0 1px,rgba(92,204,238,.19) 2px,transparent 8px),
+    radial-gradient(circle at 81% 68%,rgba(245,252,255,.5) 0 1px,rgba(98,208,243,.15) 2px,transparent 7px) !important;
+  background-size:100% 100% !important;
+  background-repeat:no-repeat !important;
+  opacity:.55;
+  animation:iterum-grid-glints 6.3s ease-in-out infinite alternate !important;
+}
+@keyframes iterum-grid-glints {
+  0%, 14% { opacity:.32; }
+  32% { opacity:.82; }
+  49% { opacity:.42; }
+  71% { opacity:.92; }
+  100% { opacity:.48; }
+}
+@media(prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .desktop-area::after {
+    animation:none !important;
+    opacity:.45 !important;
+  }
+}

@@ -1,45 +1,44 @@
-/* ITERUM / 2026 investigation-wallpaper edition.
- * This asset is DECORATION ONLY. Every application tile, case control,
- * date/time widget, status panel and 3D assistant stays a live DOM control.
+/* ITERUM workstation wallpaper: soft seamless side extension.
+ * Render the original PNG only once at contain scale, over a matching
+ * continuously tiled grid. Fade the left/right edges instead of joining
+ * two differently scaled textures at a hard vertical boundary.
  */
 body.is-workstation .desktop-shell .desktop-area {
-  /* Fit the entire circular composition inside the desktop.
-   * 'cover' cropped the top and bottom on wide screens.
-   * Keep native aspect ratio and the original PNG: no interpolation filters.
-   * Extend the background with a quiet matching technical grid.
-   */
-  background-image:
-    url("/iterum-clean-wallpaper.png"),
-    linear-gradient(rgba(22,112,134,.17) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(22,112,134,.17) 1px, transparent 1px) !important;
-  background-position: center center, center center, center center !important;
-  background-size: contain, 30px 30px, 30px 30px !important;
-  background-repeat: no-repeat, repeat, repeat !important;
-  background-color:#031922 !important;
+  isolation:isolate;
+  background:
+    linear-gradient(rgba(22,112,134,.15) 1px,transparent 1px) center / 30px 30px,
+    linear-gradient(90deg,rgba(22,112,134,.15) 1px,transparent 1px) center / 30px 30px,
+    #031922 !important;
 }
-/* The wallpaper already carries the ITERUM lettering and grid; do not
- * overlay the previous title/grid a second time. */
+body.is-workstation .desktop-shell .desktop-area::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  opacity:1 !important;
+  transform:none !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  background:url("/iterum-clean-wallpaper.png") center center / contain no-repeat !important;
+  -webkit-mask-image:linear-gradient(90deg,transparent 11%,#000 31%,#000 69%,transparent 89%);
+  mask-image:linear-gradient(90deg,transparent 11%,#000 31%,#000 69%,transparent 89%);
+}
+/* Keep every live application and assistant above the decorative layer. */
+body.is-workstation .desktop-shell .desktop-area > * {
+  z-index:1;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
+  z-index:4;
+}
 body.is-workstation .desktop-shell .desktop-wallpaper-mark,
 body.is-workstation .desktop-shell .iterum-workstation-footnote {
   display:none !important;
 }
-body.is-workstation .desktop-shell .desktop-area::before {
-  opacity:0 !important;
-  background:none !important;
-  box-shadow:none !important;
-}
-/* Keep the true floating assistant above the scenic image.
- * Do not freeze, replace or disable the user's existing assistant. */
-body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
-  z-index:4;
-}
 @media(max-width:800px) {
-  body.is-workstation .desktop-shell .desktop-area {
-    background-size: contain, 30px 30px, 30px 30px !important;
-  }
-}
-@media(prefers-reduced-motion:reduce) {
-  body.is-workstation .desktop-shell .desktop-area {
-    background-attachment:scroll !important;
+  body.is-workstation .desktop-shell .desktop-area::before {
+    -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 12%,#000 88%,transparent 100%);
+    mask-image:linear-gradient(90deg,transparent 0%,#000 12%,#000 88%,transparent 100%);
   }
 }

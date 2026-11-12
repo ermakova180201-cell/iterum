@@ -1,0 +1,194 @@
+/* ITERUM · approved ten-expression concept board translated to the live
+   3D helper. Preserve the original cloak mesh and its flight physics.
+   All expression parts are drawn with CSS, not raster overlays. */
+body.is-workstation .desktop-shell .iterum-ghost-helper .iterum-ghost-face {
+  overflow:visible;
+  transition:transform .35s ease,box-shadow .35s ease;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper .iterum-ghost-face i {
+  position:relative;
+  flex:0 0 13%;
+  width:13% !important;
+  height:27% !important;
+  border:0;
+  border-radius:60% !important;
+  clip-path:none !important;
+  background:#a6f3ff !important;
+  box-shadow:0 0 6px #5ce3ff,0 0 12px rgba(91,218,255,.7) !important;
+  filter:none;
+  opacity:1;
+  transform-origin:50% 50%;
+  transition:none;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper .iterum-ghost-face::after {
+  content:"";
+  position:absolute;
+  left:50%;top:72%;
+  width:21%;height:9%;
+  transform:translateX(-50%);
+  background:transparent;
+  border:0;
+  border-bottom:2px solid rgba(163,242,255,.95);
+  border-radius:0 0 90% 90%;
+  box-shadow:none;
+  opacity:1;
+  filter:drop-shadow(0 0 3px #56cfff);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper .iterum-ghost-face::before {
+  content:"";
+  position:absolute;left:50%;top:-32%;
+  transform:translateX(-50%);
+  z-index:5;
+  font:600 19px/1 "Space Grotesk",sans-serif;
+  color:#bceeff;
+  text-shadow:0 0 9px rgba(90,208,255,.68);
+  pointer-events:none;
+}
+/* Calm: open gentle eyes, tiny smile, occasional natural blink. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-calm .iterum-ghost-face i {
+  animation:iterumConceptBlink 6.5s ease-in-out infinite !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-calm .iterum-ghost-face i:nth-child(2){animation-delay:.06s !important;}
+@keyframes iterumConceptBlink {
+  0%,45%,47%,100%{transform:scaleY(1)}
+  46%{transform:scaleY(.1)}
+}
+/* Happy: two luminous upward arcs and an open smiling mouth. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-face i {
+  width:26% !important;height:17% !important;flex-basis:26%;
+  background:transparent !important;
+  border-top:3px solid #b5f6ff !important;
+  border-radius:90% 90% 0 0 !important;
+  box-shadow:none !important;
+  filter:drop-shadow(0 0 4px #52dcff);
+  animation:iterumConceptSmiling 2.8s ease-in-out infinite !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-face::after {
+  top:72%;width:23%;height:12%;
+  border:0 !important;
+  border-radius:12% 12% 90% 90%;
+  background:#a5edff;
+  box-shadow:0 0 6px #61e4ff;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-model-wrap {
+  animation:iterumConceptJoyFloat 3.2s ease-in-out infinite;
+}
+@keyframes iterumConceptSmiling {0%,100%{transform:translateY(0) scaleX(1)}50%{transform:translateY(-1px) scaleX(.95)}}
+@keyframes iterumConceptJoyFloat {0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-4px) rotate(1deg)}}
+/* Curious: gently tilted head, two attentive but asymmetrical oval eyes. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face {
+  transform:translate(-50%,-50%) rotate(8deg);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:first-child {
+  animation:iterumConceptCuriousA 3.4s ease-in-out infinite !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:nth-child(2) {
+  animation:iterumConceptCuriousB 3.4s ease-in-out infinite !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face::before{content:"?";}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face::after{opacity:0;}
+@keyframes iterumConceptCuriousA {0%,100%{transform:rotate(-16deg) scale(1,.9)}50%{transform:rotate(-13deg) scale(1,1)}}
+@keyframes iterumConceptCuriousB {0%,100%{transform:rotate(9deg) scale(1,1.22)}50%{transform:rotate(6deg) scale(1,1.1)}}
+/* Surprised: wide luminous eyes and distinct tiny round mouth, once. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face i {
+  animation:iterumConceptWideEyes .8s ease-out 1 both !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face::before{content:"!";}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face::after {
+  top:73%;width:12%;height:13%;
+  border:2px solid #9febff !important;
+  border-radius:50%;
+  background:transparent;
+}
+@keyframes iterumConceptWideEyes {0%{transform:scale(1)}38%{transform:scale(1.28,1.45)}100%{transform:scale(1.16,1.33)}}
+/* Thinking: both eyes glance downward, a small doubtful mouth. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i {
+  animation:iterumConceptThink 4s ease-in-out infinite !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face::before{content:"···";letter-spacing:2px;font-size:17px;}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face::after {
+  width:15%;border-bottom:2px solid #9beaff;border-radius:0;
+  transform:translateX(-50%) rotate(-10deg);
+}
+@keyframes iterumConceptThink {0%,100%{transform:translateY(1px) rotate(14deg) scaleY(.68)}50%{transform:translateY(2px) rotate(9deg) scaleY(.7)}}
+/* Grumpy: narrow sharp diagonal eyes; keep the silhouette unchanged. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i {
+  height:14% !important;
+  border-radius:45% !important;
+  animation:iterumConceptGlower 3.1s ease-in-out infinite !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i:first-child{transform:rotate(22deg);}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i:nth-child(2){animation-direction:reverse !important;}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face::after {
+  width:17%;border-bottom:2px solid #b6eaff;border-radius:0;transform:translateX(-50%) rotate(-7deg);
+}
+@keyframes iterumConceptGlower {0%,100%{transform:rotate(18deg) scaleY(.7)}50%{transform:rotate(24deg) scaleY(.6)}}
+/* Shy: downturned smiling eyelids, soft blush. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i {
+  width:23% !important;height:15% !important;flex-basis:23%;
+  border-top:2px solid #b3f3ff !important;
+  border-radius:100% 100% 0 0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  animation:iterumConceptShy 3.4s ease-in-out infinite !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face::before{
+  content:"";left:17%;top:65%;width:66%;height:19%;
+  transform:none;
+  background:radial-gradient(ellipse at 0 50%,rgba(255,142,205,.38),transparent 37%),radial-gradient(ellipse at 100% 50%,rgba(255,142,205,.38),transparent 37%);
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face::after{width:16%;height:7%;}
+@keyframes iterumConceptShy{0%,100%{transform:translateY(1px)}50%{transform:translateY(3px)}}
+/* Sleepy: almost closed crescent eyes and low hovering. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleepy .iterum-ghost-face i {
+  background:transparent !important;
+  border-bottom:3px solid #8bd9fa !important;
+  border-radius:0 0 80% 80% !important;
+  box-shadow:none !important;
+  width:23% !important;height:12% !important;flex-basis:23%;
+  animation:iterumConceptDrowse 4.4s ease-in-out infinite !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleepy .iterum-ghost-face::after{opacity:0;}
+@keyframes iterumConceptDrowse {0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(2px) scaleY(.72)}}
+/* Sad: lower both eyelids; mouth curves down slightly. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sad .iterum-ghost-face i {
+  transform:translateY(2px) rotate(10deg) scaleY(.48);
+  animation:iterumConceptSad 4.8s ease-in-out infinite !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sad .iterum-ghost-face::after {
+  top:78%;width:20%;height:9%;
+  border:0 !important;border-top:2px solid #93dcf4;border-radius:80% 80% 0 0;
+}
+@keyframes iterumConceptSad {0%,100%{transform:translateY(2px) rotate(8deg) scaleY(.52)}50%{transform:translateY(3px) rotate(6deg) scaleY(.43)}}
+/* Inspired: bright four-point stars replace the two oval eyes. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-inspired .iterum-ghost-face i {
+  width:32% !important;height:35% !important;flex-basis:32%;
+  border-radius:0 !important;
+  clip-path:polygon(50% 0,63% 36%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 36%) !important;
+  animation:iterumConceptSparkle 2.6s ease-in-out infinite !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-inspired .iterum-ghost-face i:nth-child(2){animation-delay:-1s !important;}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-inspired .iterum-ghost-face::before{content:"✧";font-size:17px;}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-inspired .iterum-ghost-face::after {width:20%;height:12%;border-bottom-width:2px;}
+@keyframes iterumConceptSparkle {0%,100%{transform:scale(.75);opacity:.82}50%{transform:scale(1.04);opacity:1}}
+/* Gentle default hover movement only; existing flight, wake and sleep logic wins. */
+@media(prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .iterum-ghost-helper .iterum-ghost-face i,
+  body.is-workstation .desktop-shell .iterum-ghost-helper .iterum-ghost-model-wrap {
+    animation:none !important;
+  }
+}
+/* Room for all ten moods in the tester, consistent with the blue workstation. */
+body.is-workstation #assistant-emotions-window .assistant-emotion-buttons {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+body.is-workstation #assistant-emotions-window .assistant-emotion-buttons button{
+  border-color:rgba(115,181,209,.3);
+  background:linear-gradient(145deg,rgba(35,94,129,.17),rgba(9,31,48,.6));
+  color:#d4eaf5;
+}
+body.is-workstation #assistant-emotions-window .assistant-emotion-buttons button:hover,
+body.is-workstation #assistant-emotions-window .assistant-emotion-buttons button:focus-visible{
+  border-color:rgba(122,222,247,.74);
+  background:rgba(53,139,188,.24);
+}

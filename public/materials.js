@@ -205,7 +205,8 @@
           const data = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(data.error || "Не удалось отметить материал.");
           item.is_read = 1;
-          render();
+          // The compact catalogue has no read-status column; keep its list
+          // stable and update only this detail window after marking as read.
           displayDetail(item);
         } catch (error) {
           action.disabled = false;

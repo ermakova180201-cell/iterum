@@ -3,15 +3,19 @@
  * date/time widget, status panel and 3D assistant stays a live DOM control.
  */
 body.is-workstation .desktop-shell .desktop-area {
-  /* The clean PNG becomes active as soon as it is added to /public.
-   * Keep the existing wallpaper underneath as a safe fallback until then.
-   * No filters or tint layers: preserve the uploaded image's colors.
+  /* Fit the entire circular composition inside the desktop.
+   * 'cover' cropped the top and bottom on wide screens.
+   * Keep native aspect ratio and the original PNG: no interpolation filters.
+   * Extend the background with a quiet matching technical grid.
    */
-  background:
-    url("/iterum-clean-wallpaper.png") center center / cover no-repeat,
-    url("/iterum-investigation-wallpaper.webp") center 57% / cover no-repeat,
-    #071b23 !important;
-  background-color:#071b23 !important;
+  background-image:
+    url("/iterum-clean-wallpaper.png"),
+    linear-gradient(rgba(22,112,134,.17) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22,112,134,.17) 1px, transparent 1px) !important;
+  background-position: center center, center center, center center !important;
+  background-size: contain, 30px 30px, 30px 30px !important;
+  background-repeat: no-repeat, repeat, repeat !important;
+  background-color:#031922 !important;
 }
 /* The wallpaper already carries the ITERUM lettering and grid; do not
  * overlay the previous title/grid a second time. */
@@ -31,7 +35,7 @@ body.is-workstation .desktop-shell .desktop-area > .iterum-ghost-helper {
 }
 @media(max-width:800px) {
   body.is-workstation .desktop-shell .desktop-area {
-    background-position:center center, center 55% !important;
+    background-size: contain, 30px 30px, 30px 30px !important;
   }
 }
 @media(prefers-reduced-motion:reduce) {

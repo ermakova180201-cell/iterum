@@ -8,7 +8,8 @@
     photo: "ФОТОГРАФИЯ",
     audio: "АУДИОЗАПИСЬ",
     map: "КАРТА / СХЕМА",
-    other: "ДРУГОЙ МАТЕРИАЛ"
+    other: "ДРУГОЙ МАТЕРИАЛ",
+    dossier: "ДОСЬЕ ПЕРСОНЫ"
   };
   let materials = [];
   let selectedId = null;
@@ -53,7 +54,7 @@
       if (filters.status === "read" && !item.is_read) return false;
       if (filters.status === "draft" && !item.is_preview) return false;
       if (filters.status !== "draft" && filters.status !== "all" && item.is_preview) return false;
-      if (query && ![item.title, item.summary, item.content, item.case_title].some(value => String(value || "").toLocaleLowerCase("ru-RU").includes(query))) return false;
+      if (query && ![item.title, item.summary, item.content, item.case_title, item.biography, item.relationships].some(value => String(value || "").toLocaleLowerCase("ru-RU").includes(query))) return false;
       return true;
     }).sort((a, b) => {
       if (filters.sort === "newest" || filters.sort === "oldest") {
@@ -156,7 +157,58 @@
     }
   }
 
+
+  function renderDossierReader(item) {
+    const reader = el("article", "materials-reader materials-person-reader");
+    const top = el("div", "materials-reader-top");
+    top.append(el("span", "materials-reader-type", "СОХРАНЁННОЕ ДОСЬЕ"));
+    top.append(el("time", "", "НАЙДЕНО: " + dateLabel(item.created_at)));
+    reader.append(top);
+
+    const identity = el("div", "materials-person-identity");
+    if (item.photo_data) {
+      const photo = document.createElement("img");
+      photo.className = "materials-person-photo";
+      photo.alt = "Фотография: " + item.title;
+      photo.src = item.photo_data;
+      photo.loading = "lazy";
+      identity.append(photo);
+    } else {
+      const placeholder = el("span", "materials-person-placeholder", "◌");
+      placeholder.setAttribute("aria-hidden", "true");
+      identity.append(placeholder);
+    }
+    const info = el("div", "materials-person-identity-info");
+    info.append(el("h3", "materials-reader-title", item.title));
+    if (item.summary) info.append(el("p", "materials-reader-summary", item.summary));
+    info.append(el("span", "materials-dossier-saved-mark", "СОХРАНЕНО В МАТЕРИАЛАХ ДЕЛА"));
+    identity.append(info);
+    reader.append(identity);
+
+    const facts = el("div", "materials-person-facts");
+    for (const [label, value] of [["ДАТА РОЖДЕНИЯ", item.birth_date],
+      ["ПРОФЕССИЯ", item.occupation]]) {
+      if (!value) continue;
+      const fact = el("div", "materials-person-fact");
+      fact.append(el("span", "", label), el("strong", "", value));
+      facts.append(fact);
+    }
+    if (facts.childElementCount) reader.append(facts);
+
+    for (const [heading, content] of [
+      ["Биография", item.biography], ["Связи с людьми", item.relationships],
+      ["Хронология", item.chronology], ["Связанные материалы", item.related_materials]
+    ]) {
+      if (!content) continue;
+      const section = el("section", "materials-person-section");
+      section.append(el("h4", "", heading), el("p", "", content));
+      reader.append(section);
+    }
+    return reader;
+  }
+
   function renderReader(item) {
+    if (item.material_type === "dossier") return renderDossierReader(item);
     const reader = el("article", "materials-reader");
     const top = el("div", "materials-reader-top");
     top.append(el("span", "materials-reader-type", labels[item.material_type] || "МАТЕРИАЛ"));
@@ -223,6 +275,7 @@
     const types = [
       { value: "all", label: "Все типы" },
       { value: "document", label: "Документы" },
+      { value: "dossier", label: "Досье людей" },
       { value: "publication", label: "Публикации" },
       { value: "photo", label: "Фотографии" },
       { value: "audio", label: "Аудиозаписи" },

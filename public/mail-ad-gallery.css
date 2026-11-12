@@ -1,0 +1,340 @@
+/* ITERUM / Mail / five illustrated advertisements.
+   Forces the real navigation to a left sidebar, with ad BELOW Trash.
+   Loaded after the existing mail and unified-window themes. */
+body.is-workstation .desktop-shell #mail-window .mail-client-layout {
+  display:grid !important;
+  grid-template-columns:minmax(198px,224px) minmax(0,1fr) !important;
+  align-items:stretch !important;
+  gap:0 !important;
+  min-width:0;
+  min-height:460px;
+  background:#091f2b;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-nav {
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  justify-content:flex-start !important;
+  grid-template-columns:none !important;
+  grid-auto-flow:initial !important;
+  gap:6px !important;
+  min-width:0 !important;
+  width:auto !important;
+  height:auto !important;
+  min-height:100%;
+  padding:15px 12px 17px !important;
+  border-right:1px solid rgba(170,194,185,.27) !important;
+  border-bottom:0 !important;
+  background:linear-gradient(175deg,rgba(13,42,52,.97),rgba(7,26,38,.99)) !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button {
+  display:flex !important;
+  flex:0 0 auto !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:7px !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:43px !important;
+  margin:0 !important;
+  padding:9px 12px !important;
+  border-radius:5px !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button > span {
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:9px !important;
+  min-width:0;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button i {
+  flex:0 0 21px;
+  width:21px;
+  font-size:18px !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button .mail-folder-label {
+  min-width:0;
+  white-space:normal !important;
+  font-size:11px !important;
+  line-height:1.4;
+  text-align:left;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button b {
+  flex:0 0 auto;
+  font:600 10px/1.3 "IBM Plex Mono",var(--mono);
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-content {
+  min-width:0;
+  grid-column:2;
+  align-self:stretch;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-column {
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:flex-start !important;
+  align-items:stretch !important;
+  grid-template-columns:none !important;
+  grid-column:auto !important;
+  gap:9px !important;
+  order:10;
+  flex:0 0 auto;
+  min-width:0;
+  width:100%;
+  max-width:none;
+  margin:9px 0 0 !important;
+  padding:15px 0 0 !important;
+  border:0 !important;
+  border-top:1px solid rgba(219,181,126,.38) !important;
+  background:transparent !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-label {
+  display:block !important;
+  width:100%;
+  margin:0;
+  padding:0 2px;
+  color:#d8bc93 !important;
+  font:600 9px/1.45 "IBM Plex Mono",var(--mono);
+  letter-spacing:.17em;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card {
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  justify-content:flex-start !important;
+  grid-template-columns:none !important;
+  gap:0 !important;
+  min-width:0 !important;
+  width:100% !important;
+  padding:7px 7px 12px !important;
+  border:1px solid rgba(215,176,118,.4) !important;
+  border-radius:7px !important;
+  color:#e7ebe5;
+  background:linear-gradient(160deg,rgba(22,52,63,.96),rgba(7,25,36,.99)) !important;
+  text-align:left !important;
+  overflow:hidden;
+  cursor:pointer;
+  transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease;
+  box-shadow:inset 0 1px rgba(232,220,199,.06),0 8px 24px rgba(0,0,0,.21);
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card:hover {
+  border-color:rgba(240,202,143,.82) !important;
+  transform:translateY(-2px);
+  box-shadow:0 9px 28px rgba(0,0,0,.35),inset 0 1px rgba(242,221,182,.13);
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card[data-ad-theme="finance"] {border-color:rgba(201,173,116,.56) !important;}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card[data-ad-theme="technology"] {border-color:rgba(144,153,229,.52) !important;}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card[data-ad-theme="transit"] {border-color:rgba(224,155,127,.5) !important;}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card[data-ad-theme="research"] {border-color:rgba(120,186,171,.55) !important;}
+body.is-workstation .desktop-shell #mail-window .mail-ad-art {
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:640 / 410;
+  object-fit:cover;
+  border:1px solid rgba(204,181,143,.27);
+  border-radius:4px;
+  background:radial-gradient(circle at 70% 30%,#2d5a60,#081c2b);
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-brand {
+  display:block !important;
+  grid-column:auto !important;
+  margin:11px 7px 0;
+  color:#d5b789;
+  font:600 9px/1.5 "IBM Plex Mono",var(--mono);
+  letter-spacing:.08em;
+  overflow-wrap:anywhere;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-title {
+  display:block !important;
+  grid-column:auto !important;
+  margin:5px 7px 0;
+  color:#f0e5d5;
+  font:600 13px/1.35 var(--sans);
+  overflow-wrap:anywhere;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-copy {
+  display:block !important;
+  grid-column:auto !important;
+  margin:6px 7px 0;
+  color:#b4cac9;
+  font:11px/1.58 var(--sans);
+  overflow-wrap:anywhere;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-more {
+  display:block !important;
+  grid-column:auto !important;
+  margin:12px 7px 0;
+  color:#e1bc8e;
+  font:600 9px/1.3 "IBM Plex Mono",var(--mono);
+  letter-spacing:.03em;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-navigation {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:1px 0 0;
+  color:#aebfbe;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-control {
+  display:grid;
+  place-items:center;
+  width:31px;
+  height:30px;
+  flex:0 0 31px;
+  padding:0;
+  border:1px solid rgba(195,169,130,.38);
+  border-radius:5px;
+  background:rgba(8,31,40,.9);
+  color:#e9c69b;
+  font:24px/1 "Space Grotesk",var(--sans);
+  cursor:pointer;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-control:hover {
+  border-color:#e3bb86;
+  background:rgba(46,85,86,.65);
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-position {
+  display:block;
+  min-width:48px;
+  text-align:center;
+  color:#cbb18a;
+  font:600 10px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.1em;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-dialog {
+  z-index:10070;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-dialog-panel {
+  width:min(510px,100%);
+  max-height:min(750px,calc(100vh - 40px));
+  overflow-y:auto;
+  padding:22px;
+  border:1px solid rgba(214,176,121,.65);
+  border-radius:10px;
+  background:linear-gradient(145deg,#16323f,#091f2b);
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-dialog-art {
+  display:block;
+  width:100%;
+  max-height:265px;
+  aspect-ratio:640 / 410;
+  object-fit:cover;
+  margin:17px 0;
+  border:1px solid rgba(212,176,129,.33);
+  border-radius:6px;
+  background:#102c38;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-dialog-panel h3 {
+  margin:12px 0 8px;
+  font:500 22px/1.25 "Playfair Display",Georgia,serif;
+  color:#f4e9dc;
+  overflow-wrap:anywhere;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-dialog-panel strong {
+  color:#e0bc86;
+  font:600 14px/1.4 var(--sans);
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-dialog-panel p {
+  margin:9px 0 16px;
+  color:#bbd0d0;
+  font:12px/1.7 var(--sans);
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-dialog-close {
+  color:#f0e5cf;
+}
+@media(max-width:930px) {
+  body.is-workstation .desktop-shell #mail-window .mail-client-layout {
+    grid-template-columns:minmax(176px,198px) minmax(0,1fr) !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-folder-nav {padding:12px 8px 17px !important;}
+  body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-title {font-size:12px;}
+}
+@media(max-width:690px) {
+  body.is-workstation .desktop-shell #mail-window .mail-client-layout {
+    display:flex !important;
+    flex-direction:column !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-folder-nav {
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    grid-auto-flow:row !important;
+    gap:5px !important;
+    width:100% !important;
+    padding:8px 7px 11px !important;
+    border-right:0 !important;
+    border-bottom:1px solid rgba(170,194,185,.27) !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-folder-button {
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:center !important;
+    align-items:center !important;
+    min-height:50px !important;
+    padding:6px 2px !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-folder-button > span {
+    flex-direction:column !important;
+    gap:3px !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-folder-button .mail-folder-label {
+    font-size:9px !important;
+    text-align:center;
+    word-break:break-word;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-folder-button b {display:none;}
+  body.is-workstation .desktop-shell #mail-window .mail-ad-column {
+    grid-column:1/-1 !important;
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    align-items:center !important;
+    gap:7px 12px !important;
+    margin:8px 0 0 !important;
+    padding:10px 4px 0 !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-ad-label {
+    grid-column:1/-1;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-ad-card {
+    grid-column:1/-1;
+    display:grid !important;
+    grid-template-columns:minmax(110px,35%) minmax(0,1fr) !important;
+    grid-template-rows:repeat(4,auto);
+    align-items:center !important;
+    gap:4px 10px !important;
+    padding:7px !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-ad-art {
+    grid-row:1/5;
+    grid-column:1;
+    height:100%;
+    max-height:130px;
+    min-height:95px;
+    aspect-ratio:auto;
+    object-fit:cover;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-brand,
+  body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-title,
+  body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-copy,
+  body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-more {
+    grid-column:2 !important;
+    margin:0 !important;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-title {font-size:11px;}
+  body.is-workstation .desktop-shell #mail-window .mail-ad-card .mail-ad-copy {font-size:10px;}
+  body.is-workstation .desktop-shell #mail-window .mail-ad-navigation {
+    grid-column:1/-1;
+    padding:4px 0 0;
+  }
+  body.is-workstation .desktop-shell #mail-window .mail-client-content {
+    grid-column:auto;
+    width:100%;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell #mail-window .mail-ad-card {
+    transition:none !important;
+  }
+}

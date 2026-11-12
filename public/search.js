@@ -4,8 +4,7 @@
   const form = document.getElementById("player-search-form");
   const input = document.getElementById("player-search-query");
   const results = document.getElementById("player-search-results");
-  const summary = document.getElementById("player-search-summary");
-  if (!form || !input || !results || !summary) return;
+  if (!form || !input || !results) return;
 
   let records = [];
   let activeId = null;
@@ -22,16 +21,9 @@
     return typeof window.iterumSelectedCaseId === "function"
       ? window.iterumSelectedCaseId() : null;
   }
-  function setStatus(value) { summary.textContent = value; }
-  function declension(n) {
-    const x = n % 100, last = n % 10;
-    return n + " " + (x >= 11 && x <= 14 ? "досье"
-      : last === 1 ? "досье" : "досье");
-  }
   function welcome() {
     records = [];
     activeId = null;
-    setStatus("ОЖИДАНИЕ ЗАПРОСА");
     results.replaceChildren();
 
     const page = el("div", "search-personnel-welcome");
@@ -45,7 +37,7 @@
     const how = el("div", "search-personnel-guide");
     how.append(el("span", "search-personnel-guide-code", "01 / ПОИСК"));
     how.append(el("strong", "", "Не нужно полное ФИО"));
-    how.append(el("p", "", "Достаточно части фамилии, имени или профессии. Например, имени, упомянутого в показаниях."));
+    how.append(el("p", "", "Можно ввести только имя или фамилию. Подойдут и первые несколько букв."));
     guidance.append(how);
 
     const where = el("div", "search-personnel-guide");
@@ -134,14 +126,12 @@
   }
   function render(preferredId) {
     if (!records.length) {
-      setStatus("НЕТ СОВПАДЕНИЙ");
-      state("Досье не найдено", "Попробуйте другую фамилию, имя или часть слова. Новые карточки могут появиться по мере расследования.");
+        state("Досье не найдено", "Попробуйте другую фамилию, имя или часть слова. Новые карточки могут появиться по мере расследования.");
       return;
     }
     results.replaceChildren();
     const selected = records.find(x => x.id === (preferredId || activeId)) || records[0];
     activeId = selected.id;
-    setStatus("НАЙДЕНО: " + declension(records.length).toUpperCase());
 
     // A single match opens directly as a dossier — no redundant results sidebar.
     // For ambiguous names show one compact selector, not a separate result pane.
@@ -181,18 +171,15 @@
     event.stopImmediatePropagation();
     const query = input.value.trim();
     if (query.length < 2) {
-      setStatus("НЕДОСТАТОЧНО СИМВОЛОВ");
       state("Введите минимум два символа", "Можно использовать только часть имени или фамилии.");
       return;
     }
     const caseId = getCaseId();
     if (!caseId) {
-      setStatus("ДЕЛО НЕ ВЫБРАНО");
       state("Сначала выберите дело", "Откройте дело на рабочем столе ITERUM и повторите запрос.");
       return;
     }
     const ticket = ++serial;
-    setStatus("ПОИСК В КАРТОТЕКЕ…");
     state("Проверяем записи", "Поиск по опубликованным досье текущего дела.", "is-loading");
     const submit = form.querySelector('button[type="submit"]');
     if (submit) submit.disabled = true;
@@ -208,7 +195,6 @@
       render();
     } catch (error) {
       if (ticket !== serial) return;
-      setStatus("ОШИБКА ПОИСКА");
       state("Не удалось получить сведения", error.message, "is-error");
     } finally {
       if (ticket === serial && submit) submit.disabled = false;

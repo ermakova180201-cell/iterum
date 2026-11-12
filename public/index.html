@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="/archive-concept-one.css?v=1">
   <link rel="stylesheet" href="/app-windows-unified.css?v=1">
   <link rel="stylesheet" href="/materials-library.css?v=1">
+  <link rel="stylesheet" href="/mail-ad-gallery.css?v=1">
   <script defer src="/dossiers.js"></script>
 </head>
 <body>
@@ -1086,54 +1087,85 @@
         list.className = "mail-inbox-list";
         const reader = document.createElement("article");
         reader.className = "mail-reader";
+        // The ad placement belongs to the folder navigation, directly below
+        // the last folder (Trash), not beside the email reading area.
         const adColumn = document.createElement("aside");
         adColumn.className = "mail-ad-column";
+        adColumn.setAttribute("aria-label", "Рекламные объявления");
         const adLabel = document.createElement("div");
         adLabel.className = "mail-ad-label";
         adLabel.textContent = "РЕКЛАМА";
         const adCard = document.createElement("button");
         adCard.type = "button";
         adCard.className = "mail-ad-card";
-        const ordinaryAds = [
-          {brand:"SECURELINE",title:"Защитите свои данные",copy:"Решения для защиты корпоративной информации.",mark:"◇"},
-          {brand:"NORTHBANK",title:"Финансы под контролем",copy:"Современные инструменты для управления средствами.",mark:"N"},
-          {brand:"TECHNOVA",title:"Технологии для работы",copy:"Оборудование и программные решения для бизнеса.",mark:"T"}
+        adCard.setAttribute("aria-label", "Подробнее о рекламном объявлении");
+        // Five fictional advertiser creatives with five distinct illustrated
+        // backgrounds. No content of the case is used in these advertisements.
+        const availableAds = [
+          {brand:"SECURELINE",title:"Защитите свои данные",copy:"Цифровая безопасность для организаций.",mark:"◇",image:"/mail-ads/secureline.svg",imageAlt:"Светящийся защитный щит и сеть цифровых соединений",theme:"security"},
+          {brand:"NORTHBANK",title:"Уверенность в завтрашнем дне",copy:"Надёжные решения для ваших финансов.",mark:"N",image:"/mail-ads/northbank.svg",imageAlt:"Ночной фасад банка и восходящий финансовый график",theme:"finance"},
+          {brand:"TECHNOVA",title:"Технологии нового поколения",copy:"Техника и решения для работы и жизни.",mark:"T",image:"/mail-ads/technova.svg",imageAlt:"Микропроцессор и светящиеся линии электронных схем",theme:"technology"},
+          {brand:"AURORA TRANSIT",title:"Город ближе, чем кажется",copy:"Комфортные маршруты для каждого дня.",mark:"A",image:"/mail-ads/auroratransit.svg",imageAlt:"Современный городской поезд на фоне ночного мегаполиса",theme:"transit"},
+          {brand:"ЦЕНТР ПРИКЛАДНЫХ ИССЛЕДОВАНИЙ",title:"Новые горизонты науки",copy:"Научные решения и современные технологии.",mark:"К",image:"/mail-ads/contourresearch.svg",imageAlt:"Освещённое здание исследовательского центра среди деревьев",theme:"research",story:true}
         ];
-        const storyAds = [
-          {brand:"ЦЕНТР ПРИКЛАДНЫХ ИССЛЕДОВАНИЙ",title:"Исследования нового поколения",copy:"Современные методы анализа и обработки данных.",mark:"К",story:true}
-        ];
-        const availableAds = [...ordinaryAds, ...storyAds];
-        let previousAdIndex = -1;
-        let currentAd = ordinaryAds[0];
-        function chooseAd() {
-          let index = Math.floor(Math.random() * availableAds.length);
-          if (availableAds.length > 1 && index === previousAdIndex) index = (index + 1) % availableAds.length;
-          previousAdIndex = index;
-          currentAd = availableAds[index];
-          adCard.innerHTML = '<span class="mail-ad-mark"></span><span class="mail-ad-brand"></span><strong class="mail-ad-title"></strong><span class="mail-ad-copy"></span><span class="mail-ad-more">Подробнее →</span>';
-          adCard.querySelector(".mail-ad-mark").textContent = currentAd.mark;
+        let currentAdIndex = Math.floor(Math.random() * availableAds.length);
+        let currentAd = availableAds[currentAdIndex];
+        adCard.innerHTML = '<img class="mail-ad-art" alt="" loading="lazy" decoding="async"><span class="mail-ad-brand"></span><strong class="mail-ad-title"></strong><span class="mail-ad-copy"></span><span class="mail-ad-more">Подробнее ↗</span>';
+        const adNavigation = document.createElement("div");
+        adNavigation.className = "mail-ad-navigation";
+        const previousAd = document.createElement("button");
+        previousAd.type = "button";
+        previousAd.className = "mail-ad-control";
+        previousAd.textContent = "‹";
+        previousAd.setAttribute("aria-label", "Предыдущая реклама");
+        const adPosition = document.createElement("span");
+        adPosition.className = "mail-ad-position";
+        adPosition.setAttribute("aria-live", "polite");
+        const nextAd = document.createElement("button");
+        nextAd.type = "button";
+        nextAd.className = "mail-ad-control";
+        nextAd.textContent = "›";
+        nextAd.setAttribute("aria-label", "Следующая реклама");
+        adNavigation.append(previousAd, adPosition, nextAd);
+        function showAd(index) {
+          currentAdIndex = (index + availableAds.length) % availableAds.length;
+          currentAd = availableAds[currentAdIndex];
+          const art = adCard.querySelector(".mail-ad-art");
+          art.src = currentAd.image;
+          art.alt = currentAd.imageAlt;
           adCard.querySelector(".mail-ad-brand").textContent = currentAd.brand;
           adCard.querySelector(".mail-ad-title").textContent = currentAd.title;
           adCard.querySelector(".mail-ad-copy").textContent = currentAd.copy;
           adCard.classList.toggle("is-story-ad", !!currentAd.story);
+          adCard.dataset.adTheme = currentAd.theme;
+          adCard.setAttribute("aria-label", "Подробнее: " + currentAd.brand + " — " + currentAd.title);
+          adPosition.textContent = (currentAdIndex + 1) + " / " + availableAds.length;
         }
-        chooseAd();
+        previousAd.addEventListener("click", () => showAd(currentAdIndex - 1));
+        nextAd.addEventListener("click", () => showAd(currentAdIndex + 1));
+        showAd(currentAdIndex);
         adCard.addEventListener("click", () => {
           const dialog = document.createElement("div");
           dialog.className = "mail-ad-dialog";
-          dialog.setAttribute("role","dialog");
-          dialog.setAttribute("aria-modal","true");
-          dialog.innerHTML = '<div class="mail-ad-dialog-panel"><button type="button" class="mail-ad-dialog-close" aria-label="Закрыть">×</button><span class="mail-ad-dialog-kicker">ИНФОРМАЦИЯ ОБ ОРГАНИЗАЦИИ</span><h3></h3><strong></strong><p></p><span class="mail-ad-dialog-foot">Рекламное объявление</span></div>';
+          dialog.setAttribute("role", "dialog");
+          dialog.setAttribute("aria-modal", "true");
+          dialog.setAttribute("aria-label", "Информация о рекламодателе");
+          dialog.innerHTML = '<div class="mail-ad-dialog-panel"><button type="button" class="mail-ad-dialog-close" aria-label="Закрыть">×</button><span class="mail-ad-dialog-kicker">РЕКЛАМНОЕ ОБЪЯВЛЕНИЕ</span><img class="mail-ad-dialog-art" alt=""><h3></h3><strong></strong><p></p><span class="mail-ad-dialog-foot">Информация об организации</span></div>';
+          dialog.querySelector(".mail-ad-dialog-art").src = currentAd.image;
+          dialog.querySelector(".mail-ad-dialog-art").alt = currentAd.imageAlt;
           dialog.querySelector("h3").textContent = currentAd.brand;
           dialog.querySelector("strong").textContent = currentAd.title;
           dialog.querySelector("p").textContent = currentAd.copy;
-          const close = () => dialog.remove();
-          dialog.querySelector("button").addEventListener("click", close);
+          const closeButton = dialog.querySelector(".mail-ad-dialog-close");
+          const close = () => { dialog.remove(); document.removeEventListener("keydown", onKeyDown); adCard.focus(); };
+          const onKeyDown = event => { if (event.key === "Escape") close(); };
+          closeButton.addEventListener("click", close);
           dialog.addEventListener("click", event => { if (event.target === dialog) close(); });
-          document.addEventListener("keydown", function esc(event) { if (event.key === "Escape") { close(); document.removeEventListener("keydown", esc); } }, {once:true});
+          document.addEventListener("keydown", onKeyDown);
           client.append(dialog);
+          closeButton.focus();
         });
-        adColumn.append(adLabel, adCard);
+        adColumn.append(adLabel, adCard, adNavigation);
 
         const menuFor = (item, anchor) => {
           client.querySelectorAll(".mail-row-menu").forEach(node => node.remove());
@@ -1232,6 +1264,8 @@
             button.addEventListener("click", () => { currentFolder = key; mailFolderFilter = key; readerMode = false; renderMailClient(); });
             folders.append(button);
           });
+          // Always reattach below Trash after the mail folder buttons rerender.
+          folders.append(adColumn);
           list.replaceChildren();
           reader.replaceChildren();
           content.classList.toggle("is-reading", readerMode);
@@ -1393,7 +1427,7 @@
           next.addEventListener("click",()=>{if(activeAttachmentIndex<activeAttachmentFiles.length-1){activeAttachmentIndex++;renderFile();}});
           await renderFile();
         }
-        layout.append(folders,content,adColumn);
+        layout.append(folders,content);
         content.append(list,reader);
         client.append(toolbar,layout);
         playerMailList.append(client);

@@ -164,6 +164,11 @@
     const submit = byId("dossier-submit");
     const id = editingId;
     if (!caseSelect.value) { note("Сначала выберите дело.", true); return; }
+    if (field("fullName").value.trim().split(/\s+/u).length < 2) {
+      note("Укажите фамилию и имя. Игроку понадобятся оба слова для поиска.", true);
+      field("fullName").focus();
+      return;
+    }
     submit.disabled = true;
     note("Сохраняем досье…");
     try {

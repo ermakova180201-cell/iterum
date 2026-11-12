@@ -48,6 +48,31 @@ async function currentUser(request, env) {
   return row || null;
 }
 
+
+let dossierDiscoveryReady = false;
+async function ensureDossierDiscoveryTable(env) {
+  if (dossierDiscoveryReady) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS player_dossier_discoveries (" +
+    "user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, " +
+    "dossier_id TEXT NOT NULL REFERENCES person_dossiers(id) ON DELETE CASCADE, " +
+    "case_id TEXT NOT NULL REFERENCES cases(id) ON DELETE CASCADE, " +
+    "discovered_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), " +
+    "PRIMARY KEY (user_id, dossier_id))").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_player_dossier_discoveries_case " +
+    "ON player_dossier_discoveries(user_id, case_id, discovered_at)").run();
+  dossierDiscoveryReady = true;
+}
+const normalizePersonName = value => String(value || "").trim()
+  .toLocaleLowerCase("ru-RU").replace(/ё/g, "е").replace(/\s+/g, " ");
+function matchesFirstAndLast(fullName, firstName, lastName) {
+  const parts = normalizePersonName(fullName).split(" ");
+  const first = normalizePersonName(firstName);
+  const last = normalizePersonName(lastName);
+  return parts.length >= 2 && first.length >= 2 && last.length >= 2 &&
+    ((parts[0] === last && parts[1] === first) ||
+     (parts[0] === first && parts[parts.length - 1] === last));
+}
+
 async function handleApi(request, env) {
   const url = new URL(request.url);
   if (request.method === "GET" && url.pathname === "/api/me") {
@@ -173,9 +198,17 @@ async function handleApi(request, env) {
   if (request.method === "GET" && url.pathname === "/api/player/search") {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
-    const query = (url.searchParams.get("q") || "").trim();
+    const peopleSearchOnly = url.searchParams.get("scope") === "people";
+    const firstName = (url.searchParams.get("firstName") || "").trim();
+    const lastName = (url.searchParams.get("lastName") || "").trim();
+    if (peopleSearchOnly && (firstName.length < 2 || lastName.length < 2 ||
+        firstName.length > 100 || lastName.length > 100)) {
+      return json({ error: "Введите имя и фамилию." }, 400);
+    }
+    const query = peopleSearchOnly ? firstName + " " + lastName
+      : (url.searchParams.get("q") || "").trim();
     if (query.length < 2) return json({ results: [] });
-    if (query.length > 100) return json({ error: "Слишком длинный поисковый запрос." }, 400);
+    if (query.length > 210) return json({ error: "Слишком длинный поисковый запрос." }, 400);
     const needle = query.toLocaleLowerCase("ru-RU");
     const caseId = (url.searchParams.get("caseId") || "").trim();
     if (caseId && !/^[a-f0-9]{32}$/.test(caseId)) {
@@ -199,21 +232,11 @@ async function handleApi(request, env) {
     const containsQuery = fields => fields.some(value =>
       String(value || "").toLocaleLowerCase("ru-RU").includes(needle)
     );
-    const peopleSearchOnly = url.searchParams.get("scope") === "people";
-    const nameTokens = needle.split(/\s+/u).filter(Boolean);
     const matchingPeople = searchablePeople
-      .filter(person => {
-        if (peopleSearchOnly) {
-          // Names entered in any order: "Илья Романов" and "Романов Илья"
-          // must both match the first two components of the public full name.
-          // No profession, biography, relationships or other dossier fields.
-          const parts = String(person.title || "").toLocaleLowerCase("ru-RU").trim()
-            .split(/\s+/u).slice(0, 2);
-          return nameTokens.every(token => parts.some(part => part.startsWith(token)));
-        }
-        return containsQuery([person.title, person.summary, person.occupation,
-          person.biography, person.relationships, person.chronology, person.related_materials]);
-      })
+      .filter(person => peopleSearchOnly
+        ? matchesFirstAndLast(person.title, firstName, lastName)
+        : containsQuery([person.title, person.summary, person.occupation,
+          person.biography, person.relationships, person.chronology, person.related_materials]))
       .map(person => ({ ...person, result_type: "person" }));
     // Personnel search only returns matching personal dossiers.
     // Keep the original multi-type API mode for any other consumers.
@@ -239,6 +262,36 @@ async function handleApi(request, env) {
     const firstNameMatches = matchingPeople.filter(item => item.title.toLocaleLowerCase("ru-RU").includes(needle));
     const otherPeople = matchingPeople.filter(item => !item.title.toLocaleLowerCase("ru-RU").includes(needle));
     return json({ results: [...firstNameMatches, ...otherPeople, ...matchingMaterials].slice(0, 30) });
+  }
+
+
+  // Persist only an explicitly opened, published dossier for this player.
+  const discoverRoute = url.pathname.match(/^\/api\/player\/dossiers\/([a-f0-9]{32})\/discover$/);
+  if (request.method === "POST" && discoverRoute) {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "Некорректный запрос." }, 400); }
+    const caseId = String(body.caseId || "");
+    const firstName = String(body.firstName || "").trim();
+    const lastName = String(body.lastName || "").trim();
+    if (!/^[a-f0-9]{32}$/.test(caseId) || firstName.length < 2 || lastName.length < 2 ||
+        firstName.length > 100 || lastName.length > 100) {
+      return json({ error: "Укажите дело, имя и фамилию." }, 400);
+    }
+    const dossier = await env.DB.prepare(
+      "SELECT d.id, d.case_id, d.full_name FROM person_dossiers d " +
+      "JOIN cases c ON c.id = d.case_id " +
+      "WHERE d.id = ? AND d.case_id = ? AND d.is_published = 1 AND c.status = 'active'"
+    ).bind(discoverRoute[1], caseId).first();
+    if (!dossier || !matchesFirstAndLast(dossier.full_name, firstName, lastName)) {
+      return json({ error: "Досье недоступно." }, 404);
+    }
+    await ensureDossierDiscoveryTable(env);
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO player_dossier_discoveries (user_id, dossier_id, case_id) VALUES (?, ?, ?)"
+    ).bind(user.id, dossier.id, dossier.case_id).run();
+    return json({ ok: true, saved: true });
   }
 
   if (request.method === "GET" && url.pathname === "/api/player/archive") {

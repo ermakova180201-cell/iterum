@@ -446,7 +446,7 @@
       <section class="dossier-admin" id="admin-dossier-panel" aria-label="Управление досье персон">
         <p class="section-kicker">КАРТОТЕКА / УПРАВЛЕНИЕ ПЕРСОНАМИ</p>
         <h3>Досье персон</h3>
-        <p class="dossier-note">Создавайте личные карточки участников дела, прикрепляйте фотографию и сохраняйте их в базе. Черновики не видны игрокам. Публикация делает карточку доступной игрокам в приложении «Поиск данных» выбранного дела.</p>
+        <p class="dossier-note">Создавайте личные карточки участников дела. Обязательно указывайте имя и фамилию, чтобы игрок мог найти человека по двум полям поиска. Прикрепляйте фотографию и сохраняйте карточку в базе. Черновики не видны игрокам. Публикация делает карточку доступной игрокам в приложении «Поиск данных» выбранного дела.</p>
         <div class="dossier-admin-actions">
           <button id="dossier-new" type="button">+ Новое досье</button>
           <button id="dossier-refresh" type="button">Обновить картотеку</button>
@@ -461,8 +461,8 @@
                 <select id="dossier-case" name="caseId" required></select>
               </div>
               <div class="dossier-field">
-                <label for="dossier-name">ФИО ИЛИ ИМЯ *</label>
-                <input id="dossier-name" name="fullName" maxlength="160" placeholder="Например: Илья" required>
+                <label for="dossier-name">ФАМИЛИЯ И ИМЯ (ОТЧЕСТВО НЕОБЯЗАТЕЛЬНО) *</label>
+                <input id="dossier-name" name="fullName" maxlength="160" placeholder="Например: Романов Илья Михайлович" required>
               </div>
               <div class="dossier-field">
                 <label for="dossier-role">РОЛЬ В РАССЛЕДОВАНИИ</label>

@@ -1,0 +1,126 @@
+/* ITERUM assistant / restrained expressive animation v1.
+   No new facial features: preserve the existing two cyan oval eyes and 3D model.
+   Mood is communicated by short eye motions and restrained body language,
+   not constant bouncing or exaggerated scaling. */
+
+@keyframes iterumMoodNaturalBlink {
+  0%, 44%, 46%, 100% { transform:scaleY(1); }
+  45% { transform:scaleY(.1); }
+}
+@keyframes iterumMoodSmile {
+  0%,100% { transform:scaleY(.48) translateY(1px); }
+  50% { transform:scaleY(.43) translateY(0); }
+}
+@keyframes iterumMoodCuriousLeft {
+  0%,100% { transform:translateY(-1px) scaleY(1.08); }
+  50% { transform:translateY(-2px) scaleY(1.05); }
+}
+@keyframes iterumMoodCuriousRight {
+  0%,100% { transform:translateY(1px) scaleY(.82); }
+  50% { transform:translateY(0) scaleY(.90); }
+}
+@keyframes iterumMoodSurprise {
+  0%,100% { transform:scale(1.06,1.15); }
+  45% { transform:scale(1.08,1.25); }
+}
+@keyframes iterumMoodThinking {
+  0%,100% { transform:translate(0,0) scaleY(.84); }
+  35%,70% { transform:translate(2px,-1px) scaleY(.84); }
+}
+@keyframes iterumMoodGrumpy {
+  0%,100% { transform:rotate(9deg) scaleY(.64); }
+  50% { transform:rotate(11deg) scaleY(.61); }
+}
+@keyframes iterumMoodSleepy {
+  0%,100% { transform:translateY(2px) scaleY(.34); }
+  55% { transform:translateY(3px) scaleY(.24); }
+}
+@keyframes iterumMoodShyLeft {
+  0%,100% { transform:translate(0,2px) scaleY(.65); }
+  50% { transform:translate(1px,3px) scaleY(.61); }
+}
+@keyframes iterumMoodShyRight {
+  0%,100% { transform:translate(0,2px) scaleY(.65); }
+  50% { transform:translate(-1px,3px) scaleY(.61); }
+}
+@keyframes iterumMoodHappyFloat {
+  0%,100% { transform:translateY(0) rotate(-1deg); }
+  50% { transform:translateY(-3px) rotate(1deg); }
+}
+@keyframes iterumMoodCuriousTilt {
+  0%,100% { transform:rotate(-2deg) translateY(0); }
+  50% { transform:rotate(-3deg) translateY(-2px); }
+}
+@keyframes iterumMoodThinkingTilt {
+  0%,100% { transform:rotate(0) translateY(0); }
+  50% { transform:rotate(2deg) translateY(-1px); }
+}
+@keyframes iterumMoodShyTilt {
+  0%,100% { transform:rotate(-1deg) translateY(1px); }
+  50% { transform:rotate(-2deg) translateY(2px); }
+}
+
+body.is-workstation .desktop-shell .iterum-ghost-helper .iterum-ghost-face i {
+  clip-path:none;
+  transform-origin:50% 50%;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-calm .iterum-ghost-face i {
+  animation:iterumMoodNaturalBlink 6.6s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-happy .iterum-ghost-face i {
+  clip-path:none;
+  width:14%;
+  height:30%;
+  animation:iterumMoodSmile 2.9s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:first-child {
+  animation:iterumMoodCuriousLeft 3.5s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-curious .iterum-ghost-face i:nth-child(2) {
+  animation:iterumMoodCuriousRight 3.5s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-surprised .iterum-ghost-face i {
+  width:15%;
+  height:34%;
+  animation:iterumMoodSurprise 1.5s ease-in-out 2;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-thinking .iterum-ghost-face i {
+  animation:iterumMoodThinking 4s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-grumpy .iterum-ghost-face i {
+  animation:iterumMoodGrumpy 3.2s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleepy .iterum-ghost-face i {
+  animation:iterumMoodSleepy 4.5s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:first-child {
+  animation:iterumMoodShyLeft 3.5s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-shy .iterum-ghost-face i:nth-child(2) {
+  animation:iterumMoodShyRight 3.5s ease-in-out infinite;
+}
+/* Body reactions do not override travel, waking up, or sleeping. */
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking):not(.is-sleeping).is-happy .iterum-ghost-model-wrap {
+  animation:iterumMoodHappyFloat 3.4s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking):not(.is-sleeping).is-curious .iterum-ghost-model-wrap {
+  animation:iterumMoodCuriousTilt 4.2s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking):not(.is-sleeping).is-thinking .iterum-ghost-model-wrap {
+  animation:iterumMoodThinkingTilt 4.5s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking):not(.is-sleeping).is-grumpy .iterum-ghost-model-wrap {
+  animation:iterumMoodThinkingTilt 4.5s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking):not(.is-sleeping).is-shy .iterum-ghost-model-wrap {
+  animation:iterumMoodShyTilt 4.5s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model:not(.is-visiting-app):not(.is-waking):not(.is-sleeping).is-surprised .iterum-ghost-model-wrap {
+  animation:iterumMoodHappyFloat 1.6s ease-out 1;
+}
+@media(prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .iterum-ghost-helper .iterum-ghost-face i,
+  body.is-workstation .desktop-shell .iterum-ghost-helper.has-3d-model .iterum-ghost-model-wrap {
+    animation:none !important;
+  }
+}

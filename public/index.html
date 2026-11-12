@@ -1267,6 +1267,19 @@
           }
           renderMailClient();
         }
+        function formatMailStamp(value) {
+          if (!value) return "";
+          const stamp = new Date(value);
+          if (Number.isNaN(stamp.getTime())) return String(value).slice(0, 28);
+          const now = new Date();
+          const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const previous = new Date(midnight);
+          previous.setDate(previous.getDate() - 1);
+          const hhmm = new Intl.DateTimeFormat("ru-RU", {hour:"2-digit",minute:"2-digit"}).format(stamp);
+          if (stamp >= midnight) return "Сегодня, " + hhmm;
+          if (stamp >= previous) return "Вчера, " + hhmm;
+          return new Intl.DateTimeFormat("ru-RU", {day:"numeric", month:"short"}).format(stamp) + ", " + hhmm;
+        }
         function renderMailClient() {
           folders.replaceChildren();
           folderDefinitions.forEach(([key, symbol, label]) => {
@@ -1316,7 +1329,7 @@
               back.type = "button"; back.className = "mail-back-button"; back.textContent = "← Назад к " + folderDefinitions.find(x=>x[0]===currentFolder)[2].toLowerCase();
               back.addEventListener("click", showList);
               const top = document.createElement("div"); top.className = "mail-reader-top";
-              const date = document.createElement("time"); date.textContent = item.sent_at || item.created_at || ""; top.append(back,date);
+              const date = document.createElement("time"); date.textContent = formatMailStamp(item.sent_at || item.created_at); top.append(back,date);
               const subject = document.createElement("h3"); subject.className = "mail-reader-subject"; subject.textContent = item.title || "Без темы";
               const senderRow = document.createElement("div"); senderRow.className = "mail-sender-row";
               const avatar = document.createElement("span"); avatar.className = "mail-reader-avatar"; avatar.textContent = (item.sender_name || "?").trim().slice(0,1).toLocaleUpperCase("ru");
@@ -1376,7 +1389,7 @@
             const dot = document.createElement("span"); dot.className = "mail-unread-dot"; dot.setAttribute("aria-hidden","true");
             const subject = document.createElement("strong"); subject.textContent = item.title || "Без темы";
             subjectLine.append(dot,subject);
-            const date = document.createElement("time"); date.textContent = item.sent_at || item.created_at || "";
+            const date = document.createElement("time"); date.textContent = formatMailStamp(item.sent_at || item.created_at);
             const actions = document.createElement("div"); actions.className = "mail-row-actions";
             const open = document.createElement("button"); open.type = "button"; open.className = "mail-open-check"; open.setAttribute("aria-label","Открыть письмо"); open.textContent = "✓";
             open.addEventListener("click", event => { event.stopPropagation(); openMessage(item); });

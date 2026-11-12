@@ -68,8 +68,11 @@ function matchesFirstAndLast(fullName, firstName, lastName) {
   const parts = normalizePersonName(fullName).split(" ");
   const first = normalizePersonName(firstName);
   const last = normalizePersonName(lastName);
+  // Support «Фамилия Имя Отчество», «Имя Фамилия Отчество» and
+  // «Имя Отчество Фамилия», but never match by job or dossier contents.
   return parts.length >= 2 && first.length >= 2 && last.length >= 2 &&
     ((parts[0] === last && parts[1] === first) ||
+     (parts[0] === first && parts[1] === last) ||
      (parts[0] === first && parts[parts.length - 1] === last));
 }
 
@@ -195,73 +198,53 @@ async function handleApi(request, env) {
     return json({ ok: true });
   }
 
+  // Search Data is strictly a personnel catalogue: both name fields required.
+  // Documents are intentionally accessed only from the Materials app.
   if (request.method === "GET" && url.pathname === "/api/player/search") {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
-    const peopleSearchOnly = url.searchParams.get("scope") === "people";
+    if (url.searchParams.get("scope") !== "people") {
+      return json({ error: "Для поиска нужны имя и фамилия." }, 400);
+    }
     const firstName = (url.searchParams.get("firstName") || "").trim();
     const lastName = (url.searchParams.get("lastName") || "").trim();
-    if (peopleSearchOnly && (firstName.length < 2 || lastName.length < 2 ||
-        firstName.length > 100 || lastName.length > 100)) {
-      return json({ error: "Введите имя и фамилию." }, 400);
+    if (firstName.length < 2 || lastName.length < 2 ||
+        firstName.length > 100 || lastName.length > 100) {
+      return json({ error: "Введите имя и фамилию полностью." }, 400);
     }
-    const query = peopleSearchOnly ? firstName + " " + lastName
-      : (url.searchParams.get("q") || "").trim();
-    if (query.length < 2) return json({ results: [] });
-    if (query.length > 210) return json({ error: "Слишком длинный поисковый запрос." }, 400);
-    const needle = query.toLocaleLowerCase("ru-RU");
     const caseId = (url.searchParams.get("caseId") || "").trim();
-    if (caseId && !/^[a-f0-9]{32}$/.test(caseId)) {
-      return json({ error: "Некорректный идентификатор дела." }, 400);
+    if (!/^[a-f0-9]{32}$/.test(caseId)) {
+      return json({ error: "Сначала выберите дело." }, 400);
     }
+
     const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
-    // People have their own cards: they are not 'materials', so do not require
-    // the material-only is_searchable flag or material read/unlock lifecycle.
-    // Explicit columns make it impossible to disclose author_notes.
+    // Published people in the selected active case, with explicit columns
+    // excluding author_notes and other private author-only data.
     const people = await env.DB.prepare(
-      "SELECT d.id, d.case_id, c.title AS case_title, d.full_name AS title, d.role_name AS summary, d.birth_date, d.occupation, d.biography, d.relationships, d.chronology, d.related_materials, d.photo_data, 0 AS is_preview FROM person_dossiers d JOIN cases c ON c.id = d.case_id WHERE c.status = 'active' AND d.is_published = 1 AND (? = '' OR d.case_id = ?) ORDER BY d.full_name COLLATE NOCASE LIMIT 200"
-    ).bind(caseId, caseId).all();
+      "SELECT d.id, d.case_id, c.title AS case_title, d.full_name AS title, " +
+      "d.role_name AS summary, d.birth_date, d.occupation, d.biography, " +
+      "d.relationships, d.chronology, d.related_materials, d.photo_data, " +
+      "0 AS is_preview FROM person_dossiers d JOIN cases c ON c.id = d.case_id " +
+      "WHERE c.status = 'active' AND d.is_published = 1 AND d.case_id = ? " +
+      "ORDER BY d.full_name COLLATE NOCASE LIMIT 200"
+    ).bind(caseId).all();
     let searchablePeople = people.results || [];
     if (isAdmin) {
-      const draftPeople = await env.DB.prepare(
-        "SELECT d.id, d.case_id, c.title AS case_title, d.full_name AS title, d.role_name AS summary, d.birth_date, d.occupation, d.biography, d.relationships, d.chronology, d.related_materials, d.photo_data, 1 AS is_preview FROM person_dossiers d JOIN cases c ON c.id = d.case_id WHERE (c.status = 'draft' OR d.is_published = 0) AND (? = '' OR d.case_id = ?) ORDER BY d.full_name COLLATE NOCASE LIMIT 200"
-      ).bind(caseId, caseId).all();
-      searchablePeople = [...searchablePeople, ...(draftPeople.results || [])];
-    }
-
-    const containsQuery = fields => fields.some(value =>
-      String(value || "").toLocaleLowerCase("ru-RU").includes(needle)
-    );
-    const matchingPeople = searchablePeople
-      .filter(person => peopleSearchOnly
-        ? matchesFirstAndLast(person.title, firstName, lastName)
-        : containsQuery([person.title, person.summary, person.occupation,
-          person.biography, person.relationships, person.chronology, person.related_materials]))
-      .map(person => ({ ...person, result_type: "person" }));
-    // Personnel search only returns matching personal dossiers.
-    // Keep the original multi-type API mode for any other consumers.
-    if (peopleSearchOnly) {
-      if (!caseId) return json({ error: "Сначала выберите дело." }, 400);
-      return json({ results: matchingPeople.slice(0, 30) });
-    }
-
-    const materials = await env.DB.prepare(
-      "SELECT m.id, m.case_id, c.title AS case_title, m.title, m.summary, m.content, EXISTS(SELECT 1 FROM player_material_reads r WHERE r.user_id = ? AND r.material_id = m.id) AS is_read, 0 AS is_preview FROM materials m JOIN cases c ON c.id = m.case_id WHERE c.status = 'active' AND m.is_published = 1 AND m.is_searchable = 1 AND (? = '' OR m.case_id = ?) AND (m.delivery_mode = 'automatic' OR EXISTS(SELECT 1 FROM material_unlocks u WHERE u.user_id = ? AND u.material_id = m.id AND u.unlocked_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))) ORDER BY m.release_order, m.created_at LIMIT 250"
-    ).bind(user.id, caseId, caseId, user.id).all();
-    let searchableMaterials = materials.results || [];
-    if (isAdmin) {
       const drafts = await env.DB.prepare(
-        "SELECT m.id, m.case_id, c.title AS case_title, m.title, m.summary, m.content, 1 AS is_read, 1 AS is_preview FROM materials m JOIN cases c ON c.id = m.case_id WHERE m.is_searchable = 1 AND (? = '' OR m.case_id = ?) AND (c.status = 'draft' OR m.is_published = 0) ORDER BY m.release_order, m.created_at LIMIT 250"
-      ).bind(caseId, caseId).all();
-      searchableMaterials = [...searchableMaterials, ...(drafts.results || [])];
+        "SELECT d.id, d.case_id, c.title AS case_title, d.full_name AS title, " +
+        "d.role_name AS summary, d.birth_date, d.occupation, d.biography, " +
+        "d.relationships, d.chronology, d.related_materials, d.photo_data, " +
+        "1 AS is_preview FROM person_dossiers d JOIN cases c ON c.id = d.case_id " +
+        "WHERE d.case_id = ? AND (c.status = 'draft' OR d.is_published = 0) " +
+        "ORDER BY d.full_name COLLATE NOCASE LIMIT 200"
+      ).bind(caseId).all();
+      searchablePeople = [...searchablePeople, ...(drafts.results || [])];
     }
-
-    const matchingMaterials = searchableMaterials
-      .filter(item => containsQuery([item.title, item.summary, item.content]))
-      .map(item => ({ ...item, result_type: "material" }));
-    const firstNameMatches = matchingPeople.filter(item => item.title.toLocaleLowerCase("ru-RU").includes(needle));
-    const otherPeople = matchingPeople.filter(item => !item.title.toLocaleLowerCase("ru-RU").includes(needle));
-    return json({ results: [...firstNameMatches, ...otherPeople, ...matchingMaterials].slice(0, 30) });
+    const results = searchablePeople
+      .filter(person => matchesFirstAndLast(person.title, firstName, lastName))
+      .map(person => ({ ...person, result_type: "person" }))
+      .slice(0, 30);
+    return json({ results });
   }
 
 

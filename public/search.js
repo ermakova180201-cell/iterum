@@ -143,37 +143,37 @@
     activeId = selected.id;
     setStatus("НАЙДЕНО: " + declension(records.length).toUpperCase());
 
-    const top = el("div", "search-results-header");
-    top.append(el("span", "search-results-label", "НАЙДЕННЫЕ ПЕРСОНЫ"));
-    top.append(el("span", "search-results-count", declension(records.length)));
-    results.append(top);
-
-    const layout = el("div", "search-results-layout");
-    const list = el("div", "search-result-list");
-    list.setAttribute("aria-label", "Найденные люди");
-    for (const person of records) {
-      const item = el("button", "search-result-entry is-person" + (person.id === activeId ? " is-active" : ""));
-      item.type = "button";
-      item.setAttribute("aria-pressed", String(person.id === activeId));
-      const row = el("span", "search-result-heading");
-      row.append(avatar(person));
-      const wrap = el("span", "search-result-heading-text");
-      wrap.append(el("strong", "search-result-name", person.title));
-      wrap.append(el("span", "search-result-type", "ДОСЬЕ ПЕРСОНЫ"));
-      row.append(wrap);
-      item.append(row);
-      if (person.summary) item.append(el("span", "search-result-description", person.summary));
-      item.append(el("span", "search-result-state is-open", person.is_preview ? "ЧЕРНОВИК" : "ОТКРЫТЬ ДОСЬЕ"));
-      item.addEventListener("click", () => {
-        const previousScroll = list.scrollTop;
-        render(person.id);
-        const nextList = results.querySelector(".search-result-list");
-        if (nextList) nextList.scrollTop = previousScroll;
+    // A single match opens directly as a dossier — no redundant results sidebar.
+    // For ambiguous names show one compact selector, not a separate result pane.
+    if (records.length > 1) {
+      const picker = el("div", "search-personnel-switcher");
+      const info = el("div", "search-personnel-switcher-info");
+      info.append(el("span", "search-personnel-switcher-kicker", "НЕСКОЛЬКО СОВПАДЕНИЙ"));
+      info.append(el("p", "", "Выберите человека, чьё досье хотите открыть."));
+      const control = el("div", "search-personnel-switcher-control");
+      const label = el("label", "", "ПЕРСОНА");
+      label.htmlFor = "search-personnel-picker";
+      const select = el("select", "search-personnel-picker");
+      select.id = "search-personnel-picker";
+      for (const person of records) {
+        const option = el("option", "", person.title + (person.summary ? " — " + person.summary : ""));
+        option.value = person.id;
+        select.append(option);
+      }
+      select.value = selected.id;
+      control.append(label, select);
+      picker.append(info, control);
+      results.append(picker);
+      select.addEventListener("change", () => {
+        const next = records.find(person => person.id === select.value);
+        if (!next) return;
+        activeId = next.id;
+        profile.replaceChildren(detail(next));
       });
-      list.append(item);
     }
-    layout.append(list, detail(selected));
-    results.append(layout);
+    const profile = el("div", "search-personnel-profile");
+    profile.append(detail(selected));
+    results.append(profile);
   }
 
   form.addEventListener("submit", async event => {

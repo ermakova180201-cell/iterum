@@ -152,7 +152,9 @@
       if (!archiveResponse.ok) return;
       const archiveData = await archiveResponse.json();
       if (getCaseId() !== caseId) return;
-      if (typeof window.renderMaterialsArchive === "function") {
+      if (typeof window.iterumUpdateCaseMaterials === "function") {
+        window.iterumUpdateCaseMaterials(caseId, archiveData.materials || []);
+      } else if (typeof window.renderMaterialsArchive === "function") {
         window.renderMaterialsArchive((archiveData.materials || []).filter(item =>
           item.case_id === caseId && item.material_type !== "email"));
       }

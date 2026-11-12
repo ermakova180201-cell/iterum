@@ -2,14 +2,16 @@
 (() => {
   "use strict";
   const form = document.getElementById("player-search-form");
-  const input = document.getElementById("player-search-query");
+  const firstInput = document.getElementById("player-search-first-name");
+  const lastInput = document.getElementById("player-search-last-name");
   const results = document.getElementById("player-search-results");
-  if (!form || !input || !results) return;
+  if (!form || !firstInput || !lastInput || !results) return;
 
   let records = [];
   let activeId = null;
   let lastCaseId = null;
   let serial = 0;
+  let lastSearchedName = null;
 
   function el(tag, className = "", text) {
     const result = document.createElement(tag);
@@ -24,20 +26,21 @@
   function welcome() {
     records = [];
     activeId = null;
+    lastSearchedName = null;
     results.replaceChildren();
 
     const page = el("div", "search-personnel-welcome");
     const intro = el("div", "search-personnel-welcome-center");
     intro.append(el("span", "search-personnel-welcome-icon", "⌕"));
-    intro.append(el("strong", "", "Начните с имени"));
-    intro.append(el("p", "", "Введите фамилию или имя, встретившееся в материалах дела. Досье откроется здесь."));
+    intro.append(el("strong", "", "Введите имя и фамилию"));
+    intro.append(el("p", "", "Чтобы открыть досье, введите имя и фамилию человека из материалов расследования."));
     page.append(intro);
 
     const guidance = el("div", "search-personnel-guides");
     const how = el("div", "search-personnel-guide");
     how.append(el("span", "search-personnel-guide-code", "01 / ПОИСК"));
-    how.append(el("strong", "", "Не нужно полное ФИО"));
-    how.append(el("p", "", "Можно ввести только имя или фамилию. Подойдут и первые несколько букв."));
+    how.append(el("strong", "", "Укажите оба поля"));
+    how.append(el("p", "", "Вводите имя и фамилию полностью. Отчество не требуется."));
     guidance.append(how);
 
     const where = el("div", "search-personnel-guide");
@@ -124,9 +127,54 @@
     }
     return card;
   }
+
+  async function persistOpenedDossier(person, notice) {
+    if (person.is_preview || !lastSearchedName) {
+      notice.textContent = person.is_preview ? "ЧЕРНОВИК · ТОЛЬКО ДЛЯ АВТОРА" : "";
+      return;
+    }
+    const { firstName, lastName, caseId } = lastSearchedName;
+    notice.textContent = "СОХРАНЯЕМ В МАТЕРИАЛАХ ДЕЛА…";
+    try {
+      const response = await fetch(
+        "/api/player/dossiers/" + encodeURIComponent(person.id) + "/discover",
+        { method: "POST", credentials: "same-origin",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ firstName, lastName, caseId }) }
+      );
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw Error(data.error || "Не удалось сохранить досье.");
+      if (getCaseId() !== caseId) return;
+      notice.textContent = "СОХРАНЕНО В «МАТЕРИАЛАХ ДЕЛА»";
+      // Keep the existing Materials app in sync without reloading the entire
+      // desktop, changing which window is open, or touching the inbox.
+      const archiveResponse = await fetch("/api/player/archive", { credentials: "same-origin" });
+      if (!archiveResponse.ok) return;
+      const archiveData = await archiveResponse.json();
+      if (getCaseId() !== caseId) return;
+      if (typeof window.iterumUpdateCaseMaterials === "function") {
+        window.iterumUpdateCaseMaterials(caseId, archiveData.materials || []);
+      } else if (typeof window.renderMaterialsArchive === "function") {
+        window.renderMaterialsArchive((archiveData.materials || []).filter(item =>
+          item.case_id === caseId && item.material_type !== "email"));
+      }
+    } catch (error) {
+      if (getCaseId() !== caseId) return;
+      notice.textContent = "НЕ УДАЛОСЬ СОХРАНИТЬ: " + error.message;
+      notice.classList.add("is-error");
+    }
+  }
+  function showDossier(person, target) {
+    target.replaceChildren(detail(person));
+    if (person.is_preview) return;
+    const note = el("p", "search-dossier-save-note", "СОХРАНЯЕМ В МАТЕРИАЛАХ ДЕЛА…");
+    target.firstElementChild?.append(note);
+    persistOpenedDossier(person, note);
+  }
+
   function render(preferredId) {
     if (!records.length) {
-        state("Досье не найдено", "Попробуйте другую фамилию, имя или часть слова. Новые карточки могут появиться по мере расследования.");
+        state("Досье не найдено", "Проверьте написание имени и фамилии. Досье может появиться по мере расследования.");
       return;
     }
     results.replaceChildren();
@@ -158,20 +206,21 @@
         const next = records.find(person => person.id === select.value);
         if (!next) return;
         activeId = next.id;
-        profile.replaceChildren(detail(next));
+        showDossier(next, profile);
       });
     }
     const profile = el("div", "search-personnel-profile");
-    profile.append(detail(selected));
     results.append(profile);
+    showDossier(selected, profile);
   }
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
     event.stopImmediatePropagation();
-    const query = input.value.trim();
-    if (query.length < 2) {
-      state("Введите минимум два символа", "Можно использовать только часть имени или фамилии.");
+    const firstName = firstInput.value.trim();
+    const lastName = lastInput.value.trim();
+    if (firstName.length < 2 || lastName.length < 2) {
+      state("Введите имя и фамилию", "Нужно заполнить оба поля полностью.");
       return;
     }
     const caseId = getCaseId();
@@ -184,13 +233,14 @@
     const submit = form.querySelector('button[type="submit"]');
     if (submit) submit.disabled = true;
     try {
-      const url = "/api/player/search?scope=people&q=" + encodeURIComponent(query) +
-        "&caseId=" + encodeURIComponent(caseId);
+      const url = "/api/player/search?scope=people&firstName=" + encodeURIComponent(firstName) +
+        "&lastName=" + encodeURIComponent(lastName) + "&caseId=" + encodeURIComponent(caseId);
       const response = await fetch(url, { credentials: "same-origin" });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw Error(data.error || "Поиск временно недоступен.");
       if (ticket !== serial || getCaseId() !== caseId) return;
       records = Array.isArray(data.results) ? data.results.filter(x => x.result_type === "person") : [];
+      lastSearchedName = { firstName, lastName, caseId };
       activeId = null;
       render();
     } catch (error) {
@@ -208,7 +258,8 @@
     if (lastCaseId !== next) {
       serial += 1;
       lastCaseId = next;
-      input.value = "";
+      firstInput.value = "";
+      lastInput.value = "";
       welcome();
     }
   });

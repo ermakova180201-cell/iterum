@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css?v=assistant-11">
-  <link rel="stylesheet" href="/search.css?v=person-search-5">
-  <link rel="stylesheet" href="/materials.css">
+  <link rel="stylesheet" href="/search.css?v=full-name-6">
+  <link rel="stylesheet" href="/materials.css?v=discovered-dossiers-1">
   <link rel="stylesheet" href="/dossiers.css">
   <link rel="stylesheet" href="/workstation-concept-one.css?v=1">
   <link rel="stylesheet" href="/archive-concept-one.css?v=1">
@@ -167,12 +167,15 @@
 
           </div>
           <form id="player-search-form" class="player-search-form">
-            <label for="player-search-query">НАЙТИ ЧЕЛОВЕКА</label>
-            <div class="player-search-row">
-              <span class="search-input-prefix" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.8" cy="10.8" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
-              </span>
-              <input id="player-search-query" type="search" minlength="2" maxlength="100" placeholder="Имя или фамилия…" required autocomplete="off" spellcheck="false">
+            <div class="player-search-row search-person-name-row">
+              <label class="search-person-name-field" for="player-search-first-name">
+                <span>ИМЯ</span>
+                <input id="player-search-first-name" name="firstName" type="text" minlength="2" maxlength="100" placeholder="Введите имя…" required autocomplete="off" spellcheck="false">
+              </label>
+              <label class="search-person-name-field" for="player-search-last-name">
+                <span>ФАМИЛИЯ</span>
+                <input id="player-search-last-name" name="lastName" type="text" minlength="2" maxlength="100" placeholder="Введите фамилию…" required autocomplete="off" spellcheck="false">
+              </label>
               <button type="submit" class="admin-mini-button search-personnel-submit">НАЙТИ <span aria-hidden="true">→</span></button>
             </div>
           </form>
@@ -180,7 +183,7 @@
             <div class="search-personnel-welcome">
               <div class="search-personnel-welcome-icon" aria-hidden="true">⌕</div>
               <strong>Картотека готова к поиску</strong>
-              <p>Введите имя или фамилию, найденную в материалах расследования.</p>
+              <p>Введите имя и фамилию человека из материалов расследования.</p>
             </div>
           </div>
         </section>
@@ -238,7 +241,7 @@
           <div class="help-window-content">
             <h3>Работа с системой</h3>
             <p><strong>Почта</strong> — сообщения и новые материалы по делу.</p>
-            <p><strong>Поиск данных</strong> — поиск сведений и зацепок.</p>
+            <p><strong>Поиск данных</strong> — поиск досье по имени и фамилии.</p>
             <p><strong>Материалы дела</strong> — изучение доступных документов и улик.</p>
             <div class="help-lock-test"><span>ТЕСТИРОВАНИЕ СИСТЕМЫ</span><button type="button" class="admin-mini-button" id="help-trigger-lock">ВЫЗВАТЬ СИСТЕМНЫЙ СБОЙ</button></div>
             <p>Чтобы открыть приложение, нажмите на его значок. Окна можно перемещать за верхнюю панель, а закрыть — кнопкой ×.</p>
@@ -443,7 +446,7 @@
       <section class="dossier-admin" id="admin-dossier-panel" aria-label="Управление досье персон">
         <p class="section-kicker">КАРТОТЕКА / УПРАВЛЕНИЕ ПЕРСОНАМИ</p>
         <h3>Досье персон</h3>
-        <p class="dossier-note">Создавайте личные карточки участников дела, прикрепляйте фотографию и сохраняйте их в базе. Черновики не видны игрокам. Публикация делает карточку доступной игрокам в приложении «Поиск данных» выбранного дела.</p>
+        <p class="dossier-note">Создавайте личные карточки участников дела. Обязательно указывайте имя и фамилию, чтобы игрок мог найти человека по двум полям поиска. Прикрепляйте фотографию и сохраняйте карточку в базе. Черновики не видны игрокам. Публикация делает карточку доступной игрокам в приложении «Поиск данных» выбранного дела.</p>
         <div class="dossier-admin-actions">
           <button id="dossier-new" type="button">+ Новое досье</button>
           <button id="dossier-refresh" type="button">Обновить картотеку</button>
@@ -458,8 +461,8 @@
                 <select id="dossier-case" name="caseId" required></select>
               </div>
               <div class="dossier-field">
-                <label for="dossier-name">ФИО ИЛИ ИМЯ *</label>
-                <input id="dossier-name" name="fullName" maxlength="160" placeholder="Например: Илья" required>
+                <label for="dossier-name">ФАМИЛИЯ И ИМЯ (ОТЧЕСТВО НЕОБЯЗАТЕЛЬНО) *</label>
+                <input id="dossier-name" name="fullName" maxlength="160" placeholder="Например: Романов Илья Михайлович" required>
               </div>
               <div class="dossier-field">
                 <label for="dossier-role">РОЛЬ В РАССЛЕДОВАНИИ</label>
@@ -546,8 +549,8 @@
   <footer>
     <span>ITERUM © 2026</span>
   </footer>
-  <script src="/materials.js"></script>
-  <script src="/search.js?v=person-search-5"></script>
+  <script src="/materials.js?v=discovered-dossiers-1"></script>
+  <script src="/search.js?v=full-name-6"></script>
   <script>
     const authPanel = document.querySelector(".auth-panel");
     const authForm = document.getElementById("auth-form");
@@ -608,6 +611,18 @@
     let archiveMaterials = [];
     let currentCaseId = null;
     window.iterumSelectedCaseId = () => currentCaseId;
+    // A newly discovered dossier must persist in the current case's in-memory
+    // archive as well as D1, even when the player switches windows or cases.
+    window.iterumUpdateCaseMaterials = (caseId, entries) => {
+      if (!caseId || caseId !== currentCaseId || !Array.isArray(entries)) return;
+      const incoming = entries.filter(item => item.case_id === caseId);
+      archiveMaterials = [...archiveMaterials.filter(item => item.case_id !== caseId), ...incoming];
+      playerArchiveCount.textContent = incoming.length + " МАТЕРИАЛОВ";
+      if (typeof window.renderMaterialsArchive === "function") {
+        window.renderMaterialsArchive(incoming.filter(item => item.material_type !== "email"));
+      }
+    };
+
     const playerMaterialList = document.getElementById("player-material-list");
     const playerArchiveCount = document.getElementById("player-archive-count");
     let registering = false;

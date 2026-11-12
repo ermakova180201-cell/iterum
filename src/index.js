@@ -48,6 +48,31 @@ async function currentUser(request, env) {
   return row || null;
 }
 
+
+let dossierDiscoveryReady = false;
+async function ensureDossierDiscoveryTable(env) {
+  if (dossierDiscoveryReady) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS player_dossier_discoveries (" +
+    "user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, " +
+    "dossier_id TEXT NOT NULL REFERENCES person_dossiers(id) ON DELETE CASCADE, " +
+    "case_id TEXT NOT NULL REFERENCES cases(id) ON DELETE CASCADE, " +
+    "discovered_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), " +
+    "PRIMARY KEY (user_id, dossier_id))").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_player_dossier_discoveries_case " +
+    "ON player_dossier_discoveries(user_id, case_id, discovered_at)").run();
+  dossierDiscoveryReady = true;
+}
+const normalizePersonName = value => String(value || "").trim()
+  .toLocaleLowerCase("ru-RU").replace(/ё/g, "е").replace(/\s+/g, " ");
+function matchesFirstAndLast(fullName, firstName, lastName) {
+  const parts = normalizePersonName(fullName).split(" ");
+  const first = normalizePersonName(firstName);
+  const last = normalizePersonName(lastName);
+  return parts.length >= 2 && first.length >= 2 && last.length >= 2 &&
+    ((parts[0] === last && parts[1] === first) ||
+     (parts[0] === first && parts[parts.length - 1] === last));
+}
+
 async function handleApi(request, env) {
   const url = new URL(request.url);
   if (request.method === "GET" && url.pathname === "/api/me") {
@@ -173,9 +198,17 @@ async function handleApi(request, env) {
   if (request.method === "GET" && url.pathname === "/api/player/search") {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
-    const query = (url.searchParams.get("q") || "").trim();
+    const peopleSearchOnly = url.searchParams.get("scope") === "people";
+    const firstName = (url.searchParams.get("firstName") || "").trim();
+    const lastName = (url.searchParams.get("lastName") || "").trim();
+    if (peopleSearchOnly && (firstName.length < 2 || lastName.length < 2 ||
+        firstName.length > 100 || lastName.length > 100)) {
+      return json({ error: "Введите имя и фамилию." }, 400);
+    }
+    const query = peopleSearchOnly ? firstName + " " + lastName
+      : (url.searchParams.get("q") || "").trim();
     if (query.length < 2) return json({ results: [] });
-    if (query.length > 100) return json({ error: "Слишком длинный поисковый запрос." }, 400);
+    if (query.length > 210) return json({ error: "Слишком длинный поисковый запрос." }, 400);
     const needle = query.toLocaleLowerCase("ru-RU");
     const caseId = (url.searchParams.get("caseId") || "").trim();
     if (caseId && !/^[a-f0-9]{32}$/.test(caseId)) {
@@ -199,21 +232,11 @@ async function handleApi(request, env) {
     const containsQuery = fields => fields.some(value =>
       String(value || "").toLocaleLowerCase("ru-RU").includes(needle)
     );
-    const peopleSearchOnly = url.searchParams.get("scope") === "people";
-    const nameTokens = needle.split(/\s+/u).filter(Boolean);
     const matchingPeople = searchablePeople
-      .filter(person => {
-        if (peopleSearchOnly) {
-          // Names entered in any order: "Илья Романов" and "Романов Илья"
-          // must both match the first two components of the public full name.
-          // No profession, biography, relationships or other dossier fields.
-          const parts = String(person.title || "").toLocaleLowerCase("ru-RU").trim()
-            .split(/\s+/u).slice(0, 2);
-          return nameTokens.every(token => parts.some(part => part.startsWith(token)));
-        }
-        return containsQuery([person.title, person.summary, person.occupation,
-          person.biography, person.relationships, person.chronology, person.related_materials]);
-      })
+      .filter(person => peopleSearchOnly
+        ? matchesFirstAndLast(person.title, firstName, lastName)
+        : containsQuery([person.title, person.summary, person.occupation,
+          person.biography, person.relationships, person.chronology, person.related_materials]))
       .map(person => ({ ...person, result_type: "person" }));
     // Personnel search only returns matching personal dossiers.
     // Keep the original multi-type API mode for any other consumers.
@@ -241,6 +264,36 @@ async function handleApi(request, env) {
     return json({ results: [...firstNameMatches, ...otherPeople, ...matchingMaterials].slice(0, 30) });
   }
 
+
+  // Persist only an explicitly opened, published dossier for this player.
+  const discoverRoute = url.pathname.match(/^\/api\/player\/dossiers\/([a-f0-9]{32})\/discover$/);
+  if (request.method === "POST" && discoverRoute) {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "Некорректный запрос." }, 400); }
+    const caseId = String(body.caseId || "");
+    const firstName = String(body.firstName || "").trim();
+    const lastName = String(body.lastName || "").trim();
+    if (!/^[a-f0-9]{32}$/.test(caseId) || firstName.length < 2 || lastName.length < 2 ||
+        firstName.length > 100 || lastName.length > 100) {
+      return json({ error: "Укажите дело, имя и фамилию." }, 400);
+    }
+    const dossier = await env.DB.prepare(
+      "SELECT d.id, d.case_id, d.full_name FROM person_dossiers d " +
+      "JOIN cases c ON c.id = d.case_id " +
+      "WHERE d.id = ? AND d.case_id = ? AND d.is_published = 1 AND c.status = 'active'"
+    ).bind(discoverRoute[1], caseId).first();
+    if (!dossier || !matchesFirstAndLast(dossier.full_name, firstName, lastName)) {
+      return json({ error: "Досье недоступно." }, 404);
+    }
+    await ensureDossierDiscoveryTable(env);
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO player_dossier_discoveries (user_id, dossier_id, case_id) VALUES (?, ?, ?)"
+    ).bind(user.id, dossier.id, dossier.case_id).run();
+    return json({ ok: true, saved: true });
+  }
+
   if (request.method === "GET" && url.pathname === "/api/player/archive") {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
@@ -261,7 +314,23 @@ async function handleApi(request, env) {
       cases = { results: [...(cases.results || []), ...(draftCases.results || [])] };
       materials = { results: [...(materials.results || []), ...(draftMaterials.results || [])] };
     }
-    return json({ cases: cases.results || [], materials: materials.results || [] });
+    await ensureDossierDiscoveryTable(env);
+    const discovered = await env.DB.prepare(
+      "SELECT d.id AS dossier_id, d.case_id, c.title AS case_title, " +
+      "d.full_name AS title, d.role_name AS summary, d.birth_date, d.occupation, " +
+      "d.biography, d.relationships, d.chronology, d.related_materials, d.photo_data, " +
+      "p.discovered_at AS created_at " +
+      "FROM player_dossier_discoveries p JOIN person_dossiers d ON d.id = p.dossier_id " +
+      "JOIN cases c ON c.id = d.case_id " +
+      "WHERE p.user_id = ? AND p.case_id = d.case_id AND d.is_published = 1 AND c.status = 'active' " +
+      "ORDER BY p.discovered_at"
+    ).bind(user.id).all();
+    const savedDossiers = (discovered.results || []).map(d => ({
+      ...d, id: "dossier:" + d.dossier_id, material_type: "dossier",
+      release_order: 99999, is_read: 1, is_published: 1, is_preview: 0, content: ""
+    }));
+    return json({ cases: cases.results || [],
+      materials: [...(materials.results || []), ...savedDossiers] });
   }
 
 
@@ -275,9 +344,19 @@ async function handleApi(request, env) {
     if (!foundCase) return json({ error: "Дело не найдено." }, 404);
     const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
     if (!isAdmin && foundCase.status !== "active") return json({ error: "Дело недоступно." }, 403);
-    const rows = await env.DB.prepare(
-      "SELECT id, case_id, full_name, role_name, birth_date, occupation, biography, relationships, chronology, related_materials, photo_data FROM person_dossiers WHERE case_id = ? AND is_published = 1 ORDER BY full_name COLLATE NOCASE"
-    ).bind(caseId).all();
+    // Public catalogue access must not disclose all published identities:
+    // the searchable name is the player's key, and only their discovered
+    // dossiers may be listed through this legacy endpoint.
+    await ensureDossierDiscoveryTable(env);
+    const baseSelect = "SELECT d.id, d.case_id, d.full_name, d.role_name, d.birth_date, d.occupation, " +
+      "d.biography, d.relationships, d.chronology, d.related_materials, d.photo_data " +
+      "FROM person_dossiers d WHERE d.case_id = ? AND d.is_published = 1 ";
+    const rows = isAdmin
+      ? await env.DB.prepare(baseSelect + "ORDER BY d.full_name COLLATE NOCASE").bind(caseId).all()
+      : await env.DB.prepare(baseSelect +
+          "AND EXISTS (SELECT 1 FROM player_dossier_discoveries p " +
+          "WHERE p.dossier_id = d.id AND p.user_id = ? AND p.case_id = ?) " +
+          "ORDER BY d.full_name COLLATE NOCASE").bind(caseId, user.id, caseId).all();
     return json({ dossiers: rows.results || [] });
   }
 
@@ -390,11 +469,13 @@ async function handleApi(request, env) {
       const existing = await env.DB.prepare("SELECT id FROM cases WHERE id = ?").bind(caseId).first();
       if (!existing) return json({ error: "Дело не найдено." }, 404);
 
+      await ensureDossierDiscoveryTable(env);
       const results = await env.DB.batch([
         env.DB.prepare("DELETE FROM player_material_reads WHERE user_id = ? AND material_id IN (SELECT id FROM materials WHERE case_id = ?)").bind(user.id, caseId),
         env.DB.prepare("DELETE FROM material_unlocks WHERE user_id = ? AND material_id IN (SELECT id FROM materials WHERE case_id = ?)").bind(user.id, caseId),
         env.DB.prepare("DELETE FROM player_progress WHERE user_id = ? AND case_id = ?").bind(user.id, caseId),
         env.DB.prepare("DELETE FROM player_notes WHERE user_id = ? AND case_id = ?").bind(user.id, caseId),
+        env.DB.prepare("DELETE FROM player_dossier_discoveries WHERE user_id = ? AND case_id = ?").bind(user.id, caseId),
         env.DB.prepare("DELETE FROM player_clues WHERE user_id = ? AND case_id = ?").bind(user.id, caseId)
       ]);
       const removed = (results || []).reduce((sum, item) => sum + Number(item.meta?.changes || 0), 0);

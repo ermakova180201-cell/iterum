@@ -1,0 +1,681 @@
+/* ITERUM desktop app windows · unified archive skin
+ * Matches Search Data visual grammar; leaves each application's content
+ * and all event handlers intact. Loaded LAST after legacy styles.
+ */
+body.is-workstation .desktop-shell .desktop-area > :is(#mail-window,#materials-window,#news-window,#help-window,#assistant-emotions-window) {
+  --iw-ink:#f2eee5;
+  --iw-muted:#aac3c6;
+  --iw-gold:#dfbb86;
+  --iw-cyan:#86c4c7;
+  --iw-stroke:rgba(158,194,194,.24);
+  box-sizing:border-box;
+  width:min(940px,calc(100% - 320px));
+  max-width:940px;
+  max-height:calc(100% - 38px);
+  min-width:0;
+  padding:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  border:1px solid rgba(217,172,112,.64) !important;
+  border-radius:13px;
+  color:var(--iw-ink) !important;
+  background:radial-gradient(ellipse at 80% 3%,rgba(50,124,128,.16),transparent 38%),linear-gradient(145deg,#0d2631,#071b27 75%) !important;
+  box-shadow:0 33px 103px rgba(0,0,0,.67),0 0 0 1px rgba(180,218,210,.09),inset 0 1px rgba(248,226,189,.12) !important;
+  scrollbar-color:rgba(206,169,117,.52) #091b26;
+  scrollbar-width:thin;
+}
+body.is-workstation .desktop-shell .desktop-area > #mail-window {
+  width:min(1200px,calc(100% - 72px));
+  max-width:1200px;
+}
+body.is-workstation .desktop-shell .desktop-area > #materials-window {
+  width:min(1020px,calc(100% - 200px));
+  max-width:1020px;
+}
+body.is-workstation .desktop-shell .desktop-area > :is(#mail-window,#materials-window,#news-window,#help-window,#assistant-emotions-window)[hidden] {
+  display:none !important;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window * {
+  box-sizing:border-box;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .player-tool-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:53px;
+  margin:0 !important;
+  padding:12px 24px !important;
+  border:0 !important;
+  border-bottom:1px solid rgba(199,167,124,.3) !important;
+  background:linear-gradient(90deg,rgba(13,35,44,.98),rgba(10,27,37,.97)) !important;
+  box-shadow:inset 0 1px rgba(221,238,222,.07);
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .search-window-topline {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  min-width:0;
+  gap:12px;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .player-tool-heading .section-kicker {
+  color:#d5b17e !important;
+  font:600 9px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.1em;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .search-topline-label {
+  display:inline-block;
+  padding-left:12px;
+  border-left:1px solid rgba(182,202,193,.27);
+  color:#849fa8;
+  font:500 9px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.08em;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .window-close {
+  display:grid;
+  place-items:center;
+  flex:0 0 29px;
+  width:29px;
+  height:29px;
+  padding:0;
+  border:1px solid rgba(205,168,116,.39) !important;
+  border-radius:6px;
+  color:#dce7e6 !important;
+  background:rgba(9,26,36,.66) !important;
+  font-size:18px;
+  line-height:1;
+  cursor:pointer;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .window-close:hover {
+  border-color:rgba(225,190,138,.9) !important;
+  background:rgba(92,68,45,.5) !important;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero {
+  position:relative;
+  display:flex;
+  align-items:center;
+  isolation:isolate;
+  overflow:hidden;
+  min-height:153px;
+  padding:27px 32px 26px;
+  border-bottom:1px solid rgba(218,179,126,.35);
+  background:
+    linear-gradient(90deg,rgba(10,30,40,.95) 0%,rgba(10,35,44,.91) 47%,rgba(8,35,43,.63) 72%,rgba(9,27,35,.68)),
+    url("/archive-room.svg") 67% 29%/cover no-repeat,#102f3b;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero::before {
+  content:"";
+  position:absolute;
+  top:-99px;
+  right:27px;
+  z-index:0;
+  width:275px;
+  height:275px;
+  border:1px solid rgba(228,187,122,.35);
+  border-radius:50%;
+  box-shadow:0 0 0 24px rgba(106,187,194,.045),0 0 0 59px rgba(106,187,194,.035),0 0 0 90px rgba(106,187,194,.024);
+  pointer-events:none;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 19px,rgba(130,211,215,.014) 19px 20px);
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero-content {
+  position:relative;
+  z-index:2;
+  min-width:0;
+  max-width:670px;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-eyebrow {
+  display:block;
+  margin-bottom:11px;
+  color:#d4b380;
+  font:600 10px/1.45 "IBM Plex Mono",var(--mono);
+  letter-spacing:.15em;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero h2 {
+  margin:0;
+  color:#f6ead8 !important;
+  font:500 clamp(28px,3vw,42px)/1.15 "Playfair Display",Georgia,serif;
+  letter-spacing:-.02em;
+  text-shadow:0 3px 16px rgba(0,0,0,.38);
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero-art {
+  position:absolute;
+  top:0;
+  right:40px;
+  z-index:1;
+  width:255px;
+  height:100%;
+  opacity:.65;
+  pointer-events:none;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero-ring {
+  position:absolute;
+  top:-23px;
+  right:7px;
+  width:209px;
+  height:209px;
+  border:2px solid rgba(223,185,120,.53);
+  border-bottom-color:rgba(98,203,207,.22);
+  border-left-color:transparent;
+  border-radius:50%;
+  transform:rotate(-25deg);
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero-symbol {
+  position:absolute;
+  top:29px;
+  right:55px;
+  width:106px;
+  height:106px;
+  opacity:.9;
+  filter:drop-shadow(0 0 20px rgba(89,186,197,.2));
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-status {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px 16px;
+  min-height:43px;
+  padding:11px 30px;
+  border-bottom:1px solid var(--iw-stroke);
+  background:rgba(6,24,33,.74);
+  color:#a7bfc0;
+  font:600 9px/1.5 "IBM Plex Mono",var(--mono);
+  letter-spacing:.065em;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-status-online {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#b6d6c9;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-status-online i {
+  width:8px;
+  height:8px;
+  flex:0 0 8px;
+  display:inline-block;
+  border-radius:50%;
+  background:#7fcfaf;
+  box-shadow:0 0 12px rgba(118,215,169,.47);
+}
+body.is-workstation .desktop-shell #mail-window .iterum-app-badge {
+  margin:0;
+  color:#dfbe91;
+  font:600 10px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.06em;
+}
+
+/* Harmonized component surfaces and controls */
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window :is(button,input,select,textarea):focus-visible {
+  outline:2px solid #e4c390;
+  outline-offset:2px;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window :is(input,select,textarea):not([type="checkbox"]):not([type="radio"]) {
+  border:1px solid rgba(174,192,189,.41);
+  border-radius:6px;
+  background:rgba(6,29,40,.86);
+  color:#ecf0e9;
+  caret-color:#dfbb86;
+  font-family:var(--sans);
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window :is(input,textarea)::placeholder {
+  color:#96aeb5;
+  opacity:1;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window :is(.admin-mini-button,.materials-read-button) {
+  color:#162832;
+  border:1px solid #dfb984;
+  border-radius:5px;
+  background:linear-gradient(110deg,#e5c395,#b99a6d);
+  box-shadow:inset 0 1px rgba(255,244,212,.27),0 6px 18px rgba(0,0,0,.15);
+  font:700 10px/1.3 "IBM Plex Mono",var(--mono);
+  letter-spacing:.045em;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window :is(.admin-mini-button,.materials-read-button):hover {
+  background:linear-gradient(110deg,#f0d2a8,#c7a87c);
+  color:#101c23;
+}
+body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window :is(.admin-mini-button,.materials-read-button):disabled {
+  opacity:.57;
+  cursor:not-allowed;
+}
+
+/* CASE MATERIALS: same blue-teal/brass treatment as Search Data's dossier. */
+body.is-workstation .desktop-shell #materials-window #player-material-list {
+  padding:22px 27px 27px;
+  color:#d9e5e1;
+}
+body.is-workstation .desktop-shell #materials-window .materials-toolbar {
+  display:grid;
+  grid-template-columns:minmax(180px,1.5fr) repeat(4,minmax(96px,1fr));
+  gap:10px;
+  margin:0 0 18px;
+  padding:15px;
+  border:1px solid rgba(139,183,183,.31);
+  border-radius:8px;
+  background:linear-gradient(125deg,rgba(25,55,63,.88),rgba(9,31,42,.96));
+  box-shadow:inset 0 1px rgba(228,236,223,.045);
+}
+body.is-workstation .desktop-shell #materials-window .materials-search > span,
+body.is-workstation .desktop-shell #materials-window .materials-filter > span {
+  color:#d8b689;
+  font:600 9px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.05em;
+}
+body.is-workstation .desktop-shell #materials-window .materials-search input,
+body.is-workstation .desktop-shell #materials-window .materials-filter select {
+  width:100%;
+  min-height:43px;
+  padding:10px 11px;
+  font-size:12px;
+  line-height:1.35;
+  border-radius:5px;
+}
+body.is-workstation .desktop-shell #materials-window .materials-catalog-heading {
+  padding:0 2px 10px;
+  margin-bottom:11px;
+  border-bottom:1px solid rgba(183,203,190,.21);
+}
+body.is-workstation .desktop-shell #materials-window .materials-catalog-kicker,
+body.is-workstation .desktop-shell #materials-window .materials-catalog-count {
+  color:#cdb184;
+  font:600 10px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.085em;
+}
+body.is-workstation .desktop-shell #materials-window .materials-catalog-count {color:#94b2b7;}
+body.is-workstation .desktop-shell #materials-window .materials-catalog-layout {
+  grid-template-columns:minmax(210px,.82fr) minmax(0,1.55fr);
+  min-height:320px;
+  overflow:hidden;
+  border:1px solid rgba(158,190,188,.32);
+  border-radius:9px;
+  background:#0a202b;
+  box-shadow:0 15px 32px rgba(0,0,0,.12),inset 0 1px rgba(194,218,210,.055);
+}
+body.is-workstation .desktop-shell #materials-window .materials-catalog-list {
+  background:linear-gradient(145deg,#0c2834,#071f2b);
+  border-right:1px solid rgba(150,184,183,.27);
+  scrollbar-color:#557e84 #0d2731;
+}
+body.is-workstation .desktop-shell #materials-window .materials-catalog-entry {
+  gap:7px;
+  padding:16px 16px;
+  border-bottom:1px solid rgba(142,184,186,.18);
+  color:#e8ece4;
+  background:transparent;
+}
+body.is-workstation .desktop-shell #materials-window .materials-catalog-entry:hover {
+  background:rgba(70,137,140,.17);
+}
+body.is-workstation .desktop-shell #materials-window .materials-catalog-entry.is-active {
+  background:linear-gradient(90deg,rgba(179,134,85,.2),rgba(58,102,110,.16));
+  box-shadow:inset 3px 0 #deb37c;
+}
+body.is-workstation .desktop-shell #materials-window .materials-entry-type {
+  color:#d2b284;
+  font:600 9px/1.4 "IBM Plex Mono",var(--mono);
+}
+body.is-workstation .desktop-shell #materials-window .materials-entry-title {
+  color:#f0e8da;
+  font:500 16px/1.4 "Playfair Display",Georgia,serif;
+}
+body.is-workstation .desktop-shell #materials-window :is(.materials-entry-case,.materials-entry-date) {
+  color:#a5bec0;
+  font:10px/1.5 var(--sans);
+}
+body.is-workstation .desktop-shell #materials-window .materials-entry-status {
+  color:#b0d5c0;
+  font:600 9px/1.4 "IBM Plex Mono",var(--mono);
+}
+body.is-workstation .desktop-shell #materials-window .materials-reader {
+  padding:26px 29px 32px;
+  background:radial-gradient(ellipse at 80% 0%,rgba(176,132,91,.08),transparent 44%),linear-gradient(140deg,#193541,#0c2430);
+}
+body.is-workstation .desktop-shell #materials-window .materials-reader-type {
+  color:#d6b888;
+  font:600 9px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.08em;
+}
+body.is-workstation .desktop-shell #materials-window .materials-reader-top time {
+  color:#93aeb4;
+  font:9px/1.5 "IBM Plex Mono",var(--mono);
+}
+body.is-workstation .desktop-shell #materials-window .materials-reader-title {
+  color:#f3e9dc;
+  font:500 clamp(22px,2.4vw,28px)/1.3 "Playfair Display",Georgia,serif;
+}
+body.is-workstation .desktop-shell #materials-window .materials-reader-meta {
+  color:#a5c0c4;
+  font:10px/1.65 var(--sans);
+}
+body.is-workstation .desktop-shell #materials-window .materials-reader-summary,
+body.is-workstation .desktop-shell #materials-window .materials-reader-content {
+  color:#c4d5d5;
+  font:12px/1.82 var(--sans);
+}
+body.is-workstation .desktop-shell #materials-window .materials-reader-divider {
+  background:rgba(165,199,189,.22);
+}
+body.is-workstation .desktop-shell #materials-window .materials-read-label {
+  color:#acd3b5;
+}
+body.is-workstation .desktop-shell #materials-window .materials-empty {
+  color:#aec9cb;
+  border:1px dashed rgba(129,177,178,.33);
+  border-radius:7px;
+  background:rgba(11,35,45,.65);
+}
+body.is-workstation .desktop-shell #materials-window .materials-person-reader :is(.materials-person-fact,.materials-person-section) {
+  border-color:rgba(152,191,185,.23);
+  color:#d5e4df;
+}
+body.is-workstation .desktop-shell #materials-window .materials-person-reader .materials-person-fact {
+  background:rgba(6,27,35,.49);
+}
+body.is-workstation .desktop-shell #materials-window .materials-person-reader h4 {color:#f0e5d4;}
+body.is-workstation .desktop-shell #materials-window .materials-person-reader p {color:#c4d6d4;}
+
+/* EMAIL: retain Gmail-like folders/actions, repaint every surface with same
+   materials as the search dossier, and preserve the read/unread logic. */
+body.is-workstation .desktop-shell #mail-window #player-mail-list {
+  margin:0;
+  padding:0;
+  color:#d9e4e6;
+}
+body.is-workstation .desktop-shell #mail-window .mail-client {
+  color:#dce9e8;
+  background:rgba(7,29,39,.88);
+}
+body.is-workstation .desktop-shell #mail-window .mail-client-toolbar {
+  border-bottom:1px solid rgba(159,193,193,.25);
+  background:linear-gradient(110deg,rgba(22,52,63,.95),rgba(9,32,42,.96));
+}
+body.is-workstation .desktop-shell #mail-window .mail-brand strong {
+  color:#e2c297;
+}
+body.is-workstation .desktop-shell #mail-window :is(.mail-brand span,.mail-account-email) {
+  color:#a5c3c9;
+}
+body.is-workstation .desktop-shell #mail-window .mail-search-wrap {
+  color:#d7b17f;
+  background:rgba(6,27,37,.9);
+  border-color:rgba(179,191,170,.32);
+  border-radius:6px;
+}
+body.is-workstation .desktop-shell #mail-window .mail-search-wrap input {
+  background:transparent !important;
+  border:0 !important;
+  border-radius:5px;
+  color:#e7eeee !important;
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-nav {
+  border:0;
+  border-bottom:1px solid rgba(160,191,188,.27);
+  background:linear-gradient(115deg,rgba(13,41,53,.98),rgba(7,30,41,.95));
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button {
+  border:1px solid rgba(147,183,182,.26);
+  border-radius:5px;
+  color:#bccbcd;
+  background:rgba(10,37,46,.68);
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button:hover {
+  border-color:rgba(222,184,126,.5);
+  color:#f4e8d8;
+  background:rgba(44,81,87,.48);
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button.is-active {
+  border-color:rgba(222,184,126,.76);
+  color:#f5e7d1;
+  background:linear-gradient(130deg,rgba(119,102,75,.45),rgba(35,70,77,.72));
+  box-shadow:inset 0 1px rgba(234,195,131,.11);
+}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button i {color:#d7b889;}
+body.is-workstation .desktop-shell #mail-window .mail-folder-button b {color:#d4c5ad;}
+body.is-workstation .desktop-shell #mail-window .mail-client-layout {
+  background:#0b2430;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-list {
+  background:linear-gradient(165deg,#0e2a38,#0a202b);
+  border-right-color:rgba(149,184,182,.23);
+  scrollbar-color:#537e83 #0c2732;
+}
+body.is-workstation .desktop-shell #mail-window .mail-list-heading,
+body.is-workstation .desktop-shell #mail-window .mail-list-columns {
+  border-bottom-color:rgba(151,186,185,.23);
+  background:rgba(14,41,51,.72);
+}
+body.is-workstation .desktop-shell #mail-window .mail-list-heading strong {color:#e8e3d9;}
+body.is-workstation .desktop-shell #mail-window .mail-list-heading span,
+body.is-workstation .desktop-shell #mail-window .mail-list-columns {color:#9db9bc;}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry {
+  border-bottom-color:rgba(151,186,186,.18);
+  background:transparent;
+  color:#c9d8d8;
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry:hover {
+  background:rgba(74,135,141,.17);
+}
+body.is-workstation .desktop-shell #mail-window .mail-inbox-entry.is-unread {
+  background:linear-gradient(90deg,rgba(213,176,119,.1),rgba(31,78,87,.15));
+  box-shadow:inset 3px 0 rgba(230,185,122,.66);
+}
+body.is-workstation .desktop-shell #mail-window :is(.mail-entry-sender,.mail-entry-subject) {
+  color:#e7eadd;
+}
+body.is-workstation .desktop-shell #mail-window :is(.mail-entry-address,.mail-entry-time,.mail-entry-snippet,.mail-list-empty) {
+  color:#9ebac0;
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader {
+  color:#d8e3df;
+  background:linear-gradient(135deg,#173441,#0d2834) !important;
+  border-color:rgba(165,191,184,.23);
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader-subject {
+  color:#f3e7d9 !important;
+  font-family:"Playfair Display",Georgia,serif;
+  font-weight:500;
+}
+body.is-workstation .desktop-shell #mail-window :is(.mail-reader-from,.mail-reader-body,.mail-reader-text) {
+  color:#c7d6d6;
+}
+body.is-workstation .desktop-shell #mail-window .mail-reader-top {
+  border-color:rgba(161,189,181,.22);
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-column {
+  background:linear-gradient(130deg,rgba(8,28,39,.94),rgba(12,38,45,.94));
+  border-left-color:rgba(155,188,186,.23);
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-card {
+  background:linear-gradient(145deg,rgba(24,56,64,.77),rgba(9,31,42,.91));
+  border-color:rgba(188,164,130,.3);
+  border-radius:8px;
+}
+body.is-workstation .desktop-shell #mail-window .mail-ad-brand {color:#dab686;}
+body.is-workstation .desktop-shell #mail-window .mail-ad-title {color:#e7e9df;}
+body.is-workstation .desktop-shell #mail-window .mail-ad-copy {color:#acbec1;}
+body.is-workstation .desktop-shell #mail-window .mail-open-check::before {border-color:#ddb784;}
+
+/* NEWS: one coherent archive frame, no second giant banner inside it. */
+body.is-workstation .desktop-shell #news-window .news-window-content {
+  display:grid;
+  gap:18px;
+  padding:25px 29px 32px;
+  color:#d6e4e1;
+  background:transparent;
+}
+body.is-workstation .desktop-shell #news-window .news-feed-intro {
+  padding:0 0 15px;
+  border-bottom:1px solid rgba(167,199,193,.21);
+}
+body.is-workstation .desktop-shell #news-window .news-feed-identifier {
+  display:block;
+  margin-bottom:8px;
+  color:#d6b383;
+  font:600 9px/1.4 "IBM Plex Mono",var(--mono);
+  letter-spacing:.14em;
+}
+body.is-workstation .desktop-shell #news-window .news-feed-intro h3 {
+  margin:0;
+  color:#f0e7dc;
+  font:500 23px/1.3 "Playfair Display",Georgia,serif;
+}
+body.is-workstation .desktop-shell #news-window .news-empty-state {
+  display:grid;
+  justify-items:center;
+  align-content:center;
+  gap:10px;
+  min-height:230px;
+  padding:36px 18px;
+  border:1px dashed rgba(153,188,188,.32);
+  border-radius:9px;
+  background:
+    linear-gradient(90deg,rgba(119,171,173,.027) 1px,transparent 1px),
+    linear-gradient(rgba(119,171,173,.027) 1px,transparent 1px),rgba(11,34,43,.65);
+  background-size:23px 23px,23px 23px,auto;
+}
+body.is-workstation .desktop-shell #news-window .news-empty-icon {
+  display:grid;
+  place-items:center;
+  width:51px;
+  height:51px;
+  border:1px solid rgba(215,180,131,.48);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(99,165,172,.22),rgba(7,27,36,.24));
+  color:#e2bb82;
+  font:30px/1 "Space Grotesk",var(--sans);
+}
+body.is-workstation .desktop-shell #news-window .news-empty-state strong {
+  color:#f0e7dc;
+  font:500 21px/1.35 "Playfair Display",Georgia,serif;
+}
+body.is-workstation .desktop-shell #news-window .news-empty-state p {
+  color:#a9c2c6;
+  font:12px/1.65 var(--sans);
+}
+
+/* All other open tools use the SAME header chrome and content cards. */
+body.is-workstation .desktop-shell #help-window .help-window-content,
+body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotions-intro {
+  margin:0;
+  padding:24px 29px;
+  background:transparent;
+  color:#c9dcda;
+}
+body.is-workstation .desktop-shell #help-window .help-window-content h3,
+body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotions-intro strong {
+  color:#f0e6d7;
+  font:500 23px/1.35 "Playfair Display",Georgia,serif;
+}
+body.is-workstation .desktop-shell #help-window .help-window-content p,
+body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotions-intro p {
+  color:#afc9ca;
+}
+body.is-workstation .desktop-shell #help-window .help-lock-test,
+body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotion-test {
+  border:1px solid rgba(154,188,185,.32);
+  border-radius:8px;
+  background:linear-gradient(130deg,rgba(22,54,63,.89),rgba(8,29,40,.93));
+}
+body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotion-test {
+  margin:0 27px 20px;
+  padding:19px;
+}
+body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotions-status {
+  margin:0 27px 25px;
+  padding:13px 16px;
+  color:#b7d1cd;
+  border:1px solid rgba(156,191,183,.26);
+  border-radius:5px;
+  background:rgba(9,34,44,.75);
+}
+body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotion-test-heading span,
+body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotion-test-heading small {
+  color:#d9b786;
+}
+body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotion-buttons button {
+  color:#e5e9dd;
+  border:1px solid rgba(162,191,182,.32);
+  border-radius:5px;
+  background:rgba(14,42,53,.88);
+}
+body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotion-buttons button:hover {
+  border-color:rgba(222,186,133,.68);
+  background:rgba(46,91,96,.7);
+}
+
+/* Screen sizes / viewport height */
+@media(max-width:1100px) {
+  body.is-workstation .desktop-shell .desktop-area > :is(#mail-window,#materials-window,#news-window,#help-window,#assistant-emotions-window) {
+    width:calc(100% - 36px);
+    max-width:none;
+  }
+  body.is-workstation .desktop-shell #materials-window .materials-toolbar {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  body.is-workstation .desktop-shell #materials-window .materials-search {
+    grid-column:1/-1;
+  }
+}
+@media (min-width:681px) and (max-height:850px) {
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .player-tool-heading {
+    min-height:43px;
+    padding:8px 19px !important;
+  }
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero {
+    min-height:116px;
+    padding:18px 27px;
+  }
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero h2 {font-size:34px;}
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-status {min-height:35px;padding:8px 25px;}
+  body.is-workstation .desktop-shell #materials-window #player-material-list {padding:15px 22px;}
+}
+@media(max-width:680px) {
+  body.is-workstation .desktop-shell .desktop-area > :is(#mail-window,#materials-window,#news-window,#help-window,#assistant-emotions-window) {
+    width:calc(100% - 18px);
+    max-height:calc(100% - 18px);
+  }
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .player-tool-heading {
+    min-height:45px;
+    padding:10px 14px !important;
+  }
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .search-topline-label {display:none;}
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero {
+    min-height:125px;
+    padding:19px 17px;
+  }
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero h2 {font-size:30px;}
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-eyebrow {font-size:9px;letter-spacing:.09em;}
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-hero-art {right:-75px;opacity:.29;}
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window .iterum-app-status {min-height:35px;padding:8px 16px;}
+  body.is-workstation .desktop-shell #materials-window #player-material-list {padding:16px 13px 20px;}
+  body.is-workstation .desktop-shell #materials-window .materials-toolbar {grid-template-columns:minmax(0,1fr);padding:13px;}
+  body.is-workstation .desktop-shell #materials-window .materials-search {grid-column:auto;}
+  body.is-workstation .desktop-shell #materials-window .materials-catalog-layout {grid-template-columns:minmax(0,1fr);}
+  body.is-workstation .desktop-shell #materials-window .materials-catalog-list {
+    max-height:218px;
+    border-right:0;
+    border-bottom:1px solid rgba(154,190,186,.25);
+  }
+  body.is-workstation .desktop-shell #materials-window .materials-reader {padding:18px 15px;}
+  body.is-workstation .desktop-shell #mail-window .mail-client-toolbar {padding:12px;}
+  body.is-workstation .desktop-shell #news-window .news-window-content {padding:19px 16px;}
+  body.is-workstation .desktop-shell #help-window .help-window-content,
+  body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotions-intro {padding:18px 16px;}
+  body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotion-test {margin:0 14px 16px;padding:12px;}
+  body.is-workstation .desktop-shell #assistant-emotions-window .assistant-emotions-status {margin:0 14px 16px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window *,
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window::before,
+  body.is-workstation .desktop-shell .desktop-area > .iterum-unified-window::after {
+    animation:none !important;
+    transition:none !important;
+  }
+}

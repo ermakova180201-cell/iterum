@@ -1,0 +1,21 @@
+
+/* ITERUM / news publication: exhibition of children's art */
+#news-window .news-window-content{overflow:auto;max-height:min(68vh,700px);padding:20px 22px 28px}
+#news-window .iterum-news-issue{max-width:960px;margin:0 auto;color:#dcebf6;font-family:Manrope,Arial,sans-serif}
+#news-window .iterum-news-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px;color:#8fb9d2;font:600 11px 'IBM Plex Mono',monospace;letter-spacing:.11em}
+#news-window .iterum-news-story{border:1px solid #365b77;border-radius:13px;overflow:hidden;background:linear-gradient(160deg,#16314a,#10253a 72%);box-shadow:0 13px 35px #02101e40}
+#news-window .iterum-news-story-head{padding:23px 24px 15px;border-bottom:1px solid #34526b}
+#news-window .iterum-news-category{display:inline-block;padding:5px 10px;margin-bottom:13px;border:1px solid #5685a3;border-radius:20px;color:#b9d9ea;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.14em}
+#news-window .iterum-news-story h3{margin:0 0 10px;color:#f2f8fc;font-size:clamp(20px,2.5vw,29px);line-height:1.24;font-weight:700}
+#news-window .iterum-news-lead{margin:0;color:#c0d5e4;line-height:1.7;font-size:14px}
+#news-window .iterum-news-meta{display:flex;gap:12px;flex-wrap:wrap;color:#9bb9ca;font:500 11px 'IBM Plex Mono',monospace;margin-top:17px}
+#news-window .iterum-news-article-body{padding:18px 24px 24px}
+#news-window .iterum-news-article-body p{margin:0 0 14px;color:#cbdde9;font-size:13px;line-height:1.8}
+#news-window .iterum-news-art-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:20px 0}
+#news-window .iterum-news-art{margin:0;padding:9px;border:1px solid #42667e;border-radius:8px;background:#e9edf0;color:#172c3e}
+#news-window .iterum-news-art svg{width:100%;display:block;aspect-ratio:4/5;background:#fffaf0;border:1px solid #d4d0c8;border-radius:2px}
+#news-window .iterum-news-art figcaption{display:flex;flex-direction:column;gap:3px;margin-top:10px;font-size:11px;line-height:1.4}
+#news-window .iterum-news-art figcaption strong{font-size:12px;color:#132c41}
+#news-window .iterum-news-art figcaption span{color:#4c6070}
+#news-window .iterum-news-foot{margin-top:15px;padding-top:14px;border-top:1px solid #33546a;color:#91afc3;font-size:11px;line-height:1.7}
+@media(max-width:670px){#news-window .news-window-content{padding:12px}#news-window .iterum-news-story-head,#news-window .iterum-news-article-body{padding:16px}#news-window .iterum-news-art-grid{grid-template-columns:1fr}#news-window .iterum-news-art svg{max-height:360px}#news-window .iterum-news-bar{flex-wrap:wrap}}

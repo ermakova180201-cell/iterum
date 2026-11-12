@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css?v=assistant-11">
-  <link rel="stylesheet" href="/search.css?v=person-search-5">
-  <link rel="stylesheet" href="/materials.css">
+  <link rel="stylesheet" href="/search.css?v=full-name-6">
+  <link rel="stylesheet" href="/materials.css?v=discovered-dossiers-1">
   <link rel="stylesheet" href="/dossiers.css">
   <link rel="stylesheet" href="/workstation-concept-one.css?v=1">
   <link rel="stylesheet" href="/archive-concept-one.css?v=1">
@@ -167,12 +167,15 @@
 
           </div>
           <form id="player-search-form" class="player-search-form">
-            <label for="player-search-query">НАЙТИ ЧЕЛОВЕКА</label>
-            <div class="player-search-row">
-              <span class="search-input-prefix" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.8" cy="10.8" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
-              </span>
-              <input id="player-search-query" type="search" minlength="2" maxlength="100" placeholder="Имя или фамилия…" required autocomplete="off" spellcheck="false">
+            <div class="player-search-row search-person-name-row">
+              <label class="search-person-name-field" for="player-search-first-name">
+                <span>ИМЯ</span>
+                <input id="player-search-first-name" name="firstName" type="text" minlength="2" maxlength="100" placeholder="Введите имя…" required autocomplete="off" spellcheck="false">
+              </label>
+              <label class="search-person-name-field" for="player-search-last-name">
+                <span>ФАМИЛИЯ</span>
+                <input id="player-search-last-name" name="lastName" type="text" minlength="2" maxlength="100" placeholder="Введите фамилию…" required autocomplete="off" spellcheck="false">
+              </label>
               <button type="submit" class="admin-mini-button search-personnel-submit">НАЙТИ <span aria-hidden="true">→</span></button>
             </div>
           </form>
@@ -180,7 +183,7 @@
             <div class="search-personnel-welcome">
               <div class="search-personnel-welcome-icon" aria-hidden="true">⌕</div>
               <strong>Картотека готова к поиску</strong>
-              <p>Введите имя или фамилию, найденную в материалах расследования.</p>
+              <p>Введите имя и фамилию человека из материалов расследования.</p>
             </div>
           </div>
         </section>
@@ -546,8 +549,8 @@
   <footer>
     <span>ITERUM © 2026</span>
   </footer>
-  <script src="/materials.js"></script>
-  <script src="/search.js?v=person-search-5"></script>
+  <script src="/materials.js?v=discovered-dossiers-1"></script>
+  <script src="/search.js?v=full-name-6"></script>
   <script>
     const authPanel = document.querySelector(".auth-panel");
     const authForm = document.getElementById("auth-form");

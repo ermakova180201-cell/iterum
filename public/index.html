@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="/materials-library.css?v=1">
   <link rel="stylesheet" href="/mail-ad-gallery.css?v=1">
   <link rel="stylesheet" href="/mail-reference.css?v=1">
+  <link rel="stylesheet" href="/mail-single-panel.css?v=1">
   <script defer src="/dossiers.js"></script>
 </head>
 <body>
@@ -1402,23 +1403,6 @@
             const empty = document.createElement("div"); empty.className = "mail-list-empty";
             empty.textContent = currentFolder === "sent" ? "Отправленных писем пока нет." : query ? "По вашему запросу ничего не найдено." : "В этой папке пока нет писем.";
             list.append(empty);
-          }
-          if (!readerMode) {
-            const hint = document.createElement("div");
-            hint.className = "mail-reader-placeholder";
-            hint.setAttribute("aria-label", "Выберите письмо из списка для чтения");
-            const emblem = document.createElement("span");
-            emblem.className = "mail-reader-placeholder-symbol";
-            emblem.setAttribute("aria-hidden", "true");
-            emblem.innerHTML = '<svg viewBox="0 0 100 100"><path d="M18 30h64v40H18zM18 31l32 25 32-25" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/></svg>';
-            const title = document.createElement("p");
-            title.className = "mail-reader-placeholder-title";
-            title.textContent = "Выберите письмо";
-            const subtitle = document.createElement("span");
-            subtitle.className = "mail-reader-placeholder-subtitle";
-            subtitle.textContent = "из списка";
-            hint.append(emblem, title, subtitle);
-            reader.append(hint);
           }
         }
         async function openAttachment(files,index,mailId) {

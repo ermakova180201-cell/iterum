@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="/mail-blue-unified.css?v=1">
 <link rel="stylesheet" href="/ghost-cloak-motion.css?v=1">
 <link rel="stylesheet" href="/ghost-emotions-refined.css?v=1">
+<link rel="stylesheet" href="/ghost-emotions-concept.css?v=1">
   <script defer src="/dossiers.js"></script>
 </head>
 <body>
@@ -249,7 +250,7 @@
             <div><strong>ПРОВЕРКА ВЫРАЖЕНИЙ ПРИВИДЕНИЯ</strong><p>Выбери состояние, чтобы посмотреть, как помощник меняет выражение и поведение. Это тестовая панель — она не влияет на ход расследования.</p></div>
           </div>
           <div class="assistant-emotion-test" id="assistant-emotion-test">
-            <div class="assistant-emotion-test-heading"><span>ВОСЕМЬ СОСТОЯНИЙ</span><small>ВЫБЕРИ ЭМОЦИЮ</small></div>
+            <div class="assistant-emotion-test-heading"><span>ДЕСЯТЬ СОСТОЯНИЙ</span><small>ВЫБЕРИ ЭМОЦИЮ</small></div>
             <div class="assistant-emotion-buttons">
               <button type="button" data-assistant-mood="calm">Спокойствие</button>
               <button type="button" data-assistant-mood="curious">Любопытство</button>
@@ -259,6 +260,8 @@
               <button type="button" data-assistant-mood="grumpy">Недовольство</button>
               <button type="button" data-assistant-mood="sleepy">Сонливость</button>
               <button type="button" data-assistant-mood="shy">Смущение</button>
+              <button type="button" data-assistant-mood="sad">Грусть</button>
+              <button type="button" data-assistant-mood="inspired">Вдохновение</button>
             </div>
           </div>
           <p class="assistant-emotions-status" id="assistant-emotions-status" role="status" aria-live="polite">Ожидание выбора. Нажми на любую эмоцию.</p>
@@ -1472,7 +1475,7 @@
     const assistantGhost = document.querySelector(".iterum-ghost-helper");
     const assistantGhostMessage = assistantGhost.querySelector(".iterum-ghost-message");
     const assistantChatInput = document.getElementById("assistant-chat-input");
-    const assistantEmotions = ["calm","curious","happy","surprised","thinking","grumpy","sleepy","shy"];
+    const assistantEmotions = ["calm","curious","happy","surprised","thinking","grumpy","sleepy","shy","sad","inspired"];
 
     // Память помощника хранит только ход работы, а не тексты писем, документов или поисковых запросов.
     const assistantMemory = {
@@ -1777,7 +1780,7 @@
       windows: "Нажми на значок приложения, чтобы открыть его. Окно можно перемещать за верхнюю панель, а закрыть кнопкой ×. Если потеряешься — нажми на меня."
     };
     const assistantLabels = {mail:"Почта",search:"Поиск данных",materials:"Материалы дела",windows:"Окна и рабочий стол"};
-    const assistantMoodLabels = {calm:"Спокойствие",curious:"Любопытство",happy:"Радость",surprised:"Удивление",thinking:"Размышление",grumpy:"Недовольство",sleepy:"Сонливость",shy:"Смущение"};
+    const assistantMoodLabels = {calm:"Спокойствие",curious:"Любопытство",happy:"Радость",surprised:"Удивление",thinking:"Размышление",grumpy:"Недовольство",sleepy:"Сонливость",shy:"Смущение",sad:"Грусть",inspired:"Вдохновение"};
     const assistantEmotionToggle = document.getElementById("assistant-emotion-toggle");
     const assistantEmotionPanel = document.getElementById("assistant-emotion-test");
     assistantEmotionToggle?.addEventListener("click", () => {

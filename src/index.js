@@ -199,18 +199,27 @@ async function handleApi(request, env) {
     const containsQuery = fields => fields.some(value =>
       String(value || "").toLocaleLowerCase("ru-RU").includes(needle)
     );
+    const peopleSearchOnly = url.searchParams.get("scope") === "people";
+    const nameTokens = needle.split(/\s+/u).filter(Boolean);
     const matchingPeople = searchablePeople
-      .filter(person => containsQuery([person.title, person.summary, person.occupation,
-        person.biography, person.relationships, person.chronology, person.related_materials]))
+      .filter(person => {
+        if (peopleSearchOnly) {
+          // Names entered in any order: "Илья Романов" and "Романов Илья"
+          // must both match the first two components of the public full name.
+          // No profession, biography, relationships or other dossier fields.
+          const parts = String(person.title || "").toLocaleLowerCase("ru-RU").trim()
+            .split(/\s+/u).slice(0, 2);
+          return nameTokens.every(token => parts.some(part => part.startsWith(token)));
+        }
+        return containsQuery([person.title, person.summary, person.occupation,
+          person.biography, person.relationships, person.chronology, person.related_materials]);
+      })
       .map(person => ({ ...person, result_type: "person" }));
-    // Simplified personnel catalogue in the Search Data workstation app:
-    // avoid even querying or returning materials for this mode. The original
-    // multi-type endpoint stays available for any other existing consumers.
-    if (url.searchParams.get("scope") === "people") {
+    // Personnel search only returns matching personal dossiers.
+    // Keep the original multi-type API mode for any other consumers.
+    if (peopleSearchOnly) {
       if (!caseId) return json({ error: "Сначала выберите дело." }, 400);
-      const firstNameMatches = matchingPeople.filter(item => item.title.toLocaleLowerCase("ru-RU").includes(needle));
-      const otherPeople = matchingPeople.filter(item => !item.title.toLocaleLowerCase("ru-RU").includes(needle));
-      return json({ results: [...firstNameMatches, ...otherPeople].slice(0, 30) });
+      return json({ results: matchingPeople.slice(0, 30) });
     }
 
     const materials = await env.DB.prepare(

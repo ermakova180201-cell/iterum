@@ -43,8 +43,9 @@ body.is-workstation .desktop-shell .iterum-workstation-footnote {
   }
 }
 
-/* Tiny star-like glints near grid intersections; decorative only.
- * A few brighter points sit among much dimmer ones so the grid stays calm.
+/* Sparse white-blue glints sit exactly ON the CSS grid intersections.
+ * Both the grid and lights use a shared centered 30px lattice.
+ * 240px is a multiple of 30px, so every glint lands on a grid node.
  */
 body.is-workstation .desktop-shell .desktop-area::after {
   content:"";
@@ -60,28 +61,25 @@ body.is-workstation .desktop-shell .desktop-area::after {
   border:0 !important;
   border-radius:0 !important;
   box-shadow:none !important;
-  background:
-    radial-gradient(circle at 12% 16%,rgba(245,252,255,.75) 0 1px,rgba(98,208,243,.22) 2px,transparent 8px),
-    radial-gradient(circle at 29% 39%,rgba(245,252,255,.48) 0 1px,rgba(96,203,236,.15) 2px,transparent 7px),
-    radial-gradient(circle at 43% 14%,rgba(251,254,255,.6) 0 1px,rgba(92,204,238,.16) 2px,transparent 7px),
-    radial-gradient(circle at 72% 27%,rgba(245,252,255,.72) 0 1px,rgba(98,208,243,.2) 2px,transparent 8px),
-    radial-gradient(circle at 88% 12%,rgba(251,254,255,.42) 0 1px,rgba(92,204,238,.13) 2px,transparent 7px),
-    radial-gradient(circle at 20% 74%,rgba(245,252,255,.52) 0 1px,rgba(98,208,243,.16) 2px,transparent 7px),
-    radial-gradient(circle at 64% 82%,rgba(251,254,255,.55) 0 1px,rgba(92,204,238,.19) 2px,transparent 8px),
-    radial-gradient(circle at 81% 68%,rgba(245,252,255,.5) 0 1px,rgba(98,208,243,.15) 2px,transparent 7px) !important;
-  background-size:100% 100% !important;
-  background-repeat:no-repeat !important;
+  background-image:
+    radial-gradient(circle at 30px 60px,rgba(250,253,255,.9) 0 1px,rgba(133,226,255,.28) 2px,transparent 6px),
+    radial-gradient(circle at 180px 30px,rgba(250,253,255,.72) 0 1px,rgba(133,226,255,.20) 2px,transparent 6px),
+    radial-gradient(circle at 90px 180px,rgba(250,253,255,.62) 0 1px,rgba(133,226,255,.18) 2px,transparent 5px),
+    radial-gradient(circle at 210px 210px,rgba(250,253,255,.80) 0 1px,rgba(133,226,255,.22) 2px,transparent 6px) !important;
+  background-size:240px 240px !important;
+  background-position:center center !important;
+  background-repeat:repeat !important;
   -webkit-mask-image:none !important;
   mask-image:none !important;
-  opacity:.55;
-  animation:iterum-grid-glints 6.3s ease-in-out infinite alternate !important;
+  opacity:.45;
+  animation:iterum-grid-glints 7.4s ease-in-out infinite alternate !important;
 }
 @keyframes iterum-grid-glints {
-  0%, 14% { opacity:.32; }
-  32% { opacity:.82; }
-  49% { opacity:.42; }
-  71% { opacity:.92; }
-  100% { opacity:.48; }
+  0%, 13% { opacity:.18; }
+  31% { opacity:.68; }
+  48% { opacity:.3; }
+  72% { opacity:.85; }
+  100% { opacity:.22; }
 }
 @media(prefers-reduced-motion:reduce) {
   body.is-workstation .desktop-shell .desktop-area::after {

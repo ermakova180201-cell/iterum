@@ -1,271 +1,231 @@
-/* ITERUM / Archive query interface v2 — documents and people */
+/* ITERUM • Search Data v3: a case-scoped personnel catalogue, not a second document archive. */
 (() => {
   "use strict";
   const form = document.getElementById("player-search-form");
+  const input = document.getElementById("player-search-query");
   const results = document.getElementById("player-search-results");
-  const queryInput = document.getElementById("player-search-query");
-  const filters = document.getElementById("player-search-filters");
   const summary = document.getElementById("player-search-summary");
-  if (!form || !results || !queryInput || !filters || !summary) return;
+  if (!form || !input || !results || !summary) return;
 
-  let allResults = [];
+  let records = [];
   let activeId = null;
-  let activeFilter = "all";
+  let lastCaseId = null;
+  let serial = 0;
 
-  const labelCount = n => {
-    const lastTwo = n % 100, last = n % 10;
-    return n + " " + (lastTwo >= 11 && lastTwo <= 14 ? "записей"
-      : last === 1 ? "запись" : last >= 2 && last <= 4 ? "записи" : "записей");
-  };
-  const kind = item => item.result_type === "person" ? "person" : "material";
-  const key = item => kind(item) + ":" + item.id;
-
-  function node(tag, className, text) {
-    const el = document.createElement(tag);
-    if (className) el.className = className;
-    if (text !== undefined) el.textContent = String(text);
-    return el;
+  function el(tag, className = "", text) {
+    const result = document.createElement(tag);
+    if (className) result.className = className;
+    if (text !== undefined) result.textContent = String(text);
+    return result;
   }
-  function showState(title, message, variant = "") {
+  function getCaseId() {
+    return typeof window.iterumSelectedCaseId === "function"
+      ? window.iterumSelectedCaseId() : null;
+  }
+  function setStatus(value) { summary.textContent = value; }
+  function declension(n) {
+    const x = n % 100, last = n % 10;
+    return n + " " + (x >= 11 && x <= 14 ? "досье"
+      : last === 1 ? "досье" : "досье");
+  }
+  function welcome() {
+    records = [];
+    activeId = null;
+    setStatus("ОЖИДАНИЕ ЗАПРОСА");
     results.replaceChildren();
-    const state = node("div", "search-ui-state" + (variant ? " " + variant : ""));
-    state.append(node("div", "search-ui-state-symbol", variant === "is-loading" ? "⌁" : "⌕"));
-    state.append(node("strong", "", title));
-    state.append(node("p", "", message));
-    results.append(state);
-  }
-  function updateSummary(text) {
-    summary.textContent = text;
-  }
 
-  function dataBlock(label, value) {
+    const page = el("div", "search-personnel-welcome");
+    const intro = el("div", "search-personnel-welcome-center");
+    intro.append(el("span", "search-personnel-welcome-icon", "⌕"));
+    intro.append(el("strong", "", "Начните с имени"));
+    intro.append(el("p", "", "Введите фамилию или имя, встретившееся в материалах дела. Досье откроется здесь."));
+    page.append(intro);
+
+    const guidance = el("div", "search-personnel-guides");
+    const how = el("div", "search-personnel-guide");
+    how.append(el("span", "search-personnel-guide-code", "01 / ПОИСК"));
+    how.append(el("strong", "", "Не нужно полное ФИО"));
+    how.append(el("p", "", "Достаточно части фамилии, имени или профессии. Например, имени, упомянутого в показаниях."));
+    guidance.append(how);
+
+    const where = el("div", "search-personnel-guide");
+    where.append(el("span", "search-personnel-guide-code", "02 / ДОКУМЕНТЫ"));
+    where.append(el("strong", "", "Где искать улики?"));
+    where.append(el("p", "", "Письма, отчёты, фотографии и другие доказательства находятся отдельно — в «Материалах дела»."));
+    const open = el("button", "search-personnel-open-materials", "ОТКРЫТЬ МАТЕРИАЛЫ ДЕЛА");
+    open.type = "button";
+    open.addEventListener("click", () => {
+      const shortcut = document.querySelector('[data-open-window="materials-window"]');
+      if (shortcut) shortcut.click();
+    });
+    where.append(open);
+    guidance.append(where);
+    page.append(guidance);
+    results.append(page);
+  }
+  function state(title, detail, type = "") {
+    results.replaceChildren();
+    const box = el("div", "search-personnel-empty" + (type ? " " + type : ""));
+    box.append(el("div", "search-personnel-empty-glyph", type === "is-loading" ? "⌁" : "⌕"));
+    box.append(el("strong", "", title));
+    box.append(el("p", "", detail));
+    results.append(box);
+  }
+  function row(label, value) {
     if (!value) return null;
-    const item = node("div", "search-person-data-row");
-    item.append(node("span", "search-person-data-label", label));
-    item.append(node("strong", "search-person-data-value", value));
+    const item = el("div", "search-personnel-fact");
+    item.append(el("span", "search-personnel-fact-label", label));
+    item.append(el("strong", "search-personnel-fact-value", value));
     return item;
   }
-  function renderPersonReader(person) {
-    const reader = node("article", "search-dossier-reader search-person-reader");
-    const bar = node("div", "search-reader-overline");
-    bar.append(node("span", "search-reader-kicker", "АРХИВ / ЛИЧНОЕ ДЕЛО"));
-    bar.append(node("span", "search-reader-id", "ID " + String(person.id).slice(0, 8).toUpperCase()));
-    reader.append(bar);
-
-    const heading = node("div", "search-person-heading");
-    if (person.photo_data) {
-      const img = node("img", "search-person-photo");
-      img.src = person.photo_data;
-      img.alt = "Фотография: " + person.title;
-      heading.append(img);
-    } else {
-      const placeholder = node("span", "search-person-silhouette");
-      placeholder.setAttribute("aria-hidden", "true");
-      placeholder.textContent = "◌";
-      heading.append(placeholder);
+  function avatar(item, big = false) {
+    if (item.photo_data) {
+      const img = el("img", big ? "search-person-photo" : "search-personnel-avatar");
+      img.alt = big ? "Фотография: " + item.title : "";
+      img.src = item.photo_data;
+      img.loading = "lazy";
+      return img;
     }
-    const info = node("div", "search-person-heading-text");
-    info.append(node("span", "search-type-caption", "КАРТОЧКА ПЕРСОНЫ"));
-    info.append(node("h3", "search-reader-title", person.title));
-    info.append(node("p", "search-reader-meta", person.summary || "Роль не указана"));
-    const state = node("span", "search-reader-status is-open", person.is_preview ? "ЧЕРНОВИК · ТОЛЬКО ДЛЯ АВТОРА" : "ДОСЬЕ ДОСТУПНО");
-    info.append(state);
-    heading.append(info);
-    reader.append(heading);
+    const placeholder = el("span", big ? "search-person-silhouette" : "search-personnel-avatar-placeholder", "◌");
+    placeholder.setAttribute("aria-hidden", "true");
+    return placeholder;
+  }
+  function detail(person) {
+    const card = el("article", "search-dossier-reader search-person-reader");
+    const over = el("div", "search-reader-overline");
+    over.append(el("span", "search-reader-kicker", "ЛИЧНОЕ ДЕЛО / КАРТОТЕКА"));
+    over.append(el("span", "search-reader-id", "№ " + String(person.id).slice(0, 8).toUpperCase()));
+    card.append(over);
 
-    const facts = node("div", "search-person-data");
-    const birth = dataBlock("ДАТА РОЖДЕНИЯ", person.birth_date);
-    const job = dataBlock("ПРОФЕССИЯ", person.occupation);
-    if (birth) facts.append(birth);
-    if (job) facts.append(job);
-    if (facts.childElementCount) reader.append(facts);
+    const header = el("div", "search-person-heading");
+    header.append(avatar(person, true));
+    const headInfo = el("div", "search-person-heading-text");
+    headInfo.append(el("span", "search-type-caption", "СВЕДЕНИЯ О ПЕРСОНЕ"));
+    headInfo.append(el("h3", "search-reader-title", person.title));
+    if (person.summary) headInfo.append(el("p", "search-reader-meta", person.summary));
+    headInfo.append(el("span", "search-reader-status is-open",
+      person.is_preview ? "ЧЕРНОВИК · ТОЛЬКО ДЛЯ АВТОРА" : "ДОСЬЕ ДОСТУПНО"));
+    header.append(headInfo);
+    card.append(header);
 
-    for (const [title, value, number] of [
-      ["Биография", person.biography, "01"],
-      ["Связи с людьми", person.relationships, "02"],
-      ["Хронология", person.chronology, "03"],
-      ["Связанные материалы", person.related_materials, "04"]
+    const facts = el("div", "search-person-data");
+    const birthday = row("ДАТА РОЖДЕНИЯ", person.birth_date);
+    const occupation = row("МЕСТО РАБОТЫ / ПРОФЕССИЯ", person.occupation);
+    if (birthday) facts.append(birthday);
+    if (occupation) facts.append(occupation);
+    if (facts.childElementCount) card.append(facts);
+
+    for (const [number, title, content] of [
+      ["01", "Биография", person.biography],
+      ["02", "Связи с людьми", person.relationships],
+      ["03", "Хронология", person.chronology],
+      ["04", "Связанные материалы", person.related_materials]
     ]) {
-      if (!value) continue;
-      const section = node("section", "search-person-section");
-      const head = node("div", "search-section-heading");
-      head.append(node("span", "", number));
-      head.append(node("h4", "", title));
-      section.append(head);
-      section.append(node("p", "search-person-prose", value));
-      reader.append(section);
+      if (!content) continue;
+      const section = el("section", "search-person-section");
+      const heading = el("div", "search-section-heading");
+      heading.append(el("span", "", number));
+      heading.append(el("h4", "", title));
+      section.append(heading);
+      section.append(el("p", "search-person-prose", content));
+      card.append(section);
     }
-    return reader;
+    return card;
   }
-
-  function renderMaterialReader(item) {
-    const read = Boolean(item.is_read);
-    const reader = node("article", "search-dossier-reader search-material-reader");
-    const top = node("div", "search-reader-overline");
-    top.append(node("span", "search-reader-kicker",
-      item.is_preview ? "ПРЕДПРОСМОТР / МАТЕРИАЛ" : "АРХИВ / МАТЕРИАЛ ДЕЛА"));
-    top.append(node("span", "search-reader-id", "ID " + String(item.id).slice(0, 8).toUpperCase()));
-    reader.append(top);
-    reader.append(node("span", "search-type-caption", "ЦИФРОВОЕ ВЛОЖЕНИЕ"));
-    reader.append(node("h3", "search-reader-title", item.title));
-    reader.append(node("p", "search-reader-meta", item.case_title || "Текущее дело"));
-    if (item.summary) reader.append(node("p", "search-reader-summary", item.summary));
-    reader.append(node("span", "search-reader-status" + (read ? " is-open" : ""),
-      item.is_preview ? "ЧЕРНОВИК · ТОЛЬКО ДЛЯ АВТОРА" : read ? "МАТЕРИАЛ ИЗУЧЕН" : "НЕ ИЗУЧЕНО"));
-
-    if (read) {
-      reader.append(node("div", "search-reader-divider"));
-      reader.append(node("div", "search-reader-content", item.content || "Текст материала отсутствует."));
-    } else {
-      reader.append(node("p", "search-reader-hint",
-        "Откройте документ, чтобы изучить его содержимое. Просмотр будет отмечен в материалах расследования."));
-      const open = node("button", "admin-mini-button search-open-button", "ОТКРЫТЬ МАТЕРИАЛ");
-      open.type = "button";
-      open.addEventListener("click", async () => {
-        open.disabled = true;
-        open.textContent = "ОТКРЫВАЕМ…";
-        try {
-          const response = await fetch("/api/player/materials/" + encodeURIComponent(item.id) + "/read", {
-            method: "POST", credentials: "same-origin"
-          });
-          const data = await response.json().catch(() => ({}));
-          if (!response.ok) throw Error(data.error || "Не удалось открыть материал.");
-          item.is_read = 1;
-          renderResults(key(item));
-        } catch (error) {
-          open.disabled = false;
-          open.textContent = "ПОВТОРИТЬ";
-          const hint = reader.querySelector(".search-reader-hint");
-          if (hint) { hint.textContent = error.message; hint.classList.add("is-error"); }
-        }
-      });
-      reader.append(open);
+  function render(preferredId) {
+    if (!records.length) {
+      setStatus("НЕТ СОВПАДЕНИЙ");
+      state("Досье не найдено", "Попробуйте другую фамилию, имя или часть слова. Новые карточки могут появиться по мере расследования.");
+      return;
     }
-    return reader;
-  }
-
-  function visibleResults() {
-    return activeFilter === "all" ? allResults
-      : allResults.filter(item => kind(item) === activeFilter);
-  }
-  function renderFilters() {
-    filters.replaceChildren();
-    if (!allResults.length) { filters.hidden = true; return; }
-    filters.hidden = false;
-    const people = allResults.filter(x => kind(x) === "person").length;
-    const materials = allResults.length - people;
-    for (const [id, title, count] of [
-      ["all", "Все", allResults.length],
-      ["person", "Люди", people],
-      ["material", "Документы", materials]
-    ]) {
-      const button = node("button", "search-filter" + (id === activeFilter ? " is-active" : ""));
-      button.type = "button";
-      button.setAttribute("aria-pressed", String(id === activeFilter));
-      button.append(node("span", "", title));
-      button.append(node("span", "search-filter-count", count));
-      button.addEventListener("click", () => {
-        if (activeFilter === id) return;
-        activeFilter = id;
-        activeId = null;
-        renderFilters();
-        renderResults();
-      });
-      filters.append(button);
-    }
-  }
-
-  function renderResults(preferred = null) {
     results.replaceChildren();
-    const items = visibleResults();
-    updateSummary("НАЙДЕНО: " + labelCount(allResults.length).toUpperCase());
-    if (!allResults.length) {
-      showState("Совпадений не найдено", "Попробуйте другую фамилию, название документа или более короткий запрос.");
-      return;
-    }
-    if (!items.length) {
-      showState("В этой категории нет записей", "Попробуйте вкладку «Все» или измените поисковый запрос.");
-      return;
-    }
-    const target = items.find(x => key(x) === (preferred || activeId)) || items[0];
-    activeId = key(target);
-    const header = node("div", "search-results-header");
-    header.append(node("span", "search-results-label", "ОБНАРУЖЕННЫЕ ЗАПИСИ"));
-    header.append(node("span", "search-results-count", labelCount(items.length)));
-    results.append(header);
-    const layout = node("div", "search-results-layout");
-    const list = node("div", "search-result-list");
-    list.setAttribute("aria-label", "Результаты запроса");
-    for (const item of items) {
-      const person = kind(item) === "person";
-      const button = node("button", "search-result-entry" +
-        (key(item) === activeId ? " is-active" : "") + (person ? " is-person" : ""));
-      button.type = "button";
-      button.setAttribute("aria-pressed", String(key(item) === activeId));
-      const heading = node("span", "search-result-heading");
-      heading.append(node("span", "search-result-glyph", person ? "◌" : "▤"));
-      const text = node("span", "search-result-heading-text");
-      text.append(node("strong", "search-result-name", item.title));
-      text.append(node("span", "search-result-type",
-        person ? "ПЕРСОНА" : "ДОКУМЕНТ"));
-      heading.append(text);
-      button.append(heading);
-      if (item.summary) button.append(node("span", "search-result-description", item.summary));
-      const footer = node("span", "search-result-footer");
-      footer.append(node("span", "search-result-case", item.case_title || "Текущее дело"));
-      footer.append(node("span", "search-result-state" + (item.is_read || person ? " is-open" : ""),
-        item.is_preview ? "ЧЕРНОВИК" : person ? "ДОСЬЕ" : item.is_read ? "ИЗУЧЕНО" : "НЕ ИЗУЧЕНО"));
-      button.append(footer);
-      button.addEventListener("click", () => {
-        if (key(item) === activeId) return;
-        // Preserve list scroll position as the right pane is updated.
-        const scrollTop = list.scrollTop;
-        renderResults(key(item));
+    const selected = records.find(x => x.id === (preferredId || activeId)) || records[0];
+    activeId = selected.id;
+    setStatus("НАЙДЕНО: " + declension(records.length).toUpperCase());
+
+    const top = el("div", "search-results-header");
+    top.append(el("span", "search-results-label", "НАЙДЕННЫЕ ПЕРСОНЫ"));
+    top.append(el("span", "search-results-count", declension(records.length)));
+    results.append(top);
+
+    const layout = el("div", "search-results-layout");
+    const list = el("div", "search-result-list");
+    list.setAttribute("aria-label", "Найденные люди");
+    for (const person of records) {
+      const item = el("button", "search-result-entry is-person" + (person.id === activeId ? " is-active" : ""));
+      item.type = "button";
+      item.setAttribute("aria-pressed", String(person.id === activeId));
+      const row = el("span", "search-result-heading");
+      row.append(avatar(person));
+      const wrap = el("span", "search-result-heading-text");
+      wrap.append(el("strong", "search-result-name", person.title));
+      wrap.append(el("span", "search-result-type", "ДОСЬЕ ПЕРСОНЫ"));
+      row.append(wrap);
+      item.append(row);
+      if (person.summary) item.append(el("span", "search-result-description", person.summary));
+      item.append(el("span", "search-result-state is-open", person.is_preview ? "ЧЕРНОВИК" : "ОТКРЫТЬ ДОСЬЕ"));
+      item.addEventListener("click", () => {
+        const previousScroll = list.scrollTop;
+        render(person.id);
         const nextList = results.querySelector(".search-result-list");
-        if (nextList) nextList.scrollTop = scrollTop;
+        if (nextList) nextList.scrollTop = previousScroll;
       });
-      list.append(button);
+      list.append(item);
     }
-    layout.append(list, kind(target) === "person" ? renderPersonReader(target) : renderMaterialReader(target));
+    layout.append(list, detail(selected));
     results.append(layout);
   }
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
     event.stopImmediatePropagation();
-    const query = queryInput.value.trim();
+    const query = input.value.trim();
     if (query.length < 2) {
-      updateSummary("ТРЕБУЕТСЯ ЗАПРОС");
-      showState("Слишком короткий запрос", "Введите не менее двух символов.");
+      setStatus("НЕДОСТАТОЧНО СИМВОЛОВ");
+      state("Введите минимум два символа", "Можно использовать только часть имени или фамилии.");
       return;
     }
-    activeId = null;
-    activeFilter = "all";
-    allResults = [];
-    renderFilters();
-    updateSummary("ВЫПОЛНЯЕТСЯ ПОИСК…");
-    showState("Обработка запроса", "Сверяем сведения с доступными записями архива.", "is-loading");
+    const caseId = getCaseId();
+    if (!caseId) {
+      setStatus("ДЕЛО НЕ ВЫБРАНО");
+      state("Сначала выберите дело", "Откройте дело на рабочем столе ITERUM и повторите запрос.");
+      return;
+    }
+    const ticket = ++serial;
+    setStatus("ПОИСК В КАРТОТЕКЕ…");
+    state("Проверяем записи", "Поиск по опубликованным досье текущего дела.", "is-loading");
     const submit = form.querySelector('button[type="submit"]');
     if (submit) submit.disabled = true;
     try {
-      const caseId = typeof window.iterumSelectedCaseId === "function"
-        ? window.iterumSelectedCaseId() : "";
-      const path = "/api/player/search?q=" + encodeURIComponent(query) +
-        (caseId ? "&caseId=" + encodeURIComponent(caseId) : "");
-      const response = await fetch(path, { credentials: "same-origin" });
+      const url = "/api/player/search?scope=people&q=" + encodeURIComponent(query) +
+        "&caseId=" + encodeURIComponent(caseId);
+      const response = await fetch(url, { credentials: "same-origin" });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw Error(data.error || "Не удалось выполнить поиск.");
-      allResults = Array.isArray(data.results) ? data.results : [];
-      renderFilters();
-      renderResults();
+      if (!response.ok) throw Error(data.error || "Поиск временно недоступен.");
+      if (ticket !== serial || getCaseId() !== caseId) return;
+      records = Array.isArray(data.results) ? data.results.filter(x => x.result_type === "person") : [];
+      activeId = null;
+      render();
     } catch (error) {
-      updateSummary("ОШИБКА ПОИСКА");
-      showState("Не удалось выполнить поиск", error.message, "is-error");
+      if (ticket !== serial) return;
+      setStatus("ОШИБКА ПОИСКА");
+      state("Не удалось получить сведения", error.message, "is-error");
     } finally {
-      if (submit) submit.disabled = false;
+      if (ticket === serial && submit) submit.disabled = false;
     }
   }, true);
 
-  updateSummary("ОЖИДАНИЕ ЗАПРОСА");
-  showState("Начните расследование", "Введите фамилию человека, название документа или ключевое слово.");
+  // Switching cases never lets one case's old search result remain visible in another.
+  document.addEventListener("click", event => {
+    if (!event.target.closest('[data-open-window="search-window"]')) return;
+    const next = getCaseId();
+    if (lastCaseId !== next) {
+      serial += 1;
+      lastCaseId = next;
+      input.value = "";
+      welcome();
+    }
+  });
+  lastCaseId = getCaseId();
+  welcome();
 })();

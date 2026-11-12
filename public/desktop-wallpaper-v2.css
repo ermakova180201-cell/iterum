@@ -71,6 +71,8 @@ body.is-workstation .desktop-shell .desktop-area::after {
     radial-gradient(circle at 81% 68%,rgba(245,252,255,.5) 0 1px,rgba(98,208,243,.15) 2px,transparent 7px) !important;
   background-size:100% 100% !important;
   background-repeat:no-repeat !important;
+  -webkit-mask-image:none !important;
+  mask-image:none !important;
   opacity:.55;
   animation:iterum-grid-glints 6.3s ease-in-out infinite alternate !important;
 }

@@ -1641,11 +1641,13 @@
     scheduleGhostNap();
 
     function assistantSay(text, mood="happy", userText="") {
-      assistantChatBody.replaceChildren();
+      if (!userText) assistantChatBody.replaceChildren();
       if (userText) {
         const user = document.createElement("p"); user.className = "assistant-bubble assistant-bubble-user"; user.textContent = userText; assistantChatBody.append(user);
       }
       const reply = document.createElement("p"); reply.className = "assistant-bubble"; reply.textContent = text; assistantChatBody.append(reply);
+      while (assistantChatBody.children.length > 14) assistantChatBody.firstElementChild.remove();
+      assistantChatBody.scrollTop = assistantChatBody.scrollHeight;
       setAssistantMood(mood, mood === "calm" ? "Я рядом." : mood === "curious" ? "О, интересно…" : mood === "thinking" ? "Сейчас подумаю…" : mood === "surprised" ? "Ого!" : mood === "grumpy" ? "Ну вот опять…" : mood === "sleepy" ? "Я тут…" : mood === "shy" ? "Ой… ты меня заметил." : mood === "happy" ? "Хи-хи!" : "Хи-хи.");
       recordAssistantAction("разговор с помощником");
     }
@@ -1813,7 +1815,7 @@
       "help-window":"помощь","assistant-emotions-window":"тест эмоций"
     };
     function assistantNormalize(text) {
-      return String(text || "").toLowerCase().replace(/ё/g,"е").replace(/[!?.,;:()«»"']/g," ").replace(/\\s+/g," ").trim();
+      return String(text || "").toLowerCase().replace(/ё/g,"е").replace(/[!?.,;:()«»"']/g," ").replace(/\s+/g," ").trim();
     }
     function assistantRememberTopic(topic) {
       if (topic && assistantDialogue.topic !== topic) assistantDialogue.hintLevel = 0;
@@ -1904,7 +1906,7 @@
       const message = assistantChatInput.value.trim();
       if (!message) return;
       const answer = answerAssistantQuestion(message);
-      const mood = /спасибо|привет/.test(message.toLowerCase()) ? "happy" : /кто ты|что умеешь/.test(message.toLowerCase()) ? "curious" : /сложно|трудно|устал/.test(message.toLowerCase()) ? "thinking" : "happy";
+      const mood = /спасибо|привет|пока/.test(message.toLowerCase()) ? "happy" : /подсказ|что дальше|верси|провер|дум|сложно|трудно|устал|запутал/.test(message.toLowerCase()) ? "thinking" : /винов|страшно|ошибк|не работает/.test(message.toLowerCase()) ? "surprised" : /интерес|кто ты|что умеешь/.test(message.toLowerCase()) ? "curious" : "calm";
       assistantSay(answer, mood, message);
       assistantChatInput.value = "";
     });

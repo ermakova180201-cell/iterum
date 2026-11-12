@@ -344,9 +344,19 @@ async function handleApi(request, env) {
     if (!foundCase) return json({ error: "Дело не найдено." }, 404);
     const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
     if (!isAdmin && foundCase.status !== "active") return json({ error: "Дело недоступно." }, 403);
-    const rows = await env.DB.prepare(
-      "SELECT id, case_id, full_name, role_name, birth_date, occupation, biography, relationships, chronology, related_materials, photo_data FROM person_dossiers WHERE case_id = ? AND is_published = 1 ORDER BY full_name COLLATE NOCASE"
-    ).bind(caseId).all();
+    // Public catalogue access must not disclose all published identities:
+    // the searchable name is the player's key, and only their discovered
+    // dossiers may be listed through this legacy endpoint.
+    await ensureDossierDiscoveryTable(env);
+    const baseSelect = "SELECT d.id, d.case_id, d.full_name, d.role_name, d.birth_date, d.occupation, " +
+      "d.biography, d.relationships, d.chronology, d.related_materials, d.photo_data " +
+      "FROM person_dossiers d WHERE d.case_id = ? AND d.is_published = 1 ";
+    const rows = isAdmin
+      ? await env.DB.prepare(baseSelect + "ORDER BY d.full_name COLLATE NOCASE").bind(caseId).all()
+      : await env.DB.prepare(baseSelect +
+          "AND EXISTS (SELECT 1 FROM player_dossier_discoveries p " +
+          "WHERE p.dossier_id = d.id AND p.user_id = ? AND p.case_id = ?) " +
+          "ORDER BY d.full_name COLLATE NOCASE").bind(caseId, user.id, caseId).all();
     return json({ dossiers: rows.results || [] });
   }
 

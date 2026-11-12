@@ -58,11 +58,12 @@ body.is-workstation .desktop-shell .desktop-area > #mail-window .window-close {
 body.is-workstation .desktop-shell .desktop-area > #mail-window .iterum-app-hero {
   display:flex;
   align-items:center;
-  min-height:143px !important;
-  padding:20px 36px !important;
+  min-height:153px !important;
+  padding:20px 42px !important;
   background:
-    linear-gradient(90deg,rgba(4,22,26,.92) 0%,rgba(4,24,29,.72) 34%,rgba(4,25,29,.18) 72%,rgba(4,15,17,.31) 100%),
-    url("/mail-archive-banner.svg") center center/cover no-repeat,#0b2b2f !important;
+    linear-gradient(90deg,rgba(3,18,21,.51) 0%,rgba(3,18,21,.18) 35%,rgba(4,17,20,.02) 73%,rgba(3,16,18,.13) 100%),
+    url("/mail-header-photo.webp") center center / cover no-repeat,
+    #071e23 !important;
   border-bottom:1px solid rgba(204,164,110,.7) !important;
 }
 body.is-workstation #mail-window .iterum-app-hero::before {
@@ -86,23 +87,31 @@ body.is-workstation #mail-window .iterum-app-eyebrow {
 body.is-workstation #mail-window .mail-reference-title {
   display:flex;
   align-items:center;
-  gap:28px;
+  gap:31px;
 }
 body.is-workstation #mail-window .mail-reference-icon {
   display:grid;
   place-items:center;
-  flex:0 0 102px;
-  width:102px;
+  flex:0 0 116px;
+  width:116px;
   height:91px;
-  border:1px solid rgba(209,170,115,.5);
-  border-radius:5px;
-  background:radial-gradient(circle,rgba(43,96,99,.25),rgba(3,18,21,.6));
+  border:0;
+  border-radius:0;
+  background:
+    linear-gradient(#d6b17e,#d6b17e) left 7px top 7px/17px 1px no-repeat,
+    linear-gradient(#d6b17e,#d6b17e) left 7px top 7px/1px 17px no-repeat,
+    linear-gradient(#d6b17e,#d6b17e) right 7px top 7px/17px 1px no-repeat,
+    linear-gradient(#d6b17e,#d6b17e) right 7px top 7px/1px 17px no-repeat,
+    linear-gradient(#d6b17e,#d6b17e) left 7px bottom 7px/17px 1px no-repeat,
+    linear-gradient(#d6b17e,#d6b17e) left 7px bottom 7px/1px 17px no-repeat,
+    linear-gradient(#d6b17e,#d6b17e) right 7px bottom 7px/17px 1px no-repeat,
+    linear-gradient(#d6b17e,#d6b17e) right 7px bottom 7px/1px 17px no-repeat;
   color:#d5b17f;
-  box-shadow:0 0 17px rgba(143,137,95,.15),inset 0 0 0 8px rgba(6,26,31,.5);
+  filter:drop-shadow(0 0 10px rgba(143,137,95,.13));
 }
 body.is-workstation #mail-window .mail-reference-icon svg {
-  width:73px;
-  height:73px;
+  width:65px;
+  height:65px;
 }
 body.is-workstation #mail-window .iterum-app-hero h2 {
   color:#efdfbf !important;

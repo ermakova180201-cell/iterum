@@ -1,0 +1,325 @@
+/* ITERUM / Materials Library v2.
+   Compact, independent lists of discovered dossiers and case documents.
+   Full content lives ONLY in a separate, matching desktop window. */
+
+/* Catalogue: two compact collections, without an inline reader. */
+body.is-workstation .desktop-shell #materials-window #player-material-list {
+  padding:23px 28px 30px;
+  min-width:0;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:start;
+  gap:20px;
+  width:100%;
+  min-width:0;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-section {
+  min-width:0;
+  overflow:hidden;
+  border:1px solid rgba(162,193,189,.33);
+  border-radius:9px;
+  background:linear-gradient(150deg,rgba(20,50,60,.87),rgba(8,30,41,.94));
+  box-shadow:inset 0 1px rgba(248,234,205,.045),0 10px 26px rgba(0,0,0,.13);
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:83px;
+  margin:0;
+  padding:17px 21px 15px;
+  border:0;
+  border-bottom:1px solid rgba(216,177,120,.34);
+  background:
+    linear-gradient(95deg,rgba(93,105,89,.18),rgba(16,44,54,.28)),
+    rgba(9,31,41,.78);
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-eyebrow {
+  display:block;
+  margin-bottom:7px;
+  color:#d7b487;
+  font:600 9px/1.3 "IBM Plex Mono",var(--mono);
+  letter-spacing:.1em;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-title {
+  margin:0;
+  color:#f2e8db;
+  font:500 23px/1.2 "Playfair Display",Georgia,serif;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-list {
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  width:100%;
+  min-width:0;
+  min-height:185px;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-entry {
+  display:flex;
+  align-items:center;
+  gap:13px;
+  width:100%;
+  min-height:68px;
+  padding:13px 16px;
+  border:0;
+  border-left:3px solid transparent;
+  border-bottom:1px solid rgba(157,185,183,.17);
+  border-radius:0;
+  background:transparent;
+  color:#e7ece8;
+  text-align:left;
+  cursor:pointer;
+  transition:background .15s ease,border-color .15s ease,transform .15s ease;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-entry:last-child {border-bottom:0;}
+body.is-workstation .desktop-shell #materials-window .materials-library-entry:hover {
+  border-left-color:#dfb783;
+  background:linear-gradient(90deg,rgba(166,130,86,.18),rgba(80,139,144,.14));
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-entry:active {background:rgba(72,137,140,.2);}
+body.is-workstation .desktop-shell #materials-window .materials-library-entry:focus-visible {
+  outline:2px solid #e4c390;
+  outline-offset:-3px;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-item-icon {
+  display:grid;
+  place-items:center;
+  flex:0 0 38px;
+  width:38px;
+  height:43px;
+  border:1px solid rgba(220,181,130,.48);
+  border-radius:5px;
+  background:linear-gradient(145deg,#214352,#102e3b);
+  color:#e7c794;
+  font:27px/1 "Space Grotesk",var(--sans);
+  box-shadow:inset 0 1px rgba(243,229,188,.065);
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-section.is-dossiers .materials-library-item-icon {
+  color:#bdded4;
+  border-color:rgba(134,195,185,.48);
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-item-body {
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  flex:1 1 auto;
+  gap:6px;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-item-title {
+  display:block;
+  color:#f0e7d9;
+  font:600 13px/1.4 var(--sans);
+  overflow-wrap:anywhere;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-item-meta {
+  display:block;
+  color:#a8c5c4;
+  font:500 10px/1.4 var(--sans);
+  letter-spacing:.025em;
+  overflow-wrap:anywhere;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-item-arrow {
+  display:grid;
+  place-items:center;
+  flex:0 0 24px;
+  width:24px;
+  color:#d1b587;
+  font:23px/1 "Space Grotesk",var(--sans);
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-empty {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  min-height:185px;
+  padding:22px 26px;
+  color:#a7c2c3;
+  text-align:center;
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-empty-icon {
+  display:grid;
+  place-items:center;
+  width:46px;
+  height:46px;
+  border:1px solid rgba(216,182,132,.43);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(99,165,172,.18),rgba(7,27,36,.24));
+  color:#e2bb82;
+  font:30px/1 "Space Grotesk",var(--sans);
+}
+body.is-workstation .desktop-shell #materials-window .materials-library-empty p {
+  margin:0;
+  max-width:310px;
+  color:#b0c8cb;
+  font:12px/1.7 var(--sans);
+}
+
+/* Detail window: a new floating native ITERUM desktop pane,
+   not a browser popup or an always-visible side panel. */
+body.is-workstation .desktop-shell .desktop-area > #material-detail-window {
+  --iw-ink:#f2eee5;
+  --iw-muted:#aac3c6;
+  --iw-gold:#dfbb86;
+  --iw-cyan:#86c4c7;
+  --iw-stroke:rgba(158,194,194,.24);
+  width:min(850px,calc(100% - 154px));
+  max-width:850px;
+  max-height:calc(100% - 28px);
+  min-width:0;
+  padding:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  border:1px solid rgba(217,172,112,.72) !important;
+  border-radius:13px;
+  color:#f2eee5 !important;
+  background:linear-gradient(145deg,#0d2631,#071b27 75%) !important;
+  box-shadow:0 35px 110px rgba(0,0,0,.77),0 0 0 1px rgba(180,218,210,.09) !important;
+  scrollbar-color:rgba(206,169,117,.52) #091b26;
+  scrollbar-width:thin;
+}
+body.is-workstation .desktop-shell .desktop-area > #material-detail-window[hidden] {display:none !important;}
+body.is-workstation .desktop-shell .desktop-area > #material-detail-window .materials-detail-hero {
+  min-height:110px;
+  padding:20px 28px;
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-detail-hero h2 {
+  font-size:clamp(25px,2.5vw,34px);
+  overflow-wrap:anywhere;
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-detail-hero .iterum-app-hero-art {
+  right:20px;
+  opacity:.44;
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-detail-back {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:28px;
+  padding:3px 9px;
+  border:1px solid rgba(204,177,137,.48);
+  border-radius:5px;
+  background:rgba(19,50,58,.65);
+  color:#e6c597;
+  font:600 10px/1.4 "IBM Plex Mono",var(--mono);
+  cursor:pointer;
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-detail-back:hover {
+  border-color:#e1bb87;
+  background:rgba(52,83,83,.67);
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-detail-content {
+  min-width:0;
+  padding:21px 27px 31px;
+  background:radial-gradient(ellipse at 95% 0%,rgba(167,135,95,.055),transparent 48%);
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-reader {
+  min-width:0;
+  width:100%;
+  padding:29px 32px 34px;
+  border:1px solid rgba(159,193,188,.3);
+  border-radius:8px;
+  background:linear-gradient(145deg,rgba(24,54,65,.93),rgba(10,34,46,.99));
+  color:#d5e2dd;
+  box-shadow:0 14px 31px rgba(0,0,0,.17),inset 0 1px rgba(237,223,193,.045);
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-reader-top {
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(169,194,181,.2);
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-reader-type {
+  color:#d2b281;
+  font:600 10px/1.4 "IBM Plex Mono",var(--mono);
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-reader-top time {
+  color:#9eb6b9;
+  font:10px/1.4 "IBM Plex Mono",var(--mono);
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-reader-title {
+  color:#f4e9d9;
+  font:500 clamp(22px,2.6vw,29px)/1.27 "Playfair Display",Georgia,serif;
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-reader-meta {color:#a8c1c0;}
+body.is-workstation .desktop-shell #material-detail-window .materials-reader-summary,
+body.is-workstation .desktop-shell #material-detail-window .materials-reader-content {
+  color:#cadad5;
+  font:13px/1.83 var(--sans);
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-reader-divider {
+  background:rgba(170,198,187,.23);
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-read-button {
+  min-height:40px;
+  border:1px solid #dfb984;
+  border-radius:5px;
+  padding:10px 14px;
+  color:#152a31;
+  background:linear-gradient(110deg,#e5c395,#b99a6d);
+  font:700 10px/1.4 "IBM Plex Mono",var(--mono);
+  cursor:pointer;
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-read-label,
+body.is-workstation .desktop-shell #material-detail-window .materials-dossier-saved-mark {
+  color:#badbc2;
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-person-section {
+  border-color:rgba(170,198,187,.23);
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-person-section h4 {
+  color:#f4e9d9;
+}
+body.is-workstation .desktop-shell #material-detail-window .materials-person-section p {color:#cadad5;}
+body.is-workstation .desktop-shell #material-detail-window :is(button,a,input):focus-visible {
+  outline:2px solid #e4c390;
+  outline-offset:2px;
+}
+
+/* A soft behind-the-window fade; resets automatically when detail closes. */
+body.is-workstation:has(#material-detail-window:not([hidden])) .desktop-shell #materials-window {
+  filter:brightness(.72);
+  pointer-events:none;
+}
+
+/* Responsive: compact stacks for narrow workstations. */
+@media(max-width:1100px) {
+  body.is-workstation .desktop-shell #materials-window .materials-library {
+    gap:13px;
+  }
+  body.is-workstation .desktop-shell .desktop-area > #material-detail-window {
+    width:calc(100% - 36px);
+    max-width:none;
+  }
+}
+@media(max-width:670px) {
+  body.is-workstation .desktop-shell #materials-window #player-material-list {padding:15px 14px 22px;}
+  body.is-workstation .desktop-shell #materials-window .materials-library {
+    grid-template-columns:minmax(0,1fr);
+    gap:13px;
+  }
+  body.is-workstation .desktop-shell #materials-window .materials-library-heading {
+    min-height:67px;
+    padding:13px 16px;
+  }
+  body.is-workstation .desktop-shell #materials-window .materials-library-title {font-size:21px;}
+  body.is-workstation .desktop-shell #materials-window .materials-library-list {min-height:0;}
+  body.is-workstation .desktop-shell #materials-window .materials-library-entry {min-height:60px;padding:11px 12px;}
+  body.is-workstation .desktop-shell .desktop-area > #material-detail-window {
+    width:calc(100% - 18px);
+    max-height:calc(100% - 18px);
+  }
+  body.is-workstation .desktop-shell .desktop-area > #material-detail-window .materials-detail-hero {
+    min-height:100px;
+    padding:17px 17px;
+  }
+  body.is-workstation .desktop-shell #material-detail-window .materials-detail-hero h2 {font-size:24px;}
+  body.is-workstation .desktop-shell #material-detail-window .materials-detail-content {padding:14px 12px 21px;}
+  body.is-workstation .desktop-shell #material-detail-window .materials-reader {padding:18px 16px 24px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell #materials-window .materials-library-entry {
+    transition:none !important;
+  }
+}

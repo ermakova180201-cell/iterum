@@ -12,8 +12,13 @@
     dossier: "ДОСЬЕ ПЕРСОНЫ"
   };
   let materials = [];
-  let selectedId = null;
-  let filters = { type: "all", status: "all", caseId: "all", query: "", sort: "order" };
+  const viewer = document.getElementById("material-detail-window");
+  const viewerHeading = document.getElementById("material-detail-heading");
+  const viewerType = document.getElementById("material-detail-type");
+  const viewerContent = document.getElementById("material-detail-content");
+  const parentWindow = document.getElementById("materials-window");
+  let openedId = null;
+  let lastLauncher = null;
 
   function el(tag, className, text) {
     const item = document.createElement(tag);
@@ -27,42 +32,6 @@
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return value;
     return new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "long", year: "numeric" }).format(date).toUpperCase();
-  }
-
-  function makeSelect(label, options, value, onChange) {
-    const wrap = el("label", "materials-filter");
-    wrap.append(el("span", "", label));
-    const select = document.createElement("select");
-    for (const option of options) {
-      const node = document.createElement("option");
-      node.value = option.value;
-      node.textContent = option.label;
-      select.append(node);
-    }
-    select.value = value;
-    select.addEventListener("change", () => onChange(select.value));
-    wrap.append(select);
-    return wrap;
-  }
-
-  function filteredMaterials() {
-    const query = filters.query.toLocaleLowerCase("ru-RU");
-    return materials.filter(item => {
-      if (filters.type !== "all" && item.material_type !== filters.type) return false;
-      if (filters.caseId !== "all" && item.case_id !== filters.caseId) return false;
-      if (filters.status === "unread" && item.is_read) return false;
-      if (filters.status === "read" && !item.is_read) return false;
-      if (filters.status === "draft" && !item.is_preview) return false;
-      if (filters.status !== "draft" && filters.status !== "all" && item.is_preview) return false;
-      if (query && ![item.title, item.summary, item.content, item.case_title, item.biography, item.relationships].some(value => String(value || "").toLocaleLowerCase("ru-RU").includes(query))) return false;
-      return true;
-    }).sort((a, b) => {
-      if (filters.sort === "newest" || filters.sort === "oldest") {
-        const delta = new Date(a.created_at || 0) - new Date(b.created_at || 0);
-        return filters.sort === "newest" ? -delta : delta;
-      }
-      return (a.release_order || 0) - (b.release_order || 0) || String(a.created_at || "").localeCompare(String(b.created_at || ""));
-    });
   }
 
   async function loadReaderFiles(item, target) {
@@ -236,7 +205,9 @@
           const data = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(data.error || "Не удалось отметить материал.");
           item.is_read = 1;
-          render();
+          // The compact catalogue has no read-status column; keep its list
+          // stable and update only this detail window after marking as read.
+          displayDetail(item);
         } catch (error) {
           action.disabled = false;
           action.textContent = "ПОВТОРИТЬ";
@@ -250,100 +221,131 @@
     return reader;
   }
 
+  function closeDetail(restoreFocus = true) {
+    if (!viewer) return;
+    viewer.hidden = true;
+    openedId = null;
+    if (viewerContent) viewerContent.replaceChildren();
+    if (restoreFocus && lastLauncher && lastLauncher.isConnected && parentWindow && !parentWindow.hidden) {
+      lastLauncher.focus();
+    }
+    lastLauncher = null;
+  }
+
+  function displayDetail(item) {
+    if (!viewer || !viewerContent || !viewerHeading || !viewerType) return;
+    openedId = item.id;
+    viewerHeading.textContent = item.title;
+    viewerType.textContent = item.material_type === "dossier"
+      ? "КАРТОТЕКА ПЕРСОН / СОХРАНЁННОЕ ДОСЬЕ"
+      : "СЛЕДСТВЕННЫЙ АРХИВ / " + (labels[item.material_type] || "МАТЕРИАЛ");
+    viewerContent.replaceChildren(renderReader(item));
+    if (viewer.hidden) {
+      viewer.hidden = false;
+      viewer.style.left = "50%";
+      viewer.style.top = "50%";
+      viewer.style.right = "auto";
+      viewer.style.bottom = "auto";
+      viewer.style.transform = "translate(-50%, -50%)";
+      viewer.style.width = "";
+      viewer.style.height = "";
+      viewer.style.zIndex = String(Math.max(50, (parseInt(parentWindow?.style.zIndex || "30", 10) || 30) + 1));
+      viewer.scrollTop = 0;
+    }
+  }
+
+  function openDetail(item, sourceButton) {
+    // Read from the current case-scoped list, not from old detached DOM.
+    const current = materials.find(entry => entry.id === item.id);
+    if (!current) return;
+    lastLauncher = sourceButton;
+    displayDetail(current);
+    document.getElementById("material-detail-close")?.focus();
+  }
+
+  function section(title, subtitle, entries, emptyText, category) {
+    const container = el("section", "materials-library-section is-" + category);
+    const heading = el("div", "materials-library-heading");
+    const labelsWrap = el("div", "materials-library-heading-text");
+    labelsWrap.append(el("span", "materials-library-eyebrow", subtitle));
+    labelsWrap.append(el("h3", "materials-library-title", title));
+    heading.append(labelsWrap);
+    container.append(heading);
+
+    const list = el("div", "materials-library-list");
+    if (!entries.length) {
+      const blank = el("div", "materials-library-empty");
+      blank.append(el("span", "materials-library-empty-icon", category === "dossiers" ? "◌" : "▤"));
+      blank.append(el("p", "", emptyText));
+      list.append(blank);
+    } else {
+      for (const item of entries) {
+        const button = el("button", "materials-library-entry");
+        button.type = "button";
+        button.dataset.materialId = item.id;
+        button.setAttribute("aria-label", "Открыть " + (item.material_type === "dossier" ? "досье: " : "материал: ") + item.title);
+        const symbol = el("span", "materials-library-item-icon", item.material_type === "dossier" ? "◌" : "▤");
+        symbol.setAttribute("aria-hidden", "true");
+        const body = el("span", "materials-library-item-body");
+        body.append(el("strong", "materials-library-item-title", item.title));
+        const descriptor = item.is_preview ? "ЧЕРНОВИК" :
+          item.material_type === "dossier" ? (item.summary || "ДОСЬЕ ПЕРСОНЫ") :
+          (labels[item.material_type] || "МАТЕРИАЛ");
+        body.append(el("span", "materials-library-item-meta", descriptor));
+        const action = el("span", "materials-library-item-arrow", "↗");
+        action.setAttribute("aria-hidden", "true");
+        button.append(symbol, body, action);
+        button.addEventListener("click", () => openDetail(item, button));
+        list.append(button);
+      }
+    }
+    container.append(list);
+    return container;
+  }
+
   function render() {
     root.replaceChildren();
-    const toolbar = el("div", "materials-toolbar");
-    const searchWrap = el("label", "materials-search");
-    searchWrap.append(el("span", "", "ПОИСК ПО НАЗВАНИЮ И СОДЕРЖАНИЮ"));
-    const search = document.createElement("input");
-    search.type = "search";
-    search.placeholder = "Введите ключевое слово…";
-    search.value = filters.query;
-    search.addEventListener("input", () => {
-      filters.query = search.value;
-      renderContent();
-    });
-    searchWrap.append(search);
-    toolbar.append(searchWrap);
-
-    const cases = [{ value: "all", label: "Все дела" }];
-    const caseMap = new Map();
-    for (const item of materials) if (item.case_id) caseMap.set(item.case_id, item.case_title || "Дело");
-    for (const [value, label] of caseMap) cases.push({ value, label });
-    toolbar.append(makeSelect("ДЕЛО", cases, filters.caseId, value => { filters.caseId = value; renderContent(); }));
-
-    const types = [
-      { value: "all", label: "Все типы" },
-      { value: "document", label: "Документы" },
-      { value: "dossier", label: "Досье людей" },
-      { value: "publication", label: "Публикации" },
-      { value: "photo", label: "Фотографии" },
-      { value: "audio", label: "Аудиозаписи" },
-      { value: "map", label: "Карты и схемы" },
-      { value: "other", label: "Другое" }
-    ];
-    toolbar.append(makeSelect("ТИП", types, filters.type, value => { filters.type = value; renderContent(); }));
-    const statusOptions = [
-      { value: "all", label: "Все материалы" },
-      { value: "unread", label: "Не изучено" },
-      { value: "read", label: "Изучено" },
-      ...(materials.some(item => item.is_preview) ? [{ value: "draft", label: "Черновики (предпросмотр)" }] : [])
-    ];
-    toolbar.append(makeSelect("СОСТОЯНИЕ", statusOptions, filters.status, value => { filters.status = value; renderContent(); }));
-    const sortOptions = [
-      { value: "order", label: "По порядку дела" },
-      { value: "newest", label: "Сначала новые" },
-      { value: "oldest", label: "Сначала старые" }
-    ];
-    toolbar.append(makeSelect("СОРТИРОВКА", sortOptions, filters.sort, value => { filters.sort = value; renderContent(); }));
-    root.append(toolbar);
-
-    const content = el("div", "materials-catalog-content");
-    content.id = "materials-catalog-content";
-    root.append(content);
-    renderContent();
+    const all = materials.filter(item => item.material_type !== "email");
+    const dossiers = all.filter(item => item.material_type === "dossier")
+      .sort((a, b) => String(a.title).localeCompare(String(b.title), "ru"));
+    const documents = all.filter(item => item.material_type !== "dossier")
+      .sort((a, b) => (a.release_order || 0) - (b.release_order || 0) ||
+        String(a.created_at || "").localeCompare(String(b.created_at || "")));
+    const library = el("div", "materials-library");
+    library.append(
+      section("Досье людей", "СОХРАНЁННЫЕ КАРТОЧКИ", dossiers,
+        "Пока нет найденных досье. Они сохраняются здесь после поиска по имени и фамилии.", "dossiers"),
+      section("Документы", "МАТЕРИАЛЫ И УЛИКИ", documents,
+        "Документы пока не доступны. Новые материалы появятся по мере расследования.", "documents")
+    );
+    root.append(library);
   }
 
-  function renderContent() {
-    const content = document.getElementById("materials-catalog-content");
-    if (!content) return;
-    content.replaceChildren();
-    const listItems = filteredMaterials();
-    const heading = el("div", "materials-catalog-heading");
-    heading.append(el("span", "materials-catalog-kicker", "КАТАЛОГ МАТЕРИАЛОВ"));
-    heading.append(el("span", "materials-catalog-count", listItems.length + " / " + materials.length));
-    content.append(heading);
-
-    if (!listItems.length) {
-      content.append(el("p", "materials-empty", "Материалы по выбранным условиям не найдены."));
-      return;
+  document.getElementById("material-detail-close")?.addEventListener("click", () => closeDetail());
+  document.getElementById("material-detail-back")?.addEventListener("click", () => closeDetail());
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && viewer && !viewer.hidden &&
+        !document.querySelector(".materials-image-lightbox")) {
+      closeDetail();
     }
-    if (!listItems.some(item => item.id === selectedId)) selectedId = listItems[0].id;
-    const layout = el("div", "materials-catalog-layout");
-    const list = el("div", "materials-catalog-list");
-    for (const item of listItems) {
-      const button = el("button", "materials-catalog-entry" + (item.id === selectedId ? " is-active" : ""));
-      button.type = "button";
-      button.setAttribute("aria-pressed", item.id === selectedId ? "true" : "false");
-      button.append(el("span", "materials-entry-type", item.is_preview ? "ЧЕРНОВИК" : labels[item.material_type] || "МАТЕРИАЛ"));
-      button.append(el("strong", "materials-entry-title", item.title));
-      button.append(el("span", "materials-entry-case", item.case_title || "Дело"));
-      button.append(el("span", "materials-entry-date", dateLabel(item.created_at)));
-      button.append(el("span", "materials-entry-status", item.is_preview ? "ПРЕДПРОСМОТР" : item.is_read ? "ИЗУЧЕНО" : "НОВОЕ"));
-      button.addEventListener("click", () => { selectedId = item.id; renderContent(); });
-      list.append(button);
+  });
+  // When another app is opened the desktop manager hides the detail window;
+  // clear its state too, leaving no stale dossier after switching cases.
+  document.addEventListener("click", event => {
+    if (viewer && !viewer.hidden && event.target.closest("[data-open-window]")) {
+      closeDetail(false);
     }
-    layout.append(list, renderReader(listItems.find(item => item.id === selectedId)));
-    content.append(layout);
-  }
+  }, true);
 
   window.renderMaterialsArchive = function(items) {
     materials = (items || []).filter(item => item.material_type !== "email");
-    if (!materials.some(item => item.id === selectedId)) selectedId = materials[0]?.id || null;
-    if (!materials.length) {
-      root.replaceChildren(el("p", "materials-empty", "Других открытых материалов пока нет."));
-      return;
+    // Case change or another app can hide the viewer without pressing Close.
+    // Clear old record content even when the desktop manager hid it first.
+    if (viewer && openedId &&
+        (viewer.hidden || !materials.some(item => item.id === openedId))) {
+      closeDetail(false);
     }
     render();
   };
+
 })();

@@ -19,3 +19,6 @@
 #news-window .iterum-news-art figcaption span{color:#4c6070}
 #news-window .iterum-news-foot{margin-top:15px;padding-top:14px;border-top:1px solid #33546a;color:#91afc3;font-size:11px;line-height:1.7}
 @media(max-width:670px){#news-window .news-window-content{padding:12px}#news-window .iterum-news-story-head,#news-window .iterum-news-article-body{padding:16px}#news-window .iterum-news-art-grid{grid-template-columns:1fr}#news-window .iterum-news-art svg{max-height:360px}#news-window .iterum-news-bar{flex-wrap:wrap}}
+
+#news-window .iterum-news-real-art{display:none;width:100%;aspect-ratio:3/2;object-fit:contain;background:#f8f6ef;border:1px solid #d4d0c8;border-radius:2px}
+#news-window .iterum-news-art:has(.iterum-news-real-art[style*="block"]) svg{display:none}

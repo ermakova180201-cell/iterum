@@ -62,7 +62,7 @@ body.is-workstation .desktop-shell .desktop-area > #mail-window .iterum-app-hero
   padding:20px 42px !important;
   background:
     linear-gradient(90deg,rgba(3,18,21,.51) 0%,rgba(3,18,21,.18) 35%,rgba(4,17,20,.02) 73%,rgba(3,16,18,.13) 100%),
-    url("/mail-header-photo.webp") center center / cover no-repeat,
+    url("/mail-header-highres.webp") center center / cover no-repeat,
     #071e23 !important;
   border-bottom:1px solid rgba(204,164,110,.7) !important;
 }

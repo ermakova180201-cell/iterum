@@ -1,0 +1,87 @@
+/* ITERUM / approved character concept: layered translucent animated robe.
+   The original GLB is retained in the markup as a backup, but the new SVG
+   is the visible character. No change to flight, click or mood application.
+*/
+body.is-workstation .desktop-shell .iterum-ghost-model-wrap {
+  overflow:visible;
+}
+body.is-workstation .desktop-shell .iterum-ghost-model-wrap > model-viewer.iterum-ghost-model {
+  visibility:hidden !important;
+  opacity:0 !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-model-wrap > .iterum-ghost-cloak-hem {
+  display:none !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-fabric {
+  position:absolute;
+  display:block;
+  width:100%;
+  height:100%;
+  inset:0;
+  z-index:2;
+  overflow:visible;
+  pointer-events:none;
+  filter:drop-shadow(0 0 4px rgba(91,205,255,.6)) drop-shadow(0 0 11px rgba(58,152,248,.36));
+}
+body.is-workstation .desktop-shell .iterum-ghost-face {
+  z-index:4 !important;
+  width:30%;
+  height:35%;
+  top:38%;
+  left:50%;
+  background:radial-gradient(ellipse,rgba(0,7,17,.72) 5%,rgba(0,7,17,.36) 63%,transparent 76%) !important;
+  box-shadow:none !important;
+}
+body.is-workstation .desktop-shell .iterum-ghost-fabric .iterum-fold {
+  transform-box:fill-box;
+  transform-origin:center top;
+}
+body.is-workstation .desktop-shell .iterum-ghost-fabric .fold-left {
+  animation:iterumFabricLeft 4.3s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-fabric .fold-mid-left {
+  animation:iterumFabricMid 3.7s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-fabric .fold-mid-right {
+  animation:iterumFabricMid 4.6s ease-in-out -1.8s infinite reverse;
+}
+body.is-workstation .desktop-shell .iterum-ghost-fabric .fold-right {
+  animation:iterumFabricRight 4s ease-in-out -1.1s infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-fabric .iterum-fabric-hem {
+  transform-box:fill-box;
+  transform-origin:50% 0;
+  animation:iterumFabricHem 3.2s ease-in-out infinite;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-app .iterum-ghost-fabric .iterum-fabric-hem {
+  animation-duration:1.35s;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-visiting-app .iterum-ghost-fabric .iterum-fold {
+  animation-duration:1.6s;
+}
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-fabric .iterum-fold,
+body.is-workstation .desktop-shell .iterum-ghost-helper.is-sleeping .iterum-ghost-fabric .iterum-fabric-hem {
+  animation-duration:7s;
+}
+@keyframes iterumFabricLeft {
+  0%,100%{transform:skewX(-1deg) scaleX(.97);opacity:.70}
+  50%{transform:skewX(3deg) scaleX(1.04);opacity:.87}
+}
+@keyframes iterumFabricRight {
+  0%,100%{transform:skewX(2deg) scaleX(1);opacity:.62}
+  50%{transform:skewX(-4deg) scaleX(.95);opacity:.82}
+}
+@keyframes iterumFabricMid {
+  0%,100%{transform:scaleX(.97) translateX(0);opacity:.42}
+  50%{transform:scaleX(1.08) translateX(1px);opacity:.64}
+}
+@keyframes iterumFabricHem {
+  0%,100%{transform:skewX(-2deg) translateY(0);opacity:.68}
+  50%{transform:skewX(3deg) translateY(1px);opacity:.86}
+}
+@media (prefers-reduced-motion:reduce) {
+  body.is-workstation .desktop-shell .iterum-ghost-fabric .iterum-fold,
+  body.is-workstation .desktop-shell .iterum-ghost-fabric .iterum-fabric-hem {
+    animation:none !important;
+  }
+}

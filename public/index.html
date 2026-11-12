@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="/dossiers.css">
   <link rel="stylesheet" href="/workstation-concept-one.css?v=1">
   <link rel="stylesheet" href="/archive-concept-one.css?v=1">
+  <link rel="stylesheet" href="/app-windows-unified.css?v=1">
   <script defer src="/dossiers.js"></script>
 </head>
 <body>
@@ -188,18 +189,52 @@
           </div>
         </section>
 
-        <section id="mail-window" class="player-tool-section desktop-window" aria-labelledby="mail-heading" hidden>
+        <section id="mail-window" class="player-tool-section desktop-window iterum-unified-window" aria-labelledby="mail-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 01</span><h2 id="mail-heading">Почта</h2><span class="modules-note" id="player-mail-count"></span></div>
+            <div class="search-window-topline">
+              <span class="section-kicker">ITERUM / АРХИВ / СООБЩЕНИЯ</span>
+              <span class="search-topline-label">ЗАКРЫТАЯ ИНФОРМАЦИОННАЯ СИСТЕМА</span>
+            </div>
             <button class="window-close" type="button" data-close-window="mail-window" aria-label="Закрыть окно">×</button>
+          </div>
+          <div class="iterum-app-hero">
+            <div class="iterum-app-hero-content">
+              <span class="iterum-app-eyebrow">КОММУНИКАЦИОННЫЙ МОДУЛЬ / ПОЧТОВЫЙ АРХИВ</span>
+              <h2 id="mail-heading">Почта</h2>
+            </div>
+            <div class="iterum-app-hero-art" aria-hidden="true">
+              <span class="iterum-app-hero-ring"></span>
+              <svg class="iterum-app-hero-symbol" viewBox="0 0 80 80"><use href="/workstation-icons.svg#mail"></use></svg>
+            </div>
+          </div>
+          <div class="iterum-app-status">
+            <span class="iterum-app-status-online"><i aria-hidden="true"></i> СЛУЖБА СООБЩЕНИЙ</span>
+            <span class="modules-note iterum-app-badge" id="player-mail-count"></span>
           </div>
           <div id="player-mail-list" class="player-mail-list"></div>
         </section>
 
-        <section id="assistant-emotions-window" class="player-tool-section desktop-window assistant-emotions-window" aria-labelledby="assistant-emotions-heading" hidden>
+        <section id="assistant-emotions-window" class="player-tool-section desktop-window assistant-emotions-window iterum-unified-window" aria-labelledby="assistant-emotions-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">СЛУЖЕБНЫЙ ИНСТРУМЕНТ / ASSISTANT LAB</span><h2 id="assistant-emotions-heading">Тест эмоций</h2></div>
+            <div class="search-window-topline">
+              <span class="section-kicker">ITERUM / АРХИВ / ЛАБОРАТОРИЯ</span>
+              <span class="search-topline-label">ЗАКРЫТАЯ ИНФОРМАЦИОННАЯ СИСТЕМА</span>
+            </div>
             <button class="window-close" type="button" data-close-window="assistant-emotions-window" aria-label="Закрыть окно">×</button>
+          </div>
+          <div class="iterum-app-hero">
+            <div class="iterum-app-hero-content">
+              <span class="iterum-app-eyebrow">СЛУЖЕБНЫЙ ИНСТРУМЕНТ / ЛАБОРАТОРИЯ</span>
+              <h2 id="assistant-emotions-heading">Тест эмоций</h2>
+            </div>
+            <div class="iterum-app-hero-art" aria-hidden="true">
+              <span class="iterum-app-hero-ring"></span>
+              <svg class="iterum-app-hero-symbol" viewBox="0 0 80 80"><use href="/workstation-icons.svg#emotions"></use></svg>
+            </div>
+          </div>
+          <div class="iterum-app-status">
+            <span class="iterum-app-status-online"><i aria-hidden="true"></i> ТЕСТОВЫЙ РЕЖИМ</span>
+            
           </div>
           <div class="assistant-emotions-intro">
             <span class="assistant-emotions-symbol">☺</span>
@@ -221,10 +256,27 @@
           <p class="assistant-emotions-status" id="assistant-emotions-status" role="status" aria-live="polite">Ожидание выбора. Нажми на любую эмоцию.</p>
         </section>
 
-        <section id="materials-window" class="player-tool-section desktop-window" aria-labelledby="materials-heading" hidden>
+        <section id="materials-window" class="player-tool-section desktop-window iterum-unified-window" aria-labelledby="materials-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">ПРИЛОЖЕНИЕ / 03</span><h2 id="materials-heading">Материалы дела</h2></div>
+            <div class="search-window-topline">
+              <span class="section-kicker">ITERUM / АРХИВ / МАТЕРИАЛЫ ДЕЛА</span>
+              <span class="search-topline-label">ЗАКРЫТАЯ ИНФОРМАЦИОННАЯ СИСТЕМА</span>
+            </div>
             <button class="window-close" type="button" data-close-window="materials-window" aria-label="Закрыть окно">×</button>
+          </div>
+          <div class="iterum-app-hero">
+            <div class="iterum-app-hero-content">
+              <span class="iterum-app-eyebrow">СЛЕДСТВЕННЫЙ АРХИВ / ДОКАЗАТЕЛЬСТВА</span>
+              <h2 id="materials-heading">Материалы дела</h2>
+            </div>
+            <div class="iterum-app-hero-art" aria-hidden="true">
+              <span class="iterum-app-hero-ring"></span>
+              <svg class="iterum-app-hero-symbol" viewBox="0 0 80 80"><use href="/workstation-icons.svg#materials"></use></svg>
+            </div>
+          </div>
+          <div class="iterum-app-status">
+            <span class="iterum-app-status-online"><i aria-hidden="true"></i> КАТАЛОГ ДОКАЗАТЕЛЬСТВ</span>
+            
           </div>
           <div id="player-material-list" class="player-material-list"></div>
         </section>
@@ -233,10 +285,27 @@
 
 
 
-        <section id="help-window" class="player-tool-section desktop-window help-window" aria-labelledby="help-heading" hidden>
+        <section id="help-window" class="player-tool-section desktop-window help-window iterum-unified-window" aria-labelledby="help-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">СПРАВОЧНЫЙ РАЗДЕЛ</span><h2 id="help-heading">Помощь</h2></div>
+            <div class="search-window-topline">
+              <span class="section-kicker">ITERUM / АРХИВ / СПРАВКА</span>
+              <span class="search-topline-label">ЗАКРЫТАЯ ИНФОРМАЦИОННАЯ СИСТЕМА</span>
+            </div>
             <button class="window-close" type="button" data-close-window="help-window" aria-label="Закрыть окно">×</button>
+          </div>
+          <div class="iterum-app-hero">
+            <div class="iterum-app-hero-content">
+              <span class="iterum-app-eyebrow">СПРАВОЧНЫЙ РАЗДЕЛ / РАБОТА С СИСТЕМОЙ</span>
+              <h2 id="help-heading">Помощь</h2>
+            </div>
+            <div class="iterum-app-hero-art" aria-hidden="true">
+              <span class="iterum-app-hero-ring"></span>
+              <svg class="iterum-app-hero-symbol" viewBox="0 0 80 80"><use href="/workstation-icons.svg#help"></use></svg>
+            </div>
+          </div>
+          <div class="iterum-app-status">
+            <span class="iterum-app-status-online"><i aria-hidden="true"></i> СПРАВОЧНЫЙ РАЗДЕЛ</span>
+            
           </div>
           <div class="help-window-content">
             <h3>Работа с системой</h3>
@@ -248,16 +317,30 @@
           </div>
         </section>
         
-        <section id="news-window" class="player-tool-section desktop-window news-window" aria-labelledby="news-heading" hidden>
+        <section id="news-window" class="player-tool-section desktop-window news-window iterum-unified-window" aria-labelledby="news-heading" hidden>
           <div class="player-tool-heading window-drag-handle">
-            <div><span class="section-kicker">ИНФОРМАЦИОННЫЙ РАЗДЕЛ</span><h2 id="news-heading">Новости</h2></div>
+            <div class="search-window-topline">
+              <span class="section-kicker">ITERUM / АРХИВ / НОВОСТИ</span>
+              <span class="search-topline-label">ЗАКРЫТАЯ ИНФОРМАЦИОННАЯ СИСТЕМА</span>
+            </div>
             <button class="window-close" type="button" data-close-window="news-window" aria-label="Закрыть окно">×</button>
           </div>
-          <div class="news-window-content">
-            <div class="news-folder-banner">
-              <span class="news-folder-mark">N</span>
-              <div><span class="section-kicker">ITERUM / NEWS FEED</span><h3>Лента новостей</h3><p>Обновления и сообщения системы.</p></div>
+          <div class="iterum-app-hero">
+            <div class="iterum-app-hero-content">
+              <span class="iterum-app-eyebrow">ИНФОРМАЦИОННЫЙ РАЗДЕЛ / ПУБЛИКАЦИИ</span>
+              <h2 id="news-heading">Новости</h2>
             </div>
+            <div class="iterum-app-hero-art" aria-hidden="true">
+              <span class="iterum-app-hero-ring"></span>
+              <svg class="iterum-app-hero-symbol" viewBox="0 0 80 80"><use href="/workstation-icons.svg#news"></use></svg>
+            </div>
+          </div>
+          <div class="iterum-app-status">
+            <span class="iterum-app-status-online"><i aria-hidden="true"></i> ЛЕНТА ПУБЛИКАЦИЙ</span>
+            
+          </div>
+          <div class="news-window-content">
+            <div class="news-feed-intro"><span class="news-feed-identifier">ITERUM / NEWS FEED</span><h3>Лента новостей</h3></div>
             <div class="news-empty-state">
               <span class="news-empty-icon">—</span>
               <strong>Пока нет новых публикаций</strong>

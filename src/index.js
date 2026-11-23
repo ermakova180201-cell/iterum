@@ -376,6 +376,94 @@ async function handleApi(request, env) {
       return json({ ok: true });
     }
 
+
+    // Author-only, idempotent editorial starter dossiers for the ITERUM case.
+    // Existing biographies and uploaded photographs are preserved.
+    // New dossiers are deliberately drafts; the author chooses when to publish.
+    if (request.method === "POST" && url.pathname === "/api/admin/dossiers/seed-iterum") {
+      let payload;
+      try { payload = await request.json(); }
+      catch { return json({ error: "Некорректный запрос." }, 400); }
+      const targetCaseId = String(payload.caseId || "");
+      if (!/^[a-f0-9]{32}$/.test(targetCaseId)) return json({ error: "Выберите дело." }, 400);
+      const targetCase = await env.DB.prepare("SELECT id, title FROM cases WHERE id = ?").bind(targetCaseId).first();
+      if (!targetCase) return json({ error: "Дело не найдено." }, 404);
+
+      const existing = await env.DB.prepare("SELECT * FROM person_dossiers WHERE case_id = ?").bind(targetCaseId).all();
+      const rows = existing.results || [];
+      const presets = [
+        {
+          who: "ilya",
+          name: "Романов Илья",
+          role: "Водитель, выживший в ДТП",
+          occupation: "Инженер исследовательского центра ATLAS",
+          biography: "Инженер научно-исследовательского центра ATLAS. Проживал с семьёй в частном доме района «Сосновый». 28 мая 2025 года вместе с супругой и дочерью возвращался с выступления Александры. В результате ДТП получил тяжёлые травмы и был госпитализирован.",
+          relations: "Вера Романова — супруга.\nАлександра Романова — дочь.\nАндрей — коллега и близкий друг.",
+          chronology: "2024 — имел постановление о нарушении скоростного режима.\n28.05.2025 — присутствовал на выступлении дочери; вечером пострадал в ДТП.",
+          materials: "Материалы ДТП от 28.05.2025; газетная заметка от 30.05.2025; приглашение на выступление Александры; постановление о нарушении ПДД (2024).",
+          notes: "Редакционная заметка ITERUM (не публиковать): утром 28 мая Илья обнаружил следы экспериментов ATLAS над Максимом Беловым; в обед рассказал Андрею. Конкретный механизм ДТП пока не утверждён. Старый штраф не доказывает нарушений 28 мая."
+        },
+        {
+          who: "vera",
+          name: "Романова Вера",
+          role: "Супруга Ильи Романова",
+          occupation: "",
+          biography: "Жила с мужем Ильёй и дочерью Александрой в районе «Сосновый» Северогорска. В семье возникало напряжение из-за занятости Ильи на работе. 28 мая 2025 года присутствовала на выступлении дочери в Доме культуры. Погибла в ДТП по дороге домой.",
+          relations: "Илья Романов — супруг.\nАлександра Романова — дочь.",
+          chronology: "28.05.2025 — вместе с семьёй посетила выступление Александры; вечером погибла в ДТП.",
+          materials: "Приглашение на выступление Александры; газетная заметка о ДТП от 30.05.2025; семейная фотография.",
+          notes: "Редакционная заметка ITERUM (не публиковать): по рабочему сценарию Вера позвонила Андрею перед ДТП, заметив подозрительное преследование. Детали звонка ещё не утверждены. Не выдавать содержание звонка в публичном досье."
+        },
+        {
+          who: "andrey",
+          name: "Андрей (фамилия уточняется)",
+          role: "Коллега Ильи Романова",
+          occupation: "Сотрудник исследовательского центра ATLAS",
+          biography: "Работал в исследовательском центре ATLAS вместе с Ильёй Романовым. Коллеги поддерживали дружеские отношения.",
+          relations: "Илья Романов — коллега и близкий друг.",
+          chronology: "",
+          materials: "",
+          notes: "Редакционная заметка ITERUM (не публиковать): фамилия Андрея ещё не согласована; до утверждения не публиковать досье. 28 мая после обеда намеренно сообщил руководству о находке Ильи в расчёте на карьерную выгоду. Позднее после звонка Веры осознал опасность и пытался помочь; конкретные действия и время ещё уточняются. Не раскрывать предательство игроку в открытом досье."
+        }
+      ];
+      const findPresetRow = (who) => rows.find(row => {
+        const name = normalizePersonName(row.full_name);
+        if (who === "ilya") return name.includes("илья") && name.includes("романов");
+        if (who === "vera") return name.includes("вера") && name.includes("романов");
+        return name.includes("андрей");
+      });
+      const appendMissing = (existingText, addition, phrase) => {
+        const original = String(existingText || "").trim();
+        if (!addition || (phrase && normalizePersonName(original).includes(normalizePersonName(phrase)))) return original;
+        return original ? original + "\n" + addition : addition;
+      };
+      const report = { created: [], updated: [] };
+      for (const preset of presets) {
+        const row = findPresetRow(preset.who);
+        if (!row) {
+          const id = randomToken(16);
+          await env.DB.prepare(
+            "INSERT INTO person_dossiers (id,case_id,full_name,role_name,birth_date,occupation,biography,relationships,chronology,related_materials,photo_data,author_notes,is_published) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,0)"
+          ).bind(id,targetCaseId,preset.name,preset.role,"",preset.occupation,preset.biography,preset.relations,preset.chronology,preset.materials,"",preset.notes).run();
+          report.created.push(preset.name);
+          continue;
+        }
+        // Preserve previously authored public content: fill blank fields, append only missing context.
+        const biography = row.biography || preset.biography;
+        const relations = appendMissing(row.relationships,preset.relations,
+          preset.who === "andrey" ? "илья романов" : preset.who === "vera" ? "александра романова" : "вера романова");
+        const chronology = appendMissing(row.chronology,preset.chronology,"28.05.2025");
+        const materials = row.related_materials || preset.materials;
+        const notes = appendMissing(row.author_notes,preset.notes,"Редакционная заметка ITERUM");
+        await env.DB.prepare(
+          "UPDATE person_dossiers SET role_name=?, occupation=?, biography=?, relationships=?, chronology=?, related_materials=?, author_notes=?, updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?"
+        ).bind(row.role_name||preset.role,row.occupation||preset.occupation,biography,relations,chronology,materials,notes,row.id).run();
+        report.updated.push(row.full_name);
+      }
+      return json({ ok:true, caseTitle:targetCase.title, ...report,
+        note:"Новые досье созданы как черновики. Имеющиеся публикации и фотографии сохранены." });
+    }
+
     // Dossier management is restricted to the existing server-side administrator role.
     if (request.method === "GET" && url.pathname === "/api/admin/dossiers") {
       const rows = await env.DB.prepare(

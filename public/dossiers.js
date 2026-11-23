@@ -43,17 +43,26 @@
     currentPhoto = "";
     editingId = null;
     showPhoto("");
+    byId("dossier-legacy").hidden = true;
+    byId("dossier-legacy-text").textContent = "";
     byId("dossier-form-heading").textContent = "Новое досье";
     byId("dossier-delete").hidden = true;
     note("Создание нового досье. Сначала оно будет сохранено как черновик.");
   }
   function editDossier(d) {
     editingId = d.id;
-    for (const key of ["fullName", "roleName", "birthDate", "occupation", "biography",
-      "relationships", "chronology", "relatedMaterials", "authorNotes"]) {
+    for (const key of ["fullName", "birthDate", "residence", "occupation", "workplace",
+      "maritalStatus", "spouse", "children", "lifeStatus", "biography", "authorNotes"]) {
       const dbKey = key.replace(/[A-Z]/g, match => "_" + match.toLowerCase());
       field(key).value = d[dbKey] || "";
     }
+    const legacy = byId("dossier-legacy");
+    const legacyText = [
+      ["Роль в расследовании", d.role_name], ["Другие связи", d.relationships],
+      ["Хронология", d.chronology], ["Связанные материалы", d.related_materials]
+    ].filter(item => item[1]).map(item => item[0] + ":\n" + item[1]).join("\n\n");
+    legacy.hidden = !legacyText;
+    byId("dossier-legacy-text").textContent = legacyText;
     caseSelect.value = d.case_id;
     field("isPublished").checked = d.is_published === 1;
     currentPhoto = d.photo_data || "";
@@ -80,7 +89,7 @@
         btn.append(img);
       }
       btn.append(element("strong", "", d.full_name));
-      btn.append(element("small", "", (d.case_title || "") + (d.role_name ? " · " + d.role_name : "")));
+      btn.append(element("small", "", (d.case_title || "") + (d.life_status ? " · " + d.life_status : "")));
       btn.append(element("em", "", d.is_published === 1 ? "Опубликовано" : "Черновик"));
       btn.addEventListener("click", () => editDossier(d));
       adminList.append(btn);
@@ -175,8 +184,8 @@
     try {
       const payload = { caseId: caseSelect.value, photoData: currentPhoto,
         isPublished: field("isPublished").checked };
-      for (const key of ["fullName","roleName","birthDate","occupation","biography",
-        "relationships","chronology","relatedMaterials","authorNotes"]) {
+      for (const key of ["fullName","birthDate","residence","occupation","workplace",
+        "maritalStatus","spouse","children","lifeStatus","biography","authorNotes"]) {
         payload[key] = field(key).value;
       }
       const result = await api("/api/admin/dossiers" + (id ? "/" + id : ""), {

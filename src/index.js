@@ -49,6 +49,29 @@ async function currentUser(request, env) {
 }
 
 
+
+let dossierProfileReady = false;
+let dossierProfilePromise = null;
+async function ensureDossierProfileColumns(env) {
+  if (dossierProfileReady) return;
+  if (dossierProfilePromise) return dossierProfilePromise;
+  dossierProfilePromise = (async () => {
+    const info = await env.DB.prepare("PRAGMA table_info(person_dossiers)").all();
+    const columns = new Set((info.results || []).map(column => column.name));
+    if (!columns.size) return; // The administrator creates the initial table if not migrated.
+    for (const column of ["residence", "workplace", "marital_status", "spouse", "children", "life_status"]) {
+      if (columns.has(column)) continue;
+      try {
+        await env.DB.prepare("ALTER TABLE person_dossiers ADD COLUMN " + column + " TEXT NOT NULL DEFAULT ''").run();
+      } catch (error) {
+        if (!/duplicate column name/i.test(String(error))) throw error;
+      }
+    }
+    dossierProfileReady = true;
+  })().finally(() => { dossierProfilePromise = null; });
+  return dossierProfilePromise;
+}
+
 let dossierDiscoveryReady = false;
 async function ensureDossierDiscoveryTable(env) {
   if (dossierDiscoveryReady) return;
@@ -217,13 +240,14 @@ async function handleApi(request, env) {
       return json({ error: "Сначала выберите дело." }, 400);
     }
 
+    await ensureDossierProfileColumns(env);
     const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
     // Published people in the selected active case, with explicit columns
     // excluding author_notes and other private author-only data.
     const people = await env.DB.prepare(
       "SELECT d.id, d.case_id, c.title AS case_title, d.full_name AS title, " +
-      "d.role_name AS summary, d.birth_date, d.occupation, d.biography, " +
-      "d.relationships, d.chronology, d.related_materials, d.photo_data, " +
+      "d.life_status AS summary, d.birth_date, d.residence, d.occupation, " +
+      "d.workplace, d.marital_status, d.spouse, d.children, d.life_status, d.biography, d.photo_data, " +
       "0 AS is_preview FROM person_dossiers d JOIN cases c ON c.id = d.case_id " +
       "WHERE c.status = 'active' AND d.is_published = 1 AND d.case_id = ? " +
       "ORDER BY d.full_name COLLATE NOCASE LIMIT 200"
@@ -232,8 +256,8 @@ async function handleApi(request, env) {
     if (isAdmin) {
       const drafts = await env.DB.prepare(
         "SELECT d.id, d.case_id, c.title AS case_title, d.full_name AS title, " +
-        "d.role_name AS summary, d.birth_date, d.occupation, d.biography, " +
-        "d.relationships, d.chronology, d.related_materials, d.photo_data, " +
+        "d.life_status AS summary, d.birth_date, d.residence, d.occupation, " +
+        "d.workplace, d.marital_status, d.spouse, d.children, d.life_status, d.biography, d.photo_data, " +
         "1 AS is_preview FROM person_dossiers d JOIN cases c ON c.id = d.case_id " +
         "WHERE d.case_id = ? AND (c.status = 'draft' OR d.is_published = 0) " +
         "ORDER BY d.full_name COLLATE NOCASE LIMIT 200"
@@ -280,6 +304,7 @@ async function handleApi(request, env) {
   if (request.method === "GET" && url.pathname === "/api/player/archive") {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    await ensureDossierProfileColumns(env);
     const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
     let cases = await env.DB.prepare(
       "SELECT id, title, case_code, description, status FROM cases WHERE status = 'active' ORDER BY created_at"
@@ -300,8 +325,8 @@ async function handleApi(request, env) {
     await ensureDossierDiscoveryTable(env);
     const discovered = await env.DB.prepare(
       "SELECT d.id AS dossier_id, d.case_id, c.title AS case_title, " +
-      "d.full_name AS title, d.role_name AS summary, d.birth_date, d.occupation, " +
-      "d.biography, d.relationships, d.chronology, d.related_materials, d.photo_data, " +
+      "d.full_name AS title, d.life_status AS summary, d.birth_date, d.residence, d.occupation, " +
+      "d.workplace, d.marital_status, d.spouse, d.children, d.life_status, d.biography, d.photo_data, " +
       "p.discovered_at AS created_at " +
       "FROM player_dossier_discoveries p JOIN person_dossiers d ON d.id = p.dossier_id " +
       "JOIN cases c ON c.id = d.case_id " +
@@ -323,6 +348,7 @@ async function handleApi(request, env) {
     if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
     const caseId = url.searchParams.get("caseId") || "";
     if (!/^[a-f0-9]{32}$/.test(caseId)) return json({ error: "Неверное дело." }, 400);
+    await ensureDossierProfileColumns(env);
     const foundCase = await env.DB.prepare("SELECT status FROM cases WHERE id = ?").bind(caseId).first();
     if (!foundCase) return json({ error: "Дело не найдено." }, 404);
     const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
@@ -331,8 +357,8 @@ async function handleApi(request, env) {
     // the searchable name is the player's key, and only their discovered
     // dossiers may be listed through this legacy endpoint.
     await ensureDossierDiscoveryTable(env);
-    const baseSelect = "SELECT d.id, d.case_id, d.full_name, d.role_name, d.birth_date, d.occupation, " +
-      "d.biography, d.relationships, d.chronology, d.related_materials, d.photo_data " +
+    const baseSelect = "SELECT d.id, d.case_id, d.full_name, d.birth_date, d.residence, d.occupation, " +
+      "d.workplace, d.marital_status, d.spouse, d.children, d.life_status, d.biography, d.photo_data " +
       "FROM person_dossiers d WHERE d.case_id = ? AND d.is_published = 1 ";
     const rows = isAdmin
       ? await env.DB.prepare(baseSelect + "ORDER BY d.full_name COLLATE NOCASE").bind(caseId).all()
@@ -373,12 +399,14 @@ async function handleApi(request, env) {
       await env.DB.prepare(
         "CREATE INDEX IF NOT EXISTS idx_person_dossiers_case_visible ON person_dossiers(case_id, is_published, full_name)"
       ).run();
+      await ensureDossierProfileColumns(env);
       return json({ ok: true });
     }
 
 
     // Dossier management is restricted to the existing server-side administrator role.
     if (request.method === "GET" && url.pathname === "/api/admin/dossiers") {
+      await ensureDossierProfileColumns(env);
       const rows = await env.DB.prepare(
         "SELECT d.*, c.title AS case_title FROM person_dossiers d JOIN cases c ON c.id = d.case_id ORDER BY c.created_at DESC, d.full_name COLLATE NOCASE"
       ).all();
@@ -394,26 +422,29 @@ async function handleApi(request, env) {
     }
     if ((request.method === "POST" && url.pathname === "/api/admin/dossiers") ||
         (request.method === "PUT" && dossierRoute)) {
+      await ensureDossierProfileColumns(env);
       let body;
       try { body = await request.json(); } catch { return json({ error: "Проверьте введённые данные." }, 400); }
       const caseId = String(body.caseId || "");
       const fullName = String(body.fullName || "").trim();
-      const roleName = String(body.roleName || "").trim();
       const birthDate = String(body.birthDate || "").trim();
+      const residence = String(body.residence || "").trim();
       const occupation = String(body.occupation || "").trim();
+      const workplace = String(body.workplace || "").trim();
+      const maritalStatus = String(body.maritalStatus || "").trim();
+      const spouse = String(body.spouse || "").trim();
+      const children = String(body.children || "").trim();
+      const lifeStatus = String(body.lifeStatus || "").trim();
       const biography = String(body.biography || "").trim();
-      const relationships = String(body.relationships || "").trim();
-      const chronology = String(body.chronology || "").trim();
-      const relatedMaterials = String(body.relatedMaterials || "").trim();
       const authorNotes = String(body.authorNotes || "").trim();
       const photoData = String(body.photoData || "");
       const isPublished = body.isPublished === true ? 1 : 0;
       if (!/^[a-f0-9]{32}$/.test(caseId) || !fullName ||
-          fullName.length > 160 || roleName.length > 140 ||
+          fullName.length > 160 ||
           (birthDate && !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) ||
-          occupation.length > 200 || biography.length > 10000 ||
-          relationships.length > 5000 || chronology.length > 6000 ||
-          relatedMaterials.length > 5000 || authorNotes.length > 4000 ||
+          residence.length > 300 || occupation.length > 200 || workplace.length > 200 ||
+          maritalStatus.length > 120 || spouse.length > 200 || children.length > 500 ||
+          lifeStatus.length > 120 || biography.length > 10000 || authorNotes.length > 4000 ||
           photoData.length > 550000 ||
           (photoData && !/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(photoData))) {
         return json({ error: "Проверьте поля досье и размер фотографии." }, 400);
@@ -423,16 +454,23 @@ async function handleApi(request, env) {
       if (request.method === "POST") {
         const id = randomToken(16);
         await env.DB.prepare(
-          "INSERT INTO person_dossiers (id, case_id, full_name, role_name, birth_date, occupation, biography, relationships, chronology, related_materials, photo_data, author_notes, is_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        ).bind(id, caseId, fullName, roleName, birthDate, occupation, biography, relationships, chronology, relatedMaterials, photoData, authorNotes, isPublished).run();
+          "INSERT INTO person_dossiers (id, case_id, full_name, role_name, birth_date, occupation, biography, relationships, chronology, related_materials, photo_data, author_notes, is_published, residence, workplace, marital_status, spouse, children, life_status) " +
+          "VALUES (?, ?, ?, '', ?, ?, ?, '', '', '', ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        ).bind(id, caseId, fullName, birthDate, occupation, biography, photoData, authorNotes, isPublished,
+          residence, workplace, maritalStatus, spouse, children, lifeStatus).run();
         return json({ ok: true, id });
       }
       const id = dossierRoute[1];
       const existing = await env.DB.prepare("SELECT id FROM person_dossiers WHERE id = ?").bind(id).first();
       if (!existing) return json({ error: "Досье не найдено." }, 404);
+      // Keep historical fields (role_name, relationships, chronology, related_materials)
+      // intact when this shorter, modern dossier form is saved.
       await env.DB.prepare(
-        "UPDATE person_dossiers SET case_id=?, full_name=?, role_name=?, birth_date=?, occupation=?, biography=?, relationships=?, chronology=?, related_materials=?, photo_data=?, author_notes=?, is_published=?, updated_at=strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id=?"
-      ).bind(caseId, fullName, roleName, birthDate, occupation, biography, relationships, chronology, relatedMaterials, photoData, authorNotes, isPublished, id).run();
+        "UPDATE person_dossiers SET case_id=?, full_name=?, birth_date=?, residence=?, occupation=?, workplace=?, " +
+        "marital_status=?, spouse=?, children=?, life_status=?, biography=?, photo_data=?, author_notes=?, is_published=?, " +
+        "updated_at=strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id=?"
+      ).bind(caseId, fullName, birthDate, residence, occupation, workplace, maritalStatus, spouse,
+        children, lifeStatus, biography, photoData, authorNotes, isPublished, id).run();
       return json({ ok: true, id });
     }
 

@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="/ghost-emotions-concept.css?v=1">
 <link rel="stylesheet" href="/news-exhibition.css?v=2">
 
-  <script defer src="/dossiers.js?v=manual-dossiers-1"></script>
+  <script defer src="/dossiers.js?v=dossier-fields-2"></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -684,32 +684,47 @@
                 <input id="dossier-name" name="fullName" maxlength="160" placeholder="Например: Романов Илья Михайлович" required>
               </div>
               <div class="dossier-field">
-                <label for="dossier-role">РОЛЬ В РАССЛЕДОВАНИИ</label>
-                <input id="dossier-role" name="roleName" maxlength="140" placeholder="Например: главный фигурант">
-              </div>
-              <div class="dossier-field">
                 <label for="dossier-birth">ДАТА РОЖДЕНИЯ</label>
                 <input id="dossier-birth" name="birthDate" type="date">
               </div>
+              <div class="dossier-field">
+                <label for="dossier-status-field">СТАТУС</label>
+                <input id="dossier-status-field" name="lifeStatus" maxlength="120" placeholder="Например: погибла, жив, пропал без вести">
+              </div>
               <div class="dossier-field wide">
-                <label for="dossier-occupation">РАБОТА / ПРОФЕССИЯ</label>
+                <label for="dossier-residence">МЕСТО ПРОЖИВАНИЯ</label>
+                <input id="dossier-residence" name="residence" maxlength="300" placeholder="Город, район, улица (если известна)">
+              </div>
+              <div class="dossier-field">
+                <label for="dossier-occupation">ПРОФЕССИЯ / ДОЛЖНОСТЬ</label>
                 <input id="dossier-occupation" name="occupation" maxlength="200">
               </div>
-              <div class="dossier-field wide">
-                <label for="dossier-biography">БИОГРАФИЯ</label>
-                <textarea id="dossier-biography" name="biography" maxlength="10000" rows="4"></textarea>
+              <div class="dossier-field">
+                <label for="dossier-workplace">МЕСТО РАБОТЫ</label>
+                <input id="dossier-workplace" name="workplace" maxlength="200">
+              </div>
+              <div class="dossier-field">
+                <label for="dossier-marital">СЕМЕЙНОЕ ПОЛОЖЕНИЕ</label>
+                <input id="dossier-marital" name="maritalStatus" maxlength="120" placeholder="Например: в браке">
+              </div>
+              <div class="dossier-field">
+                <label for="dossier-spouse">СУПРУГ / СУПРУГА</label>
+                <input id="dossier-spouse" name="spouse" maxlength="200" placeholder="ФИО (если известно)">
               </div>
               <div class="dossier-field wide">
-                <label for="dossier-relationships">СВЯЗИ С ДРУГИМИ ЛЮДЬМИ</label>
-                <textarea id="dossier-relationships" name="relationships" maxlength="5000" rows="3"></textarea>
+                <label for="dossier-children">ДЕТИ</label>
+                <input id="dossier-children" name="children" maxlength="500" placeholder="Имена или «нет данных»">
               </div>
               <div class="dossier-field wide">
-                <label for="dossier-chronology">ХРОНОЛОГИЯ</label>
-                <textarea id="dossier-chronology" name="chronology" maxlength="6000" rows="3"></textarea>
+                <label for="dossier-biography">КРАТКАЯ БИОГРАФИЯ</label>
+                <textarea id="dossier-biography" name="biography" maxlength="10000" rows="4" placeholder="Краткие проверяемые сведения о человеке"></textarea>
               </div>
               <div class="dossier-field wide">
-                <label for="dossier-related">СВЯЗАННЫЕ МАТЕРИАЛЫ / НОМЕРА ДОКУМЕНТОВ</label>
-                <textarea id="dossier-related" name="relatedMaterials" maxlength="5000" rows="2"></textarea>
+                <details id="dossier-legacy" hidden>
+                  <summary>Ранее заполненные поля (только для автора)</summary>
+                  <p class="dossier-note">Старые сведения сохранены в базе и не будут удалены при редактировании карточки.</p>
+                  <pre id="dossier-legacy-text" class="dossier-profile-text"></pre>
+                </details>
               </div>
               <div class="dossier-field wide">
                 <label for="dossier-author-notes">ЛИЧНЫЕ ЗАМЕТКИ АВТОРА (ИГРОК НЕ ВИДИТ)</label>
@@ -768,8 +783,8 @@
   <footer>
     <span>ITERUM © 2026</span>
   </footer>
-  <script src="/materials.js?v=library-lists-2"></script>
-  <script src="/search.js?v=full-name-6"></script>
+  <script src="/materials.js?v=profile-fields-1"></script>
+  <script src="/search.js?v=profile-fields-1"></script>
   <script>
     const authPanel = document.querySelector(".auth-panel");
     const authForm = document.getElementById("auth-form");

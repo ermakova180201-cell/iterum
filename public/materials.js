@@ -155,8 +155,15 @@
     reader.append(identity);
 
     const facts = el("div", "materials-person-facts");
-    for (const [label, value] of [["ДАТА РОЖДЕНИЯ", item.birth_date],
-      ["ПРОФЕССИЯ", item.occupation]]) {
+    for (const [label, value] of [
+      ["ДАТА РОЖДЕНИЯ", item.birth_date],
+      ["МЕСТО ПРОЖИВАНИЯ", item.residence],
+      ["ПРОФЕССИЯ / ДОЛЖНОСТЬ", item.occupation],
+      ["МЕСТО РАБОТЫ", item.workplace],
+      ["СЕМЕЙНОЕ ПОЛОЖЕНИЕ", item.marital_status],
+      ["СУПРУГ / СУПРУГА", item.spouse],
+      ["ДЕТИ", item.children]
+    ]) {
       if (!value) continue;
       const fact = el("div", "materials-person-fact");
       fact.append(el("span", "", label), el("strong", "", value));
@@ -164,10 +171,7 @@
     }
     if (facts.childElementCount) reader.append(facts);
 
-    for (const [heading, content] of [
-      ["Биография", item.biography], ["Связи с людьми", item.relationships],
-      ["Хронология", item.chronology], ["Связанные материалы", item.related_materials]
-    ]) {
+    for (const [heading, content] of [["Биография", item.biography]]) {
       if (!content) continue;
       const section = el("section", "materials-person-section");
       section.append(el("h4", "", heading), el("p", "", content));

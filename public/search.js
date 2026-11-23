@@ -104,17 +104,22 @@
     card.append(header);
 
     const facts = el("div", "search-person-data");
-    const birthday = row("ДАТА РОЖДЕНИЯ", person.birth_date);
-    const occupation = row("МЕСТО РАБОТЫ / ПРОФЕССИЯ", person.occupation);
-    if (birthday) facts.append(birthday);
-    if (occupation) facts.append(occupation);
+    for (const [label, value] of [
+      ["ДАТА РОЖДЕНИЯ", person.birth_date],
+      ["МЕСТО ПРОЖИВАНИЯ", person.residence],
+      ["ПРОФЕССИЯ / ДОЛЖНОСТЬ", person.occupation],
+      ["МЕСТО РАБОТЫ", person.workplace],
+      ["СЕМЕЙНОЕ ПОЛОЖЕНИЕ", person.marital_status],
+      ["СУПРУГ / СУПРУГА", person.spouse],
+      ["ДЕТИ", person.children]
+    ]) {
+      const fact = row(label, value);
+      if (fact) facts.append(fact);
+    }
     if (facts.childElementCount) card.append(facts);
 
     for (const [number, title, content] of [
-      ["01", "Биография", person.biography],
-      ["02", "Связи с людьми", person.relationships],
-      ["03", "Хронология", person.chronology],
-      ["04", "Связанные материалы", person.related_materials]
+      ["01", "Биография", person.biography]
     ]) {
       if (!content) continue;
       const section = el("section", "search-person-section");

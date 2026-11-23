@@ -151,38 +151,6 @@
   byId("dossier-new").addEventListener("click", resetForm);
   byId("dossier-refresh").addEventListener("click", loadAdmin);
 
-  // Editorial templates are loaded only on explicit administrator request.
-  const presetButton = element("button", "", "Подготовить досье ITERUM");
-  presetButton.type = "button";
-  presetButton.id = "dossier-load-iterum";
-  byId("dossier-refresh").parentElement.append(presetButton);
-  presetButton.addEventListener("click", async () => {
-    const selected = caseSelect.selectedOptions[0];
-    if (!selected || !caseSelect.value) {
-      note("Сначала выберите нужное дело.", true);
-      return;
-    }
-    const message = "Подготовить черновики Веры и Андрея и дополнить досье Ильи в деле «" +
-      selected.textContent + "»?\nСуществующие фотографии и опубликованные сведения останутся на месте.";
-    if (!confirm(message)) return;
-    presetButton.disabled = true;
-    try {
-      const result = await api("/api/admin/dossiers/seed-iterum", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ caseId: caseSelect.value })
-      });
-      await refreshAdmin();
-      note("Карточки подготовлены. Созданы: " + (result.created.join(", ") || "нет") +
-        ". Дополнены: " + (result.updated.join(", ") || "нет") +
-        ". Проверьте фамилию Андрея, заполните недостающие поля и опубликуйте готовые досье.");
-    } catch (error) {
-      note(error.message, true);
-    } finally {
-      presetButton.disabled = false;
-    }
-  });
-
   byId("dossier-delete").addEventListener("click", async () => {
     if (!editingId || !confirm("Удалить досье без возможности восстановления?")) return;
     try {

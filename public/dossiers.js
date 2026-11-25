@@ -36,12 +36,122 @@
     photoPreview.hidden = !data;
     if (data) photoPreview.src = data; else photoPreview.removeAttribute("src");
   }
+
+  const linkedFileInput = byId("dossier-files-input");
+  const linkedFileUpload = byId("dossier-files-upload");
+  const linkedFileList = byId("dossier-files-list");
+  const linkedFileMessage = byId("dossier-files-message");
+  function attachmentNote(message, isError) {
+    linkedFileMessage.textContent = message || "";
+    linkedFileMessage.style.color = isError ? "#e9a8a1" : "#c4b18d";
+  }
+  async function refreshAttachedFiles() {
+    const dossierId = editingId;
+    if (!dossierId) {
+      linkedFileInput.disabled = true;
+      linkedFileUpload.disabled = true;
+      linkedFileInput.value = "";
+      linkedFileList.replaceChildren(element("p", "dossier-note", "Сначала сохраните досье, затем прикрепляйте документы."));
+      attachmentNote("");
+      return;
+    }
+    linkedFileInput.disabled = false;
+    linkedFileUpload.disabled = false;
+    linkedFileList.replaceChildren(element("p", "dossier-note", "Загрузка вложений…"));
+    try {
+      const data = await api("/api/admin/dossiers/" + dossierId + "/files");
+      if (editingId !== dossierId) return;
+      linkedFileList.replaceChildren();
+      if (!Array.isArray(data.files) || !data.files.length) {
+        linkedFileList.append(element("p", "dossier-note", "Документы ещё не прикреплены."));
+        return;
+      }
+      for (const file of data.files) {
+        const wrap = element("div", "dossier-file-admin-row");
+        const name = element("div", "dossier-file-admin-name");
+        name.append(element("strong", "", file.file_name));
+        const amount = Math.max(1, Math.ceil((file.file_size || 0) / 1024));
+        name.append(element("small", "", amount + " КБ · " + (file.is_published === 1 ? "ВИДНО ИГРОКУ" : "ЧЕРНОВИК")));
+        const controls = element("div", "dossier-file-admin-actions");
+        const link = element("a", "", "Просмотреть");
+        link.href = "/api/dossier-files/" + encodeURIComponent(file.id);
+        link.target = "_blank";
+        link.rel = "noopener";
+        const toggle = element("button", "", file.is_published === 1 ? "Скрыть" : "Опубликовать");
+        toggle.type = "button";
+        toggle.addEventListener("click", async () => {
+          toggle.disabled = true;
+          try {
+            await api("/api/admin/dossier-files/" + file.id + "/publish", {
+              method: "PATCH", headers: { "content-type": "application/json" },
+              body: JSON.stringify({ isPublished: file.is_published !== 1 })
+            });
+            await refreshAttachedFiles();
+            attachmentNote(file.is_published === 1 ? "Документ скрыт от игроков." : "Документ опубликован: он доступен игроку после открытия досье.");
+          } catch (error) {
+            toggle.disabled = false;
+            attachmentNote(error.message, true);
+          }
+        });
+        const remove = element("button", "", "Удалить");
+        remove.type = "button";
+        remove.addEventListener("click", async () => {
+          if (!confirm("Удалить документ «" + file.file_name + "» из досье?")) return;
+          remove.disabled = true;
+          try {
+            await api("/api/admin/dossier-files/" + file.id, { method: "DELETE" });
+            await refreshAttachedFiles();
+            attachmentNote("Документ удалён.");
+          } catch (error) {
+            remove.disabled = false;
+            attachmentNote(error.message, true);
+          }
+        });
+        controls.append(link, toggle, remove);
+        wrap.append(name, controls);
+        linkedFileList.append(wrap);
+      }
+    } catch (error) {
+      if (editingId !== dossierId) return;
+      linkedFileList.replaceChildren(element("p", "dossier-note", "Не удалось загрузить файлы."));
+      attachmentNote(error.message, true);
+    }
+  }
+  linkedFileUpload.addEventListener("click", async () => {
+    if (!editingId) { attachmentNote("Сначала сохраните новое досье.", true); return; }
+    const files = Array.from(linkedFileInput.files || []);
+    if (!files.length) { attachmentNote("Выберите хотя бы один файл.", true); return; }
+    if (files.length > 8) { attachmentNote("За один раз можно добавить до 8 документов.", true); return; }
+    const allowed = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+    if (files.some(f => !allowed.includes(f.type) || f.size > 1024 * 1024)) {
+      attachmentNote("Допустимые форматы: PDF, JPG, PNG, WEBP, размер каждого — до 1 МБ.", true);
+      return;
+    }
+    const dossierId = editingId;
+    const form = new FormData();
+    for (const file of files) form.append("files", file);
+    linkedFileUpload.disabled = true;
+    attachmentNote("Сохраняем вложения…");
+    try {
+      await api("/api/admin/dossiers/" + dossierId + "/files", { method: "POST", body: form });
+      if (editingId !== dossierId) return;
+      linkedFileInput.value = "";
+      await refreshAttachedFiles();
+      attachmentNote("Файлы добавлены как черновики. Чтобы показать их игрокам, нажмите «Опубликовать» напротив каждого документа.");
+    } catch (error) {
+      attachmentNote(error.message, true);
+    } finally {
+      linkedFileUpload.disabled = !editingId;
+    }
+  });
+
   function resetForm() {
     const selectedCase = caseSelect.value;
     adminForm.reset();
     if ([...caseSelect.options].some(x => x.value === selectedCase)) caseSelect.value = selectedCase;
     currentPhoto = "";
     editingId = null;
+    refreshAttachedFiles();
     showPhoto("");
     byId("dossier-legacy").hidden = true;
     byId("dossier-legacy-text").textContent = "";
@@ -72,6 +182,7 @@
     byId("dossier-delete").hidden = false;
     adminForm.scrollIntoView({ block: "start", behavior: "smooth" });
     note("Изменения не появятся у игроков, пока досье не опубликовано.");
+    refreshAttachedFiles();
   }
   function renderAdmin() {
     adminList.replaceChildren();

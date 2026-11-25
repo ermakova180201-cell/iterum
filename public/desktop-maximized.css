@@ -1,0 +1,30 @@
+/* ITERUM: maximized desktop applications.
+ * Loaded after all application styles, including dossier-reference.css.
+ * Covers every current and future direct desktop application window.
+ * The document-detail dialog intentionally remains a floating overlay.
+ */
+body.is-workstation .desktop-shell .desktop-area > .desktop-window:not(#material-detail-window) {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+  border-radius: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+body.is-workstation .desktop-shell .desktop-area > .desktop-window:not(#material-detail-window)[hidden] {
+  display: none !important;
+}

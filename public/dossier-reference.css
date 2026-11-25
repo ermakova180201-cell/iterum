@@ -1,0 +1,383 @@
+/* ITERUM — dossier reference skin, selected by the author.
+   The layout is shared by Search Data and saved dossiers. Other applications are untouched. */
+
+#search-window:has(.iterum-dossier-reference),
+body.is-workstation .desktop-shell .desktop-area > #search-window:has(.iterum-dossier-reference) {
+  width:min(1390px,calc(100% - 36px)) !important;
+  max-width:1390px !important;
+  border-color:rgba(105,135,157,.5) !important;
+}
+body.is-workstation .desktop-shell .desktop-area > #material-detail-window:has(.iterum-dossier-reference) {
+  width:min(1390px,calc(100% - 36px)) !important;
+  max-width:1390px !important;
+  border-color:rgba(105,135,157,.5) !important;
+}
+#search-window:has(.iterum-dossier-reference) .search-personnel-hero {
+  min-height:74px;
+  padding:13px 26px;
+}
+#search-window:has(.iterum-dossier-reference) .search-personnel-hero h2 {font-size:clamp(22px,2.6vw,29px);}
+#search-window:has(.iterum-dossier-reference) .search-personnel-hero p,
+#search-window:has(.iterum-dossier-reference) .search-personnel-hero .search-personnel-art {display:none;}
+#search-window:has(.iterum-dossier-reference) .player-search-form {padding:12px 23px !important;}
+#search-window:has(.iterum-dossier-reference) .search-personnel-status {padding:6px 23px;}
+#search-window:has(.iterum-dossier-reference) .player-search-results {padding:0 15px 15px !important;max-height:none;}
+#search-window .search-personnel-profile:has(.iterum-dossier-reference) {
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+#search-window .search-personnel-profile:has(.iterum-dossier-reference)::before {display:none;}
+body.is-workstation .desktop-shell #material-detail-window:has(.iterum-dossier-reference) .materials-detail-content {
+  padding:0 15px 18px;
+}
+body.is-workstation .desktop-shell #material-detail-window:has(.iterum-dossier-reference) .materials-detail-hero {
+  min-height:70px;
+  padding:11px 22px;
+}
+body.is-workstation .desktop-shell #material-detail-window:has(.iterum-dossier-reference) .materials-detail-hero h2 {font-size:clamp(20px,2.6vw,28px);}
+body.is-workstation .desktop-shell #material-detail-window:has(.iterum-dossier-reference) .materials-detail-hero .iterum-app-hero-art {display:none;}
+
+.iterum-dossier-reference {
+  --ref-bg:#0e131c;
+  --ref-panel:#171c25;
+  --ref-stroke:#303c4b;
+  --ref-blue:#79b9dd;
+  --ref-text:#e9edf4;
+  --ref-muted:#9bb1c4;
+  width:100%;
+  min-width:0;
+  container-type:inline-size;
+  color:var(--ref-text);
+  font-family:"Manrope","Space Grotesk",Arial,sans-serif;
+  background:linear-gradient(130deg,#0b1018,#10151e 80%,#0b1018);
+  border:1px solid rgba(97,120,143,.47);
+  border-radius:10px;
+  overflow:hidden;
+  box-sizing:border-box;
+  box-shadow:0 22px 50px rgba(0,0,0,.36);
+}
+.iterum-dossier-reference * {box-sizing:border-box;}
+.iterum-dossier-reference .iterum-dossier-banner {
+  position:relative;
+  display:flex;
+  gap:35px;
+  align-items:center;
+  min-height:74px;
+  padding:16px 27px;
+  border-bottom:1px solid #344252;
+  background:
+    linear-gradient(90deg,rgba(11,17,25,.98) 0%,rgba(13,19,28,.94) 45%,rgba(14,21,30,.84) 100%),
+    url("/iterum-investigation-wallpaper.webp") center 45% / cover no-repeat,
+    #111723;
+}
+.iterum-dossier-brand {
+  color:#f6f7fa;
+  font-family:"Manrope",Arial,sans-serif;
+  font-weight:600;
+  font-size:clamp(15px,2cqi,23px);
+  letter-spacing:.14em;
+  white-space:nowrap;
+}
+.iterum-dossier-banner-rule {width:1px;height:31px;background:#657385;opacity:.84;}
+.iterum-dossier-banner-title {
+  color:var(--ref-blue);
+  font:700 clamp(14px,2cqi,22px)/1.2 "Manrope",Arial,sans-serif;
+  letter-spacing:.04em;
+}
+.iterum-dossier-profile-panel {
+  margin:22px 16px 0;
+  padding:19px 20px 24px;
+  background:
+    radial-gradient(ellipse at 95% 75%,rgba(60,82,108,.12),transparent 45%),
+    linear-gradient(120deg,#151922,#161b24);
+  border:1px solid rgba(110,126,146,.36);
+  border-radius:14px;
+  box-shadow:inset 0 1px rgba(255,255,255,.018);
+}
+.iterum-dossier-profile-grid {
+  display:grid;
+  grid-template-columns:minmax(150px,.74fr) minmax(325px,1.72fr) minmax(220px,1.12fr);
+  align-items:stretch;
+  column-gap:clamp(17px,2.4cqi,32px);
+  min-width:0;
+}
+.iterum-dossier-portrait {position:relative;align-self:start;min-width:0;padding:0;}
+.iterum-dossier-portrait-frame {
+  position:relative;
+  width:100%;
+  aspect-ratio:0.68;
+  max-height:435px;
+  min-height:215px;
+  border:5px solid #a9adb1;
+  border-radius:2px;
+  background:#26323a;
+  box-shadow:0 6px 17px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.24);
+}
+.iterum-dossier-portrait-frame::after {
+  content:"";
+  position:absolute;
+  left:17px;
+  top:-30px;
+  width:21px;
+  height:66px;
+  transform:rotate(19deg);
+  border:3px solid #b7c4d0;
+  border-bottom-color:rgba(165,182,195,.8);
+  border-radius:15px;
+  box-shadow:0 0 0 1px rgba(10,15,24,.48),2px 3px 4px rgba(0,0,0,.58);
+  pointer-events:none;
+}
+.iterum-dossier-portrait-image {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center 26%;
+  filter:saturate(.7) contrast(1.02);
+}
+.iterum-dossier-portrait-missing {
+  display:grid;
+  place-items:center;
+  width:100%;
+  height:100%;
+  padding:15px;
+  background:linear-gradient(140deg,#303a49,#101722);
+  color:#adb6c1;
+  font-size:12px;
+  letter-spacing:.08em;
+  text-align:center;
+}
+.iterum-dossier-identity {min-width:0;padding:0 0 2px;}
+.iterum-dossier-person-name {
+  margin:0 0 14px;
+  color:#f0f1f4;
+  font:750 clamp(19px,2.1cqi,30px)/1.22 "Manrope",Arial,sans-serif;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  overflow-wrap:anywhere;
+}
+.iterum-dossier-status-line {display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin-bottom:15px;}
+.iterum-dossier-status-label {
+  color:#8498aa;
+  font-size:clamp(11px,1.25cqi,15px);
+  font-weight:800;
+  letter-spacing:.04em;
+}
+.iterum-dossier-status {
+  display:inline-block;
+  padding:5px 13px;
+  border:1px solid #385d70;
+  border-radius:5px;
+  color:#9bcce6;
+  background:rgba(31,91,121,.16);
+  font-size:clamp(12px,1.4cqi,16px);
+  font-weight:800;
+  letter-spacing:.035em;
+  text-transform:uppercase;
+}
+.iterum-dossier-status.is-deceased {color:#fa5257;border-color:#753434;background:rgba(129,35,37,.22);}
+.iterum-dossier-status.is-missing {color:#e9bf74;border-color:#7c633c;background:rgba(113,82,30,.2);}
+.iterum-dossier-facts {margin:0;padding:0;border-top:1px solid rgba(112,131,151,.35);}
+.iterum-dossier-fact {
+  display:grid;
+  grid-template-columns:minmax(125px,40%) minmax(0,1fr);
+  gap:12px;
+  align-items:start;
+  margin:0;
+  padding:9px 1px;
+  border-bottom:1px solid rgba(112,131,151,.35);
+}
+.iterum-dossier-fact-name {
+  margin:0;
+  color:#94b2ca;
+  font:700 clamp(9px,1.08cqi,12px)/1.35 "Manrope",Arial,sans-serif;
+  letter-spacing:.035em;
+}
+.iterum-dossier-fact-value {
+  margin:0;
+  color:#eff1f6;
+  font:500 clamp(11px,1.2cqi,14px)/1.42 "Manrope",Arial,sans-serif;
+  overflow-wrap:anywhere;
+}
+.iterum-dossier-biography {
+  min-width:0;
+  padding:28px 0 0 clamp(16px,1.9cqi,27px);
+  border-left:1px solid rgba(128,149,165,.43);
+}
+.iterum-dossier-biography-title {
+  display:flex;
+  align-items:center;
+  gap:15px;
+  margin:0 0 20px;
+  color:#e9edf3;
+  font:800 clamp(12px,1.65cqi,18px)/1.32 "Manrope",Arial,sans-serif;
+  letter-spacing:.035em;
+}
+.iterum-dossier-biography-title::before {
+  content:"";
+  flex:0 0 4px;
+  width:4px;height:22px;
+  background:#79b9dd;
+}
+.iterum-dossier-biography-text {
+  margin:0;
+  color:#e2e5ee;
+  font:450 clamp(12px,1.34cqi,16px)/1.76 "Manrope",Arial,sans-serif;
+  white-space:pre-line;
+  overflow-wrap:anywhere;
+}
+.iterum-dossier-documents-panel {
+  margin:22px 16px 24px;
+  padding:18px clamp(17px,2.2cqi,33px) 22px;
+  border:1px solid rgba(110,126,146,.36);
+  border-radius:14px;
+  background:linear-gradient(132deg,#151a22,#121720);
+  box-shadow:inset 0 1px rgba(255,255,255,.022);
+}
+.iterum-dossier-documents-title {
+  display:flex;
+  align-items:center;
+  gap:25px;
+  margin:0 0 18px;
+  padding-bottom:17px;
+  border-bottom:1px solid rgba(100,121,145,.42);
+  color:#e9edf4;
+  font:800 clamp(16px,2.25cqi,25px)/1.3 "Manrope",Arial,sans-serif;
+  letter-spacing:.028em;
+}
+.iterum-dossier-folder-icon {
+  display:grid;
+  place-items:center;
+  flex:0 0 62px;
+  width:62px;height:60px;
+  border:1px solid #588cb4;
+  border-radius:8px;
+  color:#7ac5f4;
+  background:linear-gradient(145deg,#223447,#121c29);
+}
+.iterum-dossier-folder-icon svg {width:37px;height:37px;}
+.iterum-dossier-reference .dossier-attachment-area {display:grid;gap:13px;width:100%;min-width:0;}
+.iterum-dossier-reference .iterum-dossier-file {
+  width:100%;
+  margin:0;
+  border:1px solid #323d4e;
+  border-radius:9px;
+  background:linear-gradient(130deg,#1b222e,#171f2b);
+  color:#e8edf5;
+  overflow:hidden;
+}
+.iterum-dossier-reference .iterum-dossier-file-summary {
+  display:flex;
+  align-items:center;
+  gap:24px;
+  width:100%;
+  padding:12px 22px;
+  min-height:84px;
+  cursor:pointer;
+  list-style:none;
+}
+.iterum-dossier-file-summary::-webkit-details-marker {display:none;}
+.iterum-dossier-file-icon {
+  display:grid;
+  place-items:center;
+  flex:0 0 61px;
+  width:61px;height:61px;
+  color:#b7c9dc;
+  background:linear-gradient(135deg,#303947,#26303f);
+  border-radius:7px;
+}
+.iterum-dossier-file-icon svg {width:34px;height:34px;}
+.iterum-dossier-file-name {
+  flex:1;
+  min-width:0;
+  color:#eef0f7;
+  font-size:clamp(13px,1.75cqi,20px);
+  font-weight:650;
+  overflow-wrap:anywhere;
+}
+.iterum-dossier-file-view {
+  display:grid;
+  place-items:center;
+  flex:0 0 56px;
+  width:56px;height:52px;
+  border:1px solid #548ab5;
+  border-radius:7px;
+  color:#7abce6;
+  background:#1b2a3a;
+  transition:background .15s ease;
+}
+.iterum-dossier-file-view svg {width:28px;height:28px;}
+.iterum-dossier-file[open] .iterum-dossier-file-view,
+.iterum-dossier-file-summary:hover .iterum-dossier-file-view {background:#293f55;}
+.iterum-dossier-file-preview {padding:16px 20px 20px;border-top:1px solid #323d4e;}
+.iterum-dossier-file-open {
+  display:inline-block;
+  padding:8px 12px;
+  border:1px solid #588eb6;
+  border-radius:6px;
+  color:#a8d5f2;
+  font-size:12px;
+  text-decoration:none;
+  margin:0 0 13px;
+}
+.iterum-dossier-file-open:hover {background:#223c52;}
+.iterum-dossier-file-image {max-width:100%;max-height:610px;display:block;margin:0 0 13px;object-fit:contain;}
+.iterum-dossier-file-pdf {width:100%;height:min(68vh,720px);border:1px solid #526276;background:#fff;display:block;margin:0 0 13px;}
+.iterum-dossier-files-loading,.iterum-dossier-files-empty,.iterum-dossier-files-error {
+  margin:0;
+  padding:13px 17px;
+  color:#91adc2;
+  font-size:13px;
+}
+.iterum-dossier-files-error {color:#f5a6a6;}
+.iterum-dossier-preview-warning,.iterum-dossier-archive-mark {
+  margin:-10px 20px 20px;
+  color:#80a3bd;
+  font-size:11px;
+  letter-spacing:.05em;
+}
+.iterum-dossier-reference :is(summary,a):focus-visible {outline:2px solid #82c5f2;outline-offset:3px;}
+
+@container (max-width:980px) {
+  .iterum-dossier-profile-grid {
+    grid-template-columns:minmax(155px,0.55fr) minmax(270px,1.35fr);
+    gap:21px;
+  }
+  .iterum-dossier-biography {
+    grid-column:1/-1;
+    border-left:0;
+    border-top:1px solid rgba(128,149,165,.43);
+    padding:18px 0 0;
+  }
+  .iterum-dossier-portrait-frame {max-width:280px;}
+  .iterum-dossier-fact-name {font-size:11px;}
+  .iterum-dossier-fact-value {font-size:13px;}
+}
+@container (max-width:570px) {
+  .iterum-dossier-banner {padding:13px 17px;gap:16px;min-height:59px;}
+  .iterum-dossier-banner-rule {height:25px;}
+  .iterum-dossier-brand {font-size:13px;letter-spacing:.04em;}
+  .iterum-dossier-banner-title {font-size:13px;}
+  .iterum-dossier-profile-panel {padding:17px 16px;margin:14px 10px 0;}
+  .iterum-dossier-profile-grid {grid-template-columns:minmax(0,1fr);gap:17px;}
+  .iterum-dossier-portrait-frame {width:min(100%,225px);min-height:220px;}
+  .iterum-dossier-person-name {font-size:21px;}
+  .iterum-dossier-fact {grid-template-columns:minmax(115px,45%) minmax(0,1fr);gap:8px;}
+  .iterum-dossier-fact-name {font-size:10px;}
+  .iterum-dossier-fact-value {font-size:12px;}
+  .iterum-dossier-documents-panel {margin:14px 10px 17px;padding:14px 12px;}
+  .iterum-dossier-documents-title {gap:12px;font-size:17px;}
+  .iterum-dossier-folder-icon {flex-basis:45px;width:45px;height:45px;}
+  .iterum-dossier-folder-icon svg {width:29px;height:29px;}
+  .iterum-dossier-file-summary {min-height:61px;gap:12px;padding:8px 10px;}
+  .iterum-dossier-file-icon {flex-basis:41px;width:41px;height:45px;}
+  .iterum-dossier-file-icon svg {width:27px;height:27px;}
+  .iterum-dossier-file-name {font-size:13px;}
+  .iterum-dossier-file-view {flex-basis:40px;width:40px;height:40px;}
+  .iterum-dossier-file-view svg {width:24px;height:24px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  .iterum-dossier-reference * {transition:none !important;}
+}

@@ -177,6 +177,9 @@
       section.append(el("h4", "", heading), el("p", "", content));
       reader.append(section);
     }
+    const area = el("div", "dossier-attachment-area");
+    reader.append(area);
+    if (typeof window.iterumRenderDossierFiles === "function") window.iterumRenderDossierFiles(item.dossier_id, area);
     return reader;
   }
 

@@ -128,58 +128,11 @@
 
 
   function renderDossierReader(item) {
-    const reader = el("article", "materials-reader materials-person-reader");
-    const top = el("div", "materials-reader-top");
-    top.append(el("span", "materials-reader-type", "СОХРАНЁННОЕ ДОСЬЕ"));
-    top.append(el("time", "", "НАЙДЕНО: " + dateLabel(item.created_at)));
-    reader.append(top);
-
-    const identity = el("div", "materials-person-identity");
-    if (item.photo_data) {
-      const photo = document.createElement("img");
-      photo.className = "materials-person-photo";
-      photo.alt = "Фотография: " + item.title;
-      photo.src = item.photo_data;
-      photo.loading = "lazy";
-      identity.append(photo);
-    } else {
-      const placeholder = el("span", "materials-person-placeholder", "◌");
-      placeholder.setAttribute("aria-hidden", "true");
-      identity.append(placeholder);
+    const reader = window.iterumCreateDossierCard(item, { isArchived: true });
+    const target = reader.querySelector(".dossier-attachment-area");
+    if (target && typeof window.iterumRenderDossierFiles === "function") {
+      window.iterumRenderDossierFiles(item.dossier_id, target);
     }
-    const info = el("div", "materials-person-identity-info");
-    info.append(el("h3", "materials-reader-title", item.title));
-    if (item.summary) info.append(el("p", "materials-reader-summary", item.summary));
-    info.append(el("span", "materials-dossier-saved-mark", "СОХРАНЕНО В МАТЕРИАЛАХ ДЕЛА"));
-    identity.append(info);
-    reader.append(identity);
-
-    const facts = el("div", "materials-person-facts");
-    for (const [label, value] of [
-      ["ДАТА РОЖДЕНИЯ", item.birth_date],
-      ["МЕСТО ПРОЖИВАНИЯ", item.residence],
-      ["ПРОФЕССИЯ / ДОЛЖНОСТЬ", item.occupation],
-      ["МЕСТО РАБОТЫ", item.workplace],
-      ["СЕМЕЙНОЕ ПОЛОЖЕНИЕ", item.marital_status],
-      ["СУПРУГ / СУПРУГА", item.spouse],
-      ["ДЕТИ", item.children]
-    ]) {
-      if (!value) continue;
-      const fact = el("div", "materials-person-fact");
-      fact.append(el("span", "", label), el("strong", "", value));
-      facts.append(fact);
-    }
-    if (facts.childElementCount) reader.append(facts);
-
-    for (const [heading, content] of [["Биография", item.biography]]) {
-      if (!content) continue;
-      const section = el("section", "materials-person-section");
-      section.append(el("h4", "", heading), el("p", "", content));
-      reader.append(section);
-    }
-    const area = el("div", "dossier-attachment-area");
-    reader.append(area);
-    if (typeof window.iterumRenderDossierFiles === "function") window.iterumRenderDossierFiles(item.dossier_id, area);
     return reader;
   }
 

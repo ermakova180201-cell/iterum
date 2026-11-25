@@ -27,6 +27,7 @@
 <link rel="stylesheet" href="/ghost-emotions-concept.css?v=1">
 <link rel="stylesheet" href="/news-exhibition.css?v=2">
 <link rel="stylesheet" href="/dossier-reference.css?v=1">
+  <link rel="stylesheet" href="/desktop-maximized.css?v=1">
 
   <script defer src="/dossiers.js?v=dossier-files-1"></script>
 </head>
@@ -1910,7 +1911,7 @@
       mail: "Почта — здесь появляются сообщения по делу. Открой приложение «Почта», чтобы читать письма и просматривать вложения. Иногда полезно перечитать письмо: люди не всегда говорят прямо.",
       search: "Поиск данных помогает искать сведения в базе текущего дела. Введи имя, идентификатор или ключевое слово. Поиск работает только в пределах доступных материалов.",
       materials: "В «Материалах дела» собраны документы и другие доступные материалы. Открывай их и изучай внимательно. Я бы ничего не пропускал — даже если документ кажется скучным.",
-      windows: "Нажми на значок приложения, чтобы открыть его. Окно можно перемещать за верхнюю панель, а закрыть кнопкой ×. Если потеряешься — нажми на меня."
+      windows: "Нажми на значок приложения — оно сразу откроется на весь рабочий стол. Для закрытия нажми × в верхнем углу. Если потеряешься — нажми на меня."
     };
     const assistantLabels = {mail:"Почта",search:"Поиск данных",materials:"Материалы дела",windows:"Окна и рабочий стол"};
     const assistantMoodLabels = {calm:"Спокойствие",curious:"Любопытство",happy:"Радость",surprised:"Удивление",thinking:"Размышление",grumpy:"Недовольство",sleepy:"Сонливость",shy:"Смущение",sad:"Грусть",inspired:"Вдохновение"};
@@ -2166,14 +2167,14 @@
           if (win) {
             desktopShell.querySelectorAll(".desktop-window").forEach(other => { if (other !== win) other.hidden = true; });
             win.hidden = false;
-            // Открываем каждое приложение по центру рабочего пространства.
-            win.style.left = "50%";
-            win.style.top = "50%";
-            win.style.right = "auto";
-            win.style.bottom = "auto";
-            win.style.width = "";
-            win.style.height = "";
-            win.style.transform = "translate(-50%, -50%)";
+            // Открываем приложения сразу на всю площадь рабочего стола.
+            win.style.left = "0";
+            win.style.top = "0";
+            win.style.right = "0";
+            win.style.bottom = "0";
+            win.style.width = "100%";
+            win.style.height = "100%";
+            win.style.transform = "none";
             win.style.zIndex = String(++topWindowZ);
             desktopShell.querySelectorAll("[data-open-window]").forEach(button => button.classList.toggle("is-selected", button.dataset.openWindow === opener.dataset.openWindow));
             const runningApps = document.getElementById("taskbar-running-apps");
@@ -2205,9 +2206,10 @@
           if (runningApps) runningApps.replaceChildren();
         }
       });
-      // Allow application windows to be moved around the desktop by their title bars.
+      // Main applications fill the desktop; only the document dialog remains draggable.
       let topWindowZ = 20;
       desktopShell.querySelectorAll(".desktop-window").forEach(win => {
+        if (win.id !== "material-detail-window") return;
         const handle = win.querySelector(".window-drag-handle");
         if (!handle) return;
         handle.addEventListener("pointerdown", event => {

@@ -72,6 +72,43 @@ async function ensureDossierProfileColumns(env) {
   return dossierProfilePromise;
 }
 
+
+let dossierFilesReady = false;
+let dossierFilesPromise = null;
+async function ensureDossierFilesTable(env) {
+  if (dossierFilesReady) return;
+  if (dossierFilesPromise) return dossierFilesPromise;
+  dossierFilesPromise = (async () => {
+    await env.DB.prepare(
+      "CREATE TABLE IF NOT EXISTS dossier_files (" +
+      "id TEXT PRIMARY KEY, dossier_id TEXT NOT NULL REFERENCES person_dossiers(id) ON DELETE CASCADE, " +
+      "file_name TEXT NOT NULL, content_type TEXT NOT NULL, file_size INTEGER NOT NULL, " +
+      "file_data BLOB NOT NULL, is_published INTEGER NOT NULL DEFAULT 0 CHECK(is_published IN (0,1)), " +
+      "created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')))"
+    ).run();
+    await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_dossier_files_person ON dossier_files(dossier_id, created_at)").run();
+    dossierFilesReady = true;
+  })().finally(() => { dossierFilesPromise = null; });
+  return dossierFilesPromise;
+}
+async function dossierFileAccess(env, user, dossierId) {
+  const dossier = await env.DB.prepare(
+    "SELECT d.id, d.case_id, d.is_published, c.status AS case_status " +
+    "FROM person_dossiers d JOIN cases c ON c.id = d.case_id WHERE d.id = ?"
+  ).bind(dossierId).first();
+  if (!dossier) return { error: "Досье не найдено.", status: 404 };
+  const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
+  if (!isAdmin) {
+    if (dossier.is_published !== 1 || dossier.case_status !== "active") return { error: "Досье недоступно.", status: 403 };
+    await ensureDossierDiscoveryTable(env);
+    const discovered = await env.DB.prepare(
+      "SELECT 1 FROM player_dossier_discoveries WHERE user_id = ? AND dossier_id = ? AND case_id = ?"
+    ).bind(user.id, dossierId, dossier.case_id).first();
+    if (!discovered) return { error: "Сначала откройте досье через поиск данных.", status: 403 };
+  }
+  return { dossier, isAdmin };
+}
+
 let dossierDiscoveryReady = false;
 async function ensureDossierDiscoveryTable(env) {
   if (dossierDiscoveryReady) return;
@@ -219,6 +256,61 @@ async function handleApi(request, env) {
       await env.DB.prepare("INSERT INTO material_unlocks (user_id, material_id, unlocked_at) SELECT ?, id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '+' || COALESCE(delivery_delay_seconds, CASE WHEN material_type = 'email' THEN 60 ELSE 0 END) || ' seconds') FROM materials WHERE trigger_material_id = ? AND delivery_mode = 'triggered' AND is_published = 1 ON CONFLICT(user_id, material_id) DO UPDATE SET unlocked_at = excluded.unlocked_at").bind(user.id, materialId).run();
     }
     return json({ ok: true });
+  }
+
+
+  const dossierFilesListRoute = url.pathname.match(/^\/api\/player\/dossiers\/([a-f0-9]{32})\/files$/);
+  if (request.method === "GET" && dossierFilesListRoute) {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    await ensureDossierFilesTable(env);
+    const access = await dossierFileAccess(env, user, dossierFilesListRoute[1]);
+    if (access.error) return json({ error: access.error }, access.status);
+    const sql = "SELECT id, file_name, content_type, file_size, created_at FROM dossier_files WHERE dossier_id = ? " +
+      (access.isAdmin ? "" : "AND is_published = 1 ") + "ORDER BY created_at, id";
+    const rows = await env.DB.prepare(sql).bind(dossierFilesListRoute[1]).all();
+    return json({ files: rows.results || [] });
+  }
+  const dossierFileOpenRoute = url.pathname.match(/^\/api\/dossier-files\/([a-f0-9]{32})$/);
+  if (request.method === "GET" && dossierFileOpenRoute) {
+    const user = await currentUser(request, env);
+    if (!user) return json({ error: "Требуется вход в аккаунт." }, 401);
+    await ensureDossierFilesTable(env);
+    const file = await env.DB.prepare(
+      "SELECT id, dossier_id, file_name, content_type, file_size, is_published FROM dossier_files WHERE id = ?"
+    ).bind(dossierFileOpenRoute[1]).first();
+    if (!file) return json({ error: "Файл не найден." }, 404);
+    const access = await dossierFileAccess(env, user, file.dossier_id);
+    if (access.error) return json({ error: access.error }, access.status);
+    if (!access.isAdmin && file.is_published !== 1) return json({ error: "Файл недоступен." }, 403);
+    const total = Number(file.file_size) || 0;
+    if (!total) return json({ error: "Пустой файл." }, 404);
+    const safeName = String(file.file_name || "document").replace(/[\r\n"]/g, "_");
+    let offset = 0;
+    const body = new ReadableStream({
+      async pull(controller) {
+        try {
+          if (offset >= total) { controller.close(); return; }
+          const row = await env.DB.prepare(
+            "SELECT substr(file_data, ?, ?) AS chunk FROM dossier_files WHERE id = ?"
+          ).bind(offset + 1, Math.min(64 * 1024, total - offset), file.id).first();
+          if (!row || row.chunk == null) { controller.error(new Error("Файл недоступен.")); return; }
+          const bytes = row.chunk instanceof Uint8Array ? row.chunk : new Uint8Array(row.chunk);
+          if (!bytes.byteLength) { controller.error(new Error("Файл повреждён.")); return; }
+          offset += bytes.byteLength;
+          controller.enqueue(bytes);
+          if (offset >= total) controller.close();
+        } catch (error) { controller.error(error); }
+      }
+    });
+    return new Response(body, { headers: {
+      "content-type": file.content_type,
+      "content-length": String(total),
+      "content-disposition": "inline; filename*=UTF-8''" + encodeURIComponent(safeName),
+      "cache-control": "private, no-store",
+      "x-content-type-options": "nosniff",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'self'"
+    } });
   }
 
   // Search Data is strictly a personnel catalogue: both name fields required.
@@ -400,6 +492,7 @@ async function handleApi(request, env) {
         "CREATE INDEX IF NOT EXISTS idx_person_dossiers_case_visible ON person_dossiers(case_id, is_published, full_name)"
       ).run();
       await ensureDossierProfileColumns(env);
+      await ensureDossierFilesTable(env);
       return json({ ok: true });
     }
 
@@ -411,6 +504,70 @@ async function handleApi(request, env) {
         "SELECT d.*, c.title AS case_title FROM person_dossiers d JOIN cases c ON c.id = d.case_id ORDER BY c.created_at DESC, d.full_name COLLATE NOCASE"
       ).all();
       return json({ dossiers: rows.results || [] });
+    }
+
+
+    const dossierUploadRoute = url.pathname.match(/^\/api\/admin\/dossiers\/([a-f0-9]{32})\/files$/);
+    if (dossierUploadRoute && (request.method === "GET" || request.method === "POST")) {
+      const dossierId = dossierUploadRoute[1];
+      const exists = await env.DB.prepare("SELECT id FROM person_dossiers WHERE id = ?").bind(dossierId).first();
+      if (!exists) return json({ error: "Сначала сохраните досье." }, 404);
+      await ensureDossierFilesTable(env);
+      if (request.method === "GET") {
+        const records = await env.DB.prepare(
+          "SELECT id, file_name, content_type, file_size, is_published, created_at FROM dossier_files " +
+          "WHERE dossier_id = ? ORDER BY created_at, id"
+        ).bind(dossierId).all();
+        return json({ files: records.results || [] });
+      }
+      let form;
+      try { form = await request.formData(); }
+      catch { return json({ error: "Не удалось прочитать вложение." }, 400); }
+      const uploads = form.getAll("files").filter(f => f && typeof f.arrayBuffer === "function" && f.size > 0);
+      if (!uploads.length) return json({ error: "Выберите файлы для загрузки." }, 400);
+      if (uploads.length > 8) return json({ error: "За один раз можно загрузить не более 8 файлов." }, 400);
+      const count = await env.DB.prepare("SELECT COUNT(*) AS total FROM dossier_files WHERE dossier_id = ?").bind(dossierId).first();
+      if (Number(count?.total || 0) + uploads.length > 30) return json({ error: "К одному досье можно прикрепить не более 30 документов." }, 400);
+      const allowed = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
+      for (const file of uploads) {
+        if (!allowed.has(file.type)) return json({ error: "Поддерживаются PDF, JPG, PNG и WEBP." }, 400);
+        if (file.size > 1024 * 1024) return json({ error: "Размер одного файла не должен превышать 1 МБ." }, 400);
+      }
+      const saved = [];
+      for (const file of uploads) {
+        const id = randomToken(16);
+        const name = String(file.name || "document").replace(/[\r\n"]/g, "_").slice(0, 180);
+        try {
+          const buffer = new Uint8Array(await file.arrayBuffer());
+          await env.DB.prepare(
+            "INSERT INTO dossier_files (id,dossier_id,file_name,content_type,file_size,file_data,is_published) VALUES (?,?,?,?,?,?,0)"
+          ).bind(id, dossierId, name, file.type, file.size, buffer).run();
+        } catch (error) {
+          console.error("Dossier file upload failed:", error);
+          return json({ error: "Не удалось сохранить «" + name + "». Проверьте размер файла." }, 500);
+        }
+        saved.push({ id, file_name: name, file_size: file.size, content_type: file.type, is_published: 0 });
+      }
+      return json({ ok: true, files: saved });
+    }
+
+    const dossierFileManageRoute = url.pathname.match(/^\/api\/admin\/dossier-files\/([a-f0-9]{32})(?:\/publish)?$/);
+    if (dossierFileManageRoute && (request.method === "DELETE" || request.method === "PATCH")) {
+      await ensureDossierFilesTable(env);
+      const record = await env.DB.prepare("SELECT id FROM dossier_files WHERE id = ?").bind(dossierFileManageRoute[1]).first();
+      if (!record) return json({ error: "Файл не найден." }, 404);
+      if (request.method === "DELETE") {
+        if (url.pathname.endsWith("/publish")) return json({ error: "Недопустимый запрос." }, 405);
+        await env.DB.prepare("DELETE FROM dossier_files WHERE id = ?").bind(record.id).run();
+        return json({ ok: true });
+      }
+      if (!url.pathname.endsWith("/publish")) return json({ error: "Недопустимый запрос." }, 405);
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Некорректный запрос." }, 400); }
+      if (typeof body.isPublished !== "boolean") return json({ error: "Укажите статус публикации." }, 400);
+      await env.DB.prepare("UPDATE dossier_files SET is_published = ? WHERE id = ?")
+        .bind(body.isPublished ? 1 : 0, record.id).run();
+      return json({ ok: true, is_published: body.isPublished ? 1 : 0 });
     }
 
     const dossierRoute = url.pathname.match(/^\/api\/admin\/dossiers\/([a-f0-9]{32})$/);

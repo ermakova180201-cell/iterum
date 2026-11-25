@@ -86,52 +86,7 @@
     return placeholder;
   }
   function detail(person) {
-    const card = el("article", "search-dossier-reader search-person-reader");
-    const over = el("div", "search-reader-overline");
-    over.append(el("span", "search-reader-kicker", "ЛИЧНОЕ ДЕЛО / КАРТОТЕКА"));
-    over.append(el("span", "search-reader-id", "№ " + String(person.id).slice(0, 8).toUpperCase()));
-    card.append(over);
-
-    const header = el("div", "search-person-heading");
-    header.append(avatar(person, true));
-    const headInfo = el("div", "search-person-heading-text");
-    headInfo.append(el("span", "search-type-caption", "СВЕДЕНИЯ О ПЕРСОНЕ"));
-    headInfo.append(el("h3", "search-reader-title", person.title));
-    if (person.summary) headInfo.append(el("p", "search-reader-meta", person.summary));
-    headInfo.append(el("span", "search-reader-status is-open",
-      person.is_preview ? "ЧЕРНОВИК · ТОЛЬКО ДЛЯ АВТОРА" : "ДОСЬЕ ДОСТУПНО"));
-    header.append(headInfo);
-    card.append(header);
-
-    const facts = el("div", "search-person-data");
-    for (const [label, value] of [
-      ["ДАТА РОЖДЕНИЯ", person.birth_date],
-      ["МЕСТО ПРОЖИВАНИЯ", person.residence],
-      ["ПРОФЕССИЯ / ДОЛЖНОСТЬ", person.occupation],
-      ["МЕСТО РАБОТЫ", person.workplace],
-      ["СЕМЕЙНОЕ ПОЛОЖЕНИЕ", person.marital_status],
-      ["СУПРУГ / СУПРУГА", person.spouse],
-      ["ДЕТИ", person.children]
-    ]) {
-      const fact = row(label, value);
-      if (fact) facts.append(fact);
-    }
-    if (facts.childElementCount) card.append(facts);
-
-    for (const [number, title, content] of [
-      ["01", "Биография", person.biography]
-    ]) {
-      if (!content) continue;
-      const section = el("section", "search-person-section");
-      const heading = el("div", "search-section-heading");
-      heading.append(el("span", "", number));
-      heading.append(el("h4", "", title));
-      section.append(heading);
-      section.append(el("p", "search-person-prose", content));
-      card.append(section);
-    }
-    card.append(el("div", "dossier-attachment-area"));
-    return card;
+    return window.iterumCreateDossierCard(person, { isPreview: !!person.is_preview });
   }
 
   async function persistOpenedDossier(person, notice) {

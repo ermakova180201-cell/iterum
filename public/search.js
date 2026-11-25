@@ -130,6 +130,7 @@
       section.append(el("p", "search-person-prose", content));
       card.append(section);
     }
+    card.append(el("div", "dossier-attachment-area"));
     return card;
   }
 
@@ -151,6 +152,8 @@
       if (!response.ok) throw Error(data.error || "Не удалось сохранить досье.");
       if (getCaseId() !== caseId) return;
       notice.textContent = "СОХРАНЕНО В «МАТЕРИАЛАХ ДЕЛА»";
+      const area = notice.closest("article")?.querySelector(".dossier-attachment-area");
+      if (area && typeof window.iterumRenderDossierFiles === "function") window.iterumRenderDossierFiles(person.id, area);
       // Keep the existing Materials app in sync without reloading the entire
       // desktop, changing which window is open, or touching the inbox.
       const archiveResponse = await fetch("/api/player/archive", { credentials: "same-origin" });
@@ -171,7 +174,11 @@
   }
   function showDossier(person, target) {
     target.replaceChildren(detail(person));
-    if (person.is_preview) return;
+    if (person.is_preview) {
+      const area = target.firstElementChild?.querySelector(".dossier-attachment-area");
+      if (area && typeof window.iterumRenderDossierFiles === "function") window.iterumRenderDossierFiles(person.id, area);
+      return;
+    }
     const note = el("p", "search-dossier-save-note", "СОХРАНЯЕМ В МАТЕРИАЛАХ ДЕЛА…");
     target.firstElementChild?.append(note);
     persistOpenedDossier(person, note);

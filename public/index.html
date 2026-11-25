@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="/ghost-emotions-concept.css?v=1">
 <link rel="stylesheet" href="/news-exhibition.css?v=2">
 
-  <script defer src="/dossiers.js?v=dossier-fields-2"></script>
+  <script defer src="/dossiers.js?v=dossier-files-1"></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -736,6 +736,20 @@
                 <img id="dossier-photo-preview" alt="Предпросмотр фотографии" width="100" height="126" style="object-fit:cover" hidden>
                 <button id="dossier-remove-photo" type="button">Удалить фотографию</button>
               </div>
+              <div class="dossier-field wide">
+                <div class="dossier-file-admin" id="dossier-file-admin">
+                  <h4>ПРИКРЕПЛЁННЫЕ ДОКУМЕНТЫ</h4>
+                  <p class="dossier-note">Сначала сохраните досье. Затем загрузите PDF или изображения (JPG, PNG, WEBP, до 1 МБ). Каждый новый документ скрыт от игроков, пока вы его не опубликуете.</p>
+                  <div class="dossier-file-controls">
+                    <input id="dossier-files-input" type="file" multiple accept="application/pdf,image/jpeg,image/png,image/webp" disabled>
+                    <button type="button" id="dossier-files-upload" disabled>Прикрепить файлы</button>
+                  </div>
+                  <div id="dossier-files-list" class="dossier-file-admin-list">
+                    <p class="dossier-note">Чтобы прикрепить документы, сначала сохраните новое досье.</p>
+                  </div>
+                  <p id="dossier-files-message" class="dossier-note" role="status" aria-live="polite"></p>
+                </div>
+              </div>
             </div>
             <div class="dossier-form-actions">
               <label class="dossier-publish"><input name="isPublished" type="checkbox"> Опубликовать для игроков</label>
@@ -783,8 +797,9 @@
   <footer>
     <span>ITERUM © 2026</span>
   </footer>
-  <script src="/materials.js?v=profile-fields-1"></script>
-  <script src="/search.js?v=profile-fields-1"></script>
+  <script src="/dossier-attachments.js?v=1"></script>
+  <script src="/materials.js?v=dossier-files-1"></script>
+  <script src="/search.js?v=dossier-files-1"></script>
   <script>
     const authPanel = document.querySelector(".auth-panel");
     const authForm = document.getElementById("auth-form");
